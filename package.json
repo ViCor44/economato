@@ -1,0 +1,11 @@
+{
+  "name": "slide_rh_app",
+  "version": "1.0.0",
+  "scripts": {
+  "tailwind:init": "bin\\tailwindcss.exe init",
+  "tailwind:watch": "bin\\tailwindcss.exe -i ./src/css/input.css -o ./public/css/style.css --watch"
+},
+  "devDependencies": {
+    "tailwindcss": "^4.1.14"
+  }
+}
