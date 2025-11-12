@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CrewGest</title>
-    <link href="/slide_rh_app/public/css/style.css" rel="stylesheet">
+    <link href="/economato/public/css/style.css" rel="stylesheet">
 </head>
 <body class="p-8">
 

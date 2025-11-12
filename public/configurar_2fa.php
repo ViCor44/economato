@@ -18,7 +18,7 @@ use BaconQrCode\Writer;
 // Recuperar os dados da sessão
 $secret_key = $_SESSION['registration_secret_key'];
 $email = $_SESSION['registration_email'];
-$appName = 'Slide RH';
+$appName = 'CrewGest';
 
 // Limpar os dados da sessão para que esta página só possa ser vista uma vez
 unset($_SESSION['registration_success']);
@@ -52,14 +52,12 @@ $qrCodeBase64 = base64_encode($qrCodeImage);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configure a sua Segurança - Slide RH</title>
-    <link href="/slide_rh_app/public/css/style.css" rel="stylesheet">
+    <link href="/economato/public/css/style.css" rel="stylesheet">
 </head>
-<body class="min-h-screen flex items-center justify-center py-12">
-
+<body class="p-8">
     <?php include_once '../src/templates/header_public.php'; ?>
 
-    <main class="p-8">
-
+    <main class="flex items-center justify-center py-12">
     <div class="w-full max-w-lg bg-white p-8 rounded-2xl shadow-lg text-center">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">Ação Requerida: Configure o 2FA</h1>
         <p class="text-gray-600 mb-8">Para sua segurança, a autenticação de dois fatores (2FA) é obrigatória.</p>
