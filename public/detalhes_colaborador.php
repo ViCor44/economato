@@ -11,7 +11,7 @@ if ($colaborador_id <= 0) {
 }
 
 try {
-    // 🔹 Buscar dados do colaborador
+    // 🔹 Buscar dados do colaborador (agora com telefone e email)
     $stmt = $pdo->prepare("
         SELECT c.*, d.nome AS departamento_nome
         FROM colaboradores c
@@ -34,9 +34,6 @@ try {
     ");
     $stmtCacifos->execute(['id' => $colaborador_id]);
     $cacifos = $stmtCacifos->fetchAll(PDO::FETCH_ASSOC);
-
-    // 🔹 (Futuro) Buscar fardas
-    $fardas = []; // Placeholder por agora
 
 } catch (PDOException $e) {
     die("Erro ao carregar detalhes do colaborador: " . $e->getMessage());
@@ -62,11 +59,14 @@ try {
         <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
     </div>
 
+    <!-- 🧾 Dados principais -->
     <section class="mb-8">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Informações Pessoais</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             <p><strong>ID:</strong> <?= $colaborador['id'] ?></p>
             <p><strong>Cartão:</strong> <?= htmlspecialchars($colaborador['cartao']) ?></p>
+            <p><strong>Telefone:</strong> <?= htmlspecialchars($colaborador['telefone'] ?: '—') ?></p>
+            <p><strong>Email:</strong> <?= htmlspecialchars($colaborador['email'] ?: '—') ?></p>
             <p><strong>Departamento:</strong> <?= htmlspecialchars($colaborador['departamento_nome'] ?? '—') ?></p>
             <p><strong>Status:</strong>
                 <?php if ($colaborador['ativo']): ?>
@@ -81,6 +81,7 @@ try {
         </div>
     </section>
 
+    <!-- 🔒 CACIFOS -->
     <section class="mb-8">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">🔒 Cacifos Atribuídos</h2>
         <?php if (count($cacifos) > 0): ?>
@@ -107,89 +108,124 @@ try {
         <?php endif; ?>
     </section>
 
+    <!-- 🧥 FARDAS -->
     <section class="mt-8">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold text-gray-800">🧥 Fardas Atribuídas</h2>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                🧥 Fardas Atribuídas
+            </h2>
 
-        <a href="atribuir_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
-           class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300 active:scale-95">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Atribuir Farda
-        </a>
-    </div>
+            <div class="flex flex-wrap gap-3 mb-4">
 
-    <?php
-    // Buscar fardas atribuídas ao colaborador
-    $stmt = $pdo->prepare("
-        SELECT fa.id, f.nome, c.nome AS cor, t.nome AS tamanho, fa.quantidade, 
-               f.preco_unitario, fa.data_atribuicao
-        FROM farda_atribuicoes fa
-        JOIN fardas f ON fa.farda_id = f.id
-        JOIN cores c ON f.cor_id = c.id
-        JOIN tamanhos t ON f.tamanho_id = t.id
-        WHERE fa.colaborador_id = :id
-        ORDER BY fa.data_atribuicao DESC
-    ");
-    $stmt->execute(['id' => $colaborador['id']]);
-    $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    <!-- ✅ Atribuir farda -->
+    <a href="atribuir_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+        style="background-color:#16a34a; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+        onmouseover="this.style.backgroundColor='#15803d';"
+        onmouseout="this.style.backgroundColor='#16a34a';">
+        ➕ <span>Atribuir</span>
+    </a>
 
-    $total_geral = 0;
-    ?>
+    <!-- 🔄 Devolver farda -->
+    <a href="devolver_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+        style="background-color:#dc2626; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+        onmouseover="this.style.backgroundColor='#b91c1c';"
+        onmouseout="this.style.backgroundColor='#dc2626';">
+        🔁 <span>Devolver</span>
+    </a>
 
-    <?php if ($fardas_atribuidas): ?>
-        <div class="overflow-x-auto">
-            <table class="min-w-full border border-gray-200 text-sm mt-2">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-4 py-2 border-b text-left">Peça</th>
-                        <th class="px-4 py-2 border-b text-left">Cor</th>
-                        <th class="px-4 py-2 border-b text-left">Tamanho</th>
-                        <th class="px-4 py-2 border-b text-center">Qtd</th>
-                        <th class="px-4 py-2 border-b text-right">Preço (€)</th>
-                        <th class="px-4 py-2 border-b text-right">Total (€)</th>
-                        <th class="px-4 py-2 border-b text-center">Data</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($fardas_atribuidas as $f): 
-                        $total_item = $f['quantidade'] * $f['preco_unitario'];
-                        $total_geral += $total_item;
-                    ?>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['nome']) ?></td>
-                        <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['cor']) ?></td>
-                        <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['tamanho']) ?></td>
-                        <td class="px-4 py-2 border-b text-center"><?= $f['quantidade'] ?></td>
-                        <td class="px-4 py-2 border-b text-right"><?= number_format($f['preco_unitario'], 2, ',', '.') ?></td>
-                        <td class="px-4 py-2 border-b text-right font-semibold">
-                            <?= number_format($total_item, 2, ',', '.') ?>
-                        </td>
-                        <td class="px-4 py-2 border-b text-center text-gray-600">
-                            <?= date('d/m/Y H:i', strtotime($f['data_atribuicao'])) ?>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-                <tfoot class="bg-gray-50">
-                    <tr>
-                        <td colspan="5" class="px-4 py-3 text-right font-semibold">💰 Total Geral:</td>
-                        <td class="px-4 py-3 text-right font-bold text-green-700">
-                            <?= number_format($total_geral, 2, ',', '.') ?> €
-                        </td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-            </table>
+    <!-- 🟣 Emprestar farda -->
+    <a href="emprestar_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+        style="background-color:#7c3aed; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+        onmouseover="this.style.backgroundColor='#6d28d9';"
+        onmouseout="this.style.backgroundColor='#7c3aed';">
+        🧥 <span>Emprestar</span>
+    </a>
+
+    <!-- 🟧 Devolver empréstimo -->
+    <a href="devolver_emprestimo.php?colaborador_id=<?= $colaborador['id'] ?>"
+        style="background-color:#ea580c; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+        onmouseover="this.style.backgroundColor='#c2410c';"
+        onmouseout="this.style.backgroundColor='#ea580c';">
+        ↩️ <span>Devolver Empréstimo</span>
+    </a>
+
+</div>
+
         </div>
-    <?php else: ?>
-        <p class="text-gray-500 italic">Nenhuma farda atribuída a este colaborador.</p>
-    <?php endif; ?>
-</section>
 
+        <?php
+        // Buscar fardas atribuídas ao colaborador
+        $stmt = $pdo->prepare("
+            SELECT 
+                f.nome,
+                c.nome AS cor,
+                t.nome AS tamanho,
+                SUM(fa.quantidade) AS quantidade_total,
+                f.preco_unitario,
+                MAX(fa.data_atribuicao) AS ultima_data
+            FROM farda_atribuicoes fa
+            JOIN fardas f ON fa.farda_id = f.id
+            JOIN cores c ON f.cor_id = c.id
+            JOIN tamanhos t ON f.tamanho_id = t.id
+            WHERE fa.colaborador_id = :id
+            GROUP BY f.nome, c.nome, t.nome, f.preco_unitario
+            ORDER BY ultima_data DESC
+        ");
+        $stmt->execute(['id' => $colaborador['id']]);
+        $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        $total_geral = 0;
+        ?>
+
+        <?php if ($fardas_atribuidas): ?>
+            <div class="overflow-x-auto">
+                <table class="min-w-full border border-gray-200 text-sm mt-2">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-2 border-b text-left">Peça</th>
+                            <th class="px-4 py-2 border-b text-left">Cor</th>
+                            <th class="px-4 py-2 border-b text-left">Tamanho</th>
+                            <th class="px-4 py-2 border-b text-center">Qtd</th>
+                            <th class="px-4 py-2 border-b text-right">Preço (€)</th>
+                            <th class="px-4 py-2 border-b text-right">Total (€)</th>
+                            <th class="px-4 py-2 border-b text-center">Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($fardas_atribuidas as $f): 
+                            $total_item = $f['quantidade_total'] * $f['preco_unitario'];
+                            $total_geral += $total_item;
+                        ?>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['nome']) ?></td>
+                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['cor']) ?></td>
+                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['tamanho']) ?></td>
+                            <td class="px-4 py-2 border-b text-center"><?= $f['quantidade_total'] ?></td>
+                            <td class="px-4 py-2 border-b text-right"><?= number_format($f['preco_unitario'], 2, ',', '.') ?></td>
+                            <td class="px-4 py-2 border-b text-right font-semibold">
+                                <?= number_format($total_item, 2, ',', '.') ?>
+                            </td>
+                            <td class="px-4 py-2 border-b text-center text-gray-600">
+                                <?= date('d/m/Y H:i', strtotime($f['ultima_data'])) ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                    <tfoot class="bg-gray-50">
+                        <tr>
+                            <td colspan="5" class="px-4 py-3 text-right font-semibold">💰 Total Geral:</td>
+                            <td class="px-4 py-3 text-right font-bold text-green-700">
+                                <?= number_format($total_geral, 2, ',', '.') ?> €
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        <?php else: ?>
+            <p class="text-gray-500 italic">Nenhuma farda atribuída a este colaborador.</p>
+        <?php endif; ?>
+    </section>
 </main>
-
 </body>
 </html>

@@ -2,134 +2,126 @@
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
 
-// =====================
-// 🔍 FILTRO DE PESQUISA
-// =====================
+// Pesquisa opcional
 $pesquisa = trim($_GET['pesquisa'] ?? '');
-$params = [];
 
-// =====================
-// 🔹 QUERY PRINCIPAL
-// =====================
-$query = "
-    SELECT 
-        f.id,
-        f.nome,
-        f.quantidade,
-        f.preco_unitario,
-        c.nome AS cor,
-        t.nome AS tamanho,
-        d.nome AS departamento
-    FROM fardas f
-    JOIN cores c ON f.cor_id = c.id
-    JOIN tamanhos t ON f.tamanho_id = t.id
-    JOIN departamentos d ON f.departamento_id = d.id
-";
+try {
+    $query = "
+        SELECT f.id, f.nome, c.nome AS cor, t.nome AS tamanho,
+               f.preco_unitario, f.quantidade,
+               GROUP_CONCAT(DISTINCT d.nome ORDER BY d.nome SEPARATOR ', ') AS departamentos
+        FROM fardas f
+        JOIN cores c ON f.cor_id = c.id
+        JOIN tamanhos t ON f.tamanho_id = t.id
+        LEFT JOIN farda_departamentos fd ON f.id = fd.farda_id
+        LEFT JOIN departamentos d ON fd.departamento_id = d.id
+    ";
 
-if ($pesquisa !== '') {
-    $query .= " WHERE f.nome LIKE :pesquisa ";
-    $params['pesquisa'] = "%$pesquisa%";
-}
+    // Se houver termo de pesquisa, filtra por nome ou cor
+    if ($pesquisa) {
+        $query .= " WHERE f.nome LIKE :pesq OR c.nome LIKE :pesq ";
+    }
 
-$query .= " ORDER BY f.nome ASC";
+    $query .= " GROUP BY f.id ORDER BY f.nome ASC";
 
-$stmt = $pdo->prepare($query);
-$stmt->execute($params);
-$fardas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare($query);
 
-// =====================
-// 💰 CÁLCULO TOTAL DE STOCK
-// =====================
-$total_stock = 0;
-foreach ($fardas as $f) {
-    $total_stock += $f['quantidade'] * $f['preco_unitario'];
+    if ($pesquisa) {
+        $stmt->execute(['pesq' => "%$pesquisa%"]);
+    } else {
+        $stmt->execute();
+    }
+
+    $fardas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    die("Erro ao carregar stock de fardas: " . $e->getMessage());
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-PT" class="bg-gray-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerir Stock de Fardas - CrewGest</title>
+    <title>Gestão de Stock de Farda - CrewGest</title>
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
 </head>
 <body class="p-8">
+
     <?php include_once '../src/templates/header.php'; ?>
 
-    <main class="max-w-6xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">👕 Gerir Stock de Fardas</h1>
+    <main class="max-w-6xl mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Gestão de Stock de Farda</h1>
 
-            <div class="text-right text-green-700 font-semibold">
-                💰 Valor Total em Stock: <?= number_format($total_stock, 2, ',', '.') ?> €
+            <div class="flex flex-col md:flex-row gap-3 md:items-center">
+                <!-- 🔍 Pesquisa -->
+                <form method="GET" class="flex gap-2">
+                    <input 
+                        type="text" 
+                        name="pesquisa" 
+                        value="<?= htmlspecialchars($pesquisa) ?>" 
+                        placeholder="Pesquisar por nome ou cor..." 
+                        style="padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px;"
+                    >
+                    <button type="submit"
+                        style="background-color:#2563eb; color:#fff; font-weight:600; padding:8px 18px; border:none; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                        onmouseover="this.style.backgroundColor='#1d4ed8'"
+                        onmouseout="this.style.backgroundColor='#2563eb'">
+                        🔍 Pesquisar
+                    </button>
+                </form>
+
+                <!-- ➕ Adicionar Farda -->
+                <a href="adicionar_farda.php"
+                style="background-color:#16a34a; color:#fff; font-weight:600; padding:8px 18px; border-radius:8px; text-decoration:none; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                onmouseover="this.style.backgroundColor='#15803d'"
+                onmouseout="this.style.backgroundColor='#16a34a'">
+                ➕ Adicionar Farda
+                </a>
+                <a href="adicionar_stock.php"
+                style="background-color:#16a34a; color:#fff; font-weight:600; padding:8px 18px; border-radius:8px; text-decoration:none; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                onmouseover="this.style.backgroundColor='#ee7321ff'"
+                onmouseout="this.style.backgroundColor='#a37416ff'">
+                ➕ Adicionar Stock
+                </a>
             </div>
         </div>
 
-        <!-- 🔍 Barra de Pesquisa -->
-        <div class="flex justify-between items-center mb-6">
-            <form method="GET" class="flex items-center gap-2">
-                <input type="text" name="pesquisa" placeholder="🔍 Procurar item..."
-                       value="<?= htmlspecialchars($pesquisa ?? '') ?>"
-                       class="border rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500"
-                       style="min-width: 220px;">
-                <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md transition">
-                    Pesquisar
-                </button>
-                <?php if (!empty($pesquisa)): ?>
-                    <a href="gerir_stock_farda.php" class="text-gray-600 hover:underline ml-2">Limpar</a>
-                <?php endif; ?>
-            </form>
 
-            <a href="adicionar_farda.php"
-                    class="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 active:scale-95 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Novo Item
-            </a>
-        </div>
-
-        <!-- 🧾 Tabela de Stock -->
-        <?php if ($fardas): ?>
+        <?php if (empty($fardas)): ?>
+            <p class="text-gray-600 italic">Nenhuma farda encontrada.</p>
+        <?php else: ?>
             <div class="overflow-x-auto">
                 <table class="min-w-full border border-gray-200 text-sm">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="px-4 py-2 border-b text-left">Nome</th>
-                            <th class="px-4 py-2 border-b text-left">Cor</th>
-                            <th class="px-4 py-2 border-b text-left">Tamanho</th>
-                            <th class="px-4 py-2 border-b text-left">Departamento</th>
-                            <th class="px-4 py-2 border-b text-center">Qtd</th>
-                            <th class="px-4 py-2 border-b text-right">Preço (€)</th>
-                            <th class="px-4 py-2 border-b text-right">Valor Total (€)</th>
-                            <th class="px-4 py-2 border-b text-center">Ações</th>
+                            <th class="px-4 py-2 text-left">Nome</th>
+                            <th class="px-4 py-2 text-left">Cor</th>
+                            <th class="px-4 py-2 text-left">Tamanho</th>
+                            <th class="px-4 py-2 text-left">Departamentos</th>
+                            <th class="px-4 py-2 text-right">Preço (€)</th>
+                            <th class="px-4 py-2 text-right">Quantidade</th>
+                            <th class="px-4 py-2 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($fardas as $f): ?>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['nome']) ?></td>
-                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['cor']) ?></td>
-                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['tamanho']) ?></td>
-                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['departamento']) ?></td>
-                            <td class="px-4 py-2 border-b text-center font-semibold"><?= $f['quantidade'] ?></td>
-                            <td class="px-4 py-2 border-b text-right"><?= number_format($f['preco_unitario'], 2, ',', '.') ?></td>
-                            <td class="px-4 py-2 border-b text-right font-semibold">
-                                <?= number_format($f['quantidade'] * $f['preco_unitario'], 2, ',', '.') ?>
-                            </td>
-                            <td class="px-4 py-2 border-b text-center">
-                                <a href="editar_farda.php?id=<?= $f['id'] ?>" 
-                                   class="text-blue-600 hover:text-blue-800">✏️ Editar</a>
-                            </td>
-                        </tr>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-4 py-2"><?= htmlspecialchars($f['nome']) ?></td>
+                                <td class="px-4 py-2"><?= htmlspecialchars($f['cor']) ?></td>
+                                <td class="px-4 py-2"><?= htmlspecialchars($f['tamanho']) ?></td>
+                                <td class="px-4 py-2 text-gray-700"><?= htmlspecialchars($f['departamentos'] ?? '—') ?></td>
+                                <td class="px-4 py-2 text-right"><?= number_format($f['preco_unitario'], 2, ',', '.') ?></td>
+                                <td class="px-4 py-2 text-right"><?= (int)$f['quantidade'] ?></td>
+                                <td class="px-4 py-2 text-center">
+                                    <a href="editar_farda.php?id=<?= $f['id'] ?>" class="text-blue-600 hover:underline">Editar</a>
+                                </td>
+                            </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
-        <?php else: ?>
-            <p class="text-gray-600 italic mt-4">Nenhum item encontrado.</p>
         <?php endif; ?>
     </main>
 </body>

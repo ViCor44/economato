@@ -2,103 +2,124 @@
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
 
-// Buscar departamentos existentes
-$stmt = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC");
-$departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$errors = [];
+$success = '';
 
-// Inserir colaborador
+// Processar formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = trim($_POST['nome']);
-    $cartao = trim($_POST['cartao']);
-    $departamento_id = (int)$_POST['departamento_id'];
+    $nome = trim($_POST['nome'] ?? '');
+    $cartao = trim($_POST['cartao'] ?? '');
+    $telefone = trim($_POST['telefone'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $departamento_id = $_POST['departamento_id'] ?? null;
     $ativo = isset($_POST['ativo']) ? 1 : 0;
 
-    if (!empty($nome) && !empty($cartao) && $departamento_id > 0) {
-        $stmt = $pdo->prepare("
-            INSERT INTO colaboradores (nome, cartao, departamento_id, ativo)
-            VALUES (:nome, :cartao, :departamento_id, :ativo)
-        ");
-        $stmt->execute([
-            'nome' => $nome,
-            'cartao' => $cartao,
-            'departamento_id' => $departamento_id,
-            'ativo' => $ativo
-        ]);
+    // Validação
+    if (empty($nome)) $errors[] = "O nome é obrigatório.";
+    if (empty($cartao)) $errors[] = "O número do cartão é obrigatório.";
+    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "O email inserido não é válido.";
+    if (empty($departamento_id)) $errors[] = "Selecione um departamento.";
 
-        header("Location: colaboradores.php?adicionado=1");
-        exit;
-    } else {
-        $erro = "Por favor, preencha todos os campos obrigatórios.";
+    // Verificar duplicado de cartão
+    if (empty($errors)) {
+        $stmt = $pdo->prepare("SELECT id FROM colaboradores WHERE cartao = ?");
+        $stmt->execute([$cartao]);
+        if ($stmt->fetch()) {
+            $errors[] = "O cartão já está associado a outro colaborador.";
+        }
+    }
+
+    // Inserir novo colaborador
+    if (empty($errors)) {
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO colaboradores (nome_completo, cartao, telefone, email, departamento_id, ativo)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([$nome, $cartao, $telefone, $email, $departamento_id, $ativo]);
+            $success = "✅ Colaborador adicionado com sucesso!";
+        } catch (PDOException $e) {
+            $errors[] = "Erro ao adicionar colaborador: " . $e->getMessage();
+        }
     }
 }
-?>
 
+// Buscar departamentos
+$departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="pt-PT" class="bg-gray-100">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adicionar Colaborador - CrewGest</title>
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
 </head>
-<body class="p-8">
-
+<body class="bg-gray-100">
 <?php include_once '../src/templates/header.php'; ?>
 
-<main class="max-w-xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
+<main class="p-8">
+    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">👤 Adicionar Colaborador</h1>
 
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">➕ Adicionar Colaborador</h1>
+        <?php if ($success): ?>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6"><?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
 
-    <?php if (!empty($erro)): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <?= htmlspecialchars($erro) ?>
-        </div>
-    <?php endif; ?>
+        <?php if ($errors): ?>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-6">
+                <ul class="list-disc pl-5"><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul>
+            </div>
+        <?php endif; ?>
 
-    <form method="POST" class="space-y-4">
+        <form method="POST" class="space-y-6">
+            <!-- Nome -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Nome Completo</label>
+                <input type="text" name="nome" class="w-full px-4 py-2 border rounded-md" required>
+            </div>
 
-        <div>
-            <label class="block text-gray-700 mb-1 font-medium">Nome do colaborador *</label>
-            <input type="text" name="nome" placeholder="Ex: João Silva"
-                   class="w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500" required>
-        </div>
+            <!-- Cartão -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Número do Cartão</label>
+                <input type="text" name="cartao" class="w-full px-4 py-2 border rounded-md" placeholder="Aproxime ou digite o número do cartão" required>
+            </div>
 
-        <div>
-            <label class="block text-gray-700 mb-1 font-medium">Número do Cartão *</label>
-            <input type="text" name="cartao" placeholder="Ex: 123456789"
-                   class="w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500" required>
-            <p class="text-sm text-gray-500 mt-1">Passe o cartão do colaborador no leitor RFID (ou insira manualmente).</p>
-        </div>
+            <!-- Telefone e Email -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">Telefone</label>
+                    <input type="text" name="telefone" class="w-full px-4 py-2 border rounded-md" placeholder="+351 912 345 678">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">Email</label>
+                    <input type="email" name="email" class="w-full px-4 py-2 border rounded-md" placeholder="exemplo@email.com">
+                </div>
+            </div>
 
-        <div>
-            <label class="block text-gray-700 mb-1 font-medium">Departamento *</label>
-            <select name="departamento_id" class="w-full border rounded-md px-4 py-2 focus:ring-2 focus:ring-blue-500" required>
-                <option value="">-- Selecione --</option>
-                <?php foreach ($departamentos as $d): ?>
-                    <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['nome']) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
+            <!-- Departamento -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Departamento</label>
+                <select name="departamento_id" class="w-full px-4 py-2 border rounded-md" required>
+                    <option value="">-- Selecionar --</option>
+                    <?php foreach ($departamentos as $d): ?>
+                        <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['nome']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-        <div class="flex items-center gap-2">
-            <input type="checkbox" name="ativo" id="ativo" checked>
-            <label for="ativo" class="text-gray-700">Ativo</label>
-        </div>
+            <!-- Ativo -->
+            <div class="flex items-center">
+                <input type="checkbox" name="ativo" id="ativo" class="mr-2" checked>
+                <label for="ativo" class="text-gray-700">Colaborador Ativo</label>
+            </div>
 
-        <div class="flex justify-between items-center mt-6">
-            <a href="colaboradores.php" class="text-gray-600 hover:underline">← Voltar</a>
-            <button type="submit"
-                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-all duration-300 active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Adicionar
-            </button>
-        </div>
-
-    </form>
-
+            <!-- Botões -->
+            <div class="text-right pt-4">
+                <a href="colaboradores.php" class="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-300">Cancelar</a>
+                <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Guardar</button>
+            </div>
+        </form>
+    </div>
 </main>
-
 </body>
 </html>
