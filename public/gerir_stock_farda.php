@@ -73,17 +73,25 @@ try {
                 </form>
 
                 <!-- ➕ Adicionar Farda -->
-                <a href="adicionar_farda.php"
+                <a href="adicionar_farda.php" class="ml-4"
                 style="background-color:#16a34a; color:#fff; font-weight:600; padding:8px 18px; border-radius:8px; text-decoration:none; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
                 onmouseover="this.style.backgroundColor='#15803d'"
                 onmouseout="this.style.backgroundColor='#16a34a'">
                 ➕ Adicionar Farda
                 </a>
-                <a href="adicionar_stock.php"
+                <a href="adicionar_stock.php" class="ml-4"
                 style="background-color:#16a34a; color:#fff; font-weight:600; padding:8px 18px; border-radius:8px; text-decoration:none; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
                 onmouseover="this.style.backgroundColor='#ee7321ff'"
                 onmouseout="this.style.backgroundColor='#a37416ff'">
                 ➕ Adicionar Stock
+                </a>
+                <a href="dar_baixa_farda.php" class="ml-4"
+                style="background-color:#dc2626; color:#fff; padding:6px 12px; 
+                border-radius:6px; text-decoration:none; font-weight:600; 
+                box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                onmouseover="this.style.backgroundColor='#b91c1c';"
+                onmouseout="this.style.backgroundColor='#dc2626';">
+                    ⬇️ Dar Baixa Stock
                 </a>
             </div>
         </div>

@@ -143,7 +143,32 @@ try {
                     </div>
                 </a>
 
-                
+                <!-- 📊 Relatórios -->
+                <a href="<?= BASE_URL ?>/reports/reports.php" 
+                class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+
+                    <div class="flex items-center gap-4">
+
+                        <!-- Círculo do ícone (cor igual à dos outros cards informativos) -->
+                        <div class="bg-blue-100 text-blue-600 p-3 rounded-full icon-circle">
+                            <svg xmlns="http://www.w3.org/2000/svg" 
+                                class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 10h16M4 14h10M4 18h6" />
+                            </svg>
+                        </div>
+
+                        <!-- Texto -->
+                        <div>
+                            <h2 class="font-semibold text-lg text-gray-800">Relatórios</h2>
+                            <p class="text-sm text-gray-600">
+                                Consultar relatórios de stock, atribuições, devoluções e mais.
+                            </p>
+                        </div>
+
+                    </div>
+                </a>
+             
             </div>
         </div>
     </main>

@@ -2,7 +2,7 @@
 // /src/templates/header.php - Novo Design
 ?>
 
-<div class="bg-stone-800 h-2"></div>
+<div class="bg-stone-800 h-2  mt-4"></div>
 
 <header class="bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

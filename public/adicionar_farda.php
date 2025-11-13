@@ -87,21 +87,48 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Cor</label>
-                    <select name="cor_id" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500" required>
-                        <option value="">-- Escolha uma cor --</option>
-                        <?php foreach ($cores as $cor): ?>
-                            <option value="<?= $cor['id'] ?>"><?= htmlspecialchars($cor['nome']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+
+                    <div class="flex gap-2">
+                        <select id="cor_id" name="cor_id" class="w-full px-4 py-2 border rounded-md" required>
+                            <option value="">-- Escolha uma cor --</option>
+                            <?php foreach ($cores as $cor): ?>
+                                <option value="<?= $cor['id'] ?>"><?= htmlspecialchars($cor['nome']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <button type="button" id="btnAddCor"
+                                style="background:#16a34a; color:white; font-weight:bold;
+                                    padding:0 12px; border-radius:6px;">
+                            +
+                        </button>
+                    </div>
+
+                    <input type="text" id="novaCorInput"
+                        placeholder="Nova cor..."
+                        class="w-full px-3 py-2 border rounded-md mt-2 hidden">
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tamanho</label>
-                    <select name="tamanho_id" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500" required>
-                        <option value="">-- Escolha um tamanho --</option>
-                        <?php foreach ($tamanhos as $t): ?>
-                            <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['nome']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+
+                    <div class="flex gap-2">
+                        <select id="tamanho_id" name="tamanho_id" class="w-full px-4 py-2 border rounded-md" required>
+                            <option value="">-- Escolha um tamanho --</option>
+                            <?php foreach ($tamanhos as $t): ?>
+                                <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['nome']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <button type="button" id="btnAddTamanho"
+                                style="background:#16a34a; color:white; font-weight:bold;
+                                    padding:0 12px; border-radius:6px;">
+                            +
+                        </button>
+                    </div>
+
+                    <input type="text" id="novoTamanhoInput"
+                        placeholder="Novo tamanho..."
+                        class="w-full px-3 py-2 border rounded-md mt-2 hidden">
                 </div>
             </div>
 
@@ -112,7 +139,7 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                         <label class="flex items-center space-x-2">
                             <input type="checkbox" name="departamentos[]" value="<?= $d['id'] ?>"
                                    class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-                            <span class="text-gray-700"><?= htmlspecialchars($d['nome']) ?></span>
+                            <span class="text-gray-700 ml-4"><?= htmlspecialchars($d['nome']) ?></span>
                         </label>
                     <?php endforeach; ?>
                 </div>
@@ -139,5 +166,61 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             </div>
         </form>
     </main>
+    <script>
+        function adicionarOpcao(url, inputId, selectId) {
+            const valor = document.getElementById(inputId).value.trim();
+            if (valor === "") return;
+
+            fetch(url, {
+                method: "POST",
+                headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                body: "nome=" + encodeURIComponent(valor)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.erro) {
+                    alert(data.erro);
+                } else {
+                    // adicionar opção ao dropdown
+                    const sel = document.getElementById(selectId);
+                    const opt = document.createElement("option");
+                    opt.value = data.id;
+                    opt.textContent = data.nome;
+                    opt.selected = true;
+                    sel.appendChild(opt);
+
+                    // esconder input e limpar
+                    const inp = document.getElementById(inputId);
+                    inp.value = "";
+                    inp.classList.add("hidden");
+                }
+            });
+        }
+
+        // COR
+        document.getElementById("btnAddCor").onclick = () => {
+            document.getElementById("novaCorInput").classList.toggle("hidden");
+            document.getElementById("novaCorInput").focus();
+        };
+        document.getElementById("novaCorInput").addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                adicionarOpcao("nova_cor.php", "novaCorInput", "cor_id");
+            }
+        });
+
+        // TAMANHO
+        document.getElementById("btnAddTamanho").onclick = () => {
+            document.getElementById("novoTamanhoInput").classList.toggle("hidden");
+            document.getElementById("novoTamanhoInput").focus();
+        };
+        document.getElementById("novoTamanhoInput").addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                adicionarOpcao("novo_tamanho.php", "novoTamanhoInput", "tamanho_id");
+            }
+        });
+    </script>
+
 </body>
 </html>
