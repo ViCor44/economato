@@ -2,6 +2,6 @@
     "require": {
         "pragmarx/google2fa": "^9.0",
         "bacon/bacon-qr-code": "^2.0",
-        "dompdf/dompdf": "2.0"
+        "dompdf/dompdf": "^3.1"
     }
 }

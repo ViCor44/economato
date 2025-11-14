@@ -1,8 +1,7 @@
 <?php
 /**
  * @package dompdf
- * @link    http://dompdf.github.com/
- * @author  Benj Carson <benjcarson@digitaljunkies.ca>
+ * @link    https://github.com/dompdf/dompdf
  * @license http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
 namespace Dompdf\FrameDecorator;
@@ -66,7 +65,8 @@ class Table extends AbstractFrameDecorator
         parent::__construct($frame, $dompdf);
         $this->_cellmap = new Cellmap($this);
 
-        if ($frame->get_style()->table_layout === "fixed") {
+        $style = $frame->get_style();
+        if ($style->table_layout === "fixed" && $style->width !== "auto") {
             $this->_cellmap->set_layout_fixed(true);
         }
 
@@ -196,7 +196,8 @@ class Table extends AbstractFrameDecorator
                 || in_array($frame->get_style()->display, self::VALID_CHILDREN, true);
         };
 
-        return $frame->is_text_node() && !$frame->is_pre()
+        return $frame instanceof Text
+            && !$frame->is_pre()
             && preg_match($wsPattern, $frame->get_text())
             && $validChildOrNull($frame->get_prev_sibling())
             && $validChildOrNull($frame->get_next_sibling());

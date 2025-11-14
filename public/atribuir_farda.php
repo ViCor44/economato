@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit"
                         class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow">
                     Atribuir
-                </button>
+                </button>                
             </div>
         </form>
     </main>

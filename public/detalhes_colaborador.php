@@ -149,6 +149,17 @@ try {
         ↩️ <span>Devolver Empréstimo</span>
     </a>
 
+    <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
+    style="background-color:#16a34a; color:#fff; font-weight:600; 
+           display:flex; align-items:center; gap:8px; padding:8px 16px; 
+           border-radius:8px; text-decoration:none; 
+           box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+    onmouseover="this.style.backgroundColor='#15803d';"
+    onmouseout="this.style.backgroundColor='#16a34a';"
+    target="_blank">
+        📄 <span>Gerar Termo de Farda</span>
+</a>
+
 </div>
 
         </div>

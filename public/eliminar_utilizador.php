@@ -29,32 +29,36 @@ if ($id === (int)$utilizador_logado['id']) {
     exit;
 }
 
-// Verificar se existe
-$stmt = $pdo->prepare("SELECT id FROM utilizadores WHERE id = ?");
+/// Verificar se existe
+$stmt = $pdo->prepare("SELECT nome FROM utilizadores WHERE id = ?");
 $stmt->execute([$id]);
-$utilizador = $stmt->fetch();
+$utilizador = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$utilizador) {
     header("Location: gerir_utilizadores.php?erro=nao_existe");
     exit;
 }
 
+$nomeEliminado = $utilizador['nome'];
+
 try {
-    // Apagar utilizador
-    $del = $pdo->prepare("DELETE FROM utilizadores WHERE id = ?");
+
+    // Registar log ANTES de apagar
     adicionarLog(
         $pdo,
         "Eliminou utilizador",
-        "Utilizador ID $id eliminado pelo admin ID ".$utilizador_logado['id']
+        "Utilizador '{$nomeEliminado}' eliminado pelo admin ".$utilizador_logado['nome']
     );
+
+    // Apagar utilizador
+    $del = $pdo->prepare("DELETE FROM utilizadores WHERE id = ?");
     $del->execute([$id]);
 
-    
-
-    header("Location: gerir_utilizadores.php?sucesso=1");
+    header("Location: gerir_utilizadores.php?sucesso=eliminado");
     exit;
 
 } catch (Exception $e) {
-    header("Location: gerir_utilizadores.php?erro=erro_sistema");
+    header("Location: gerir_utilizadores.php?erro=erro_bd");
     exit;
 }
+
