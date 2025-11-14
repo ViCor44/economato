@@ -1,6 +1,7 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
+require_once '../src/log.php';
 
 // 🔍 Validar colaborador
 $colaborador_id = isset($_GET['colaborador_id']) ? (int)$_GET['colaborador_id'] : 0;
@@ -81,6 +82,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $pdo->commit();
             $success = "Devolução registada com sucesso!";
+
+            adicionarLog(
+                $pdo,
+                "Devolução de farda",
+                "Colaborador ID $colaborador_id devolveu farda ID $farda_id | Quantidade: $quantidade | Estado: $estado"
+            );
 
         } catch (Exception $e) {
             $pdo->rollBack();

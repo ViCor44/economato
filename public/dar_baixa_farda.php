@@ -1,6 +1,7 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
+require_once '../src/log.php';
 
 $erro = null;
 $sucesso = null;
@@ -54,10 +55,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Atualizar stock
             $stmt = $pdo->prepare("UPDATE fardas SET quantidade = quantidade - ? WHERE id = ?");
-            $stmt->execute([$quantidade, $farda_id]);
+            $stmt->execute([$quantidade, $farda_id]);            
 
             $pdo->commit();
             $sucesso = "Baixa registada com sucesso!";
+            
+            adicionarLog(
+                $pdo,
+                "Baixa de stock",
+                "Farda ID $farda_id | Quantidade: $quantidade | Motivo: $motivo"
+            );
 
         } catch (Exception $e) {
             $pdo->rollBack();

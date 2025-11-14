@@ -1,6 +1,7 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
+require_once '../src/log.php';
 
 $colaborador_id = $_GET['colaborador_id'] ?? 0;
 
@@ -46,6 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmt->execute([$colaborador_id, $farda_id, $quantidade]);
             $success = "Farda atribuída com sucesso!";
+
+            adicionarLog(
+                $pdo,
+                "Atribuição de farda",
+                "Colaborador ID $colaborador_id recebeu farda ID $farda_id x$quantidade"
+            );    
+
         } catch (PDOException $e) {
             $errors[] = "Erro ao atribuir farda: " . $e->getMessage();
         }

@@ -141,7 +141,7 @@ try {
             <a href="editar_utilizador.php?id=<?= $user['id'] ?>" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
 
             <?php if ((int)$user['id'] !== (int)$utilizador_logado['id']): ?>
-                <form action="eliminar_utilizador.php" method="POST" class="inline" onsubmit="return confirm('Tem a certeza que deseja eliminar este utilizador? O funcionário associado NÃO será apagado.');">
+                <form action="eliminar_utilizador.php" method="POST" class="inline" onsubmit="return confirm('Tem a certeza que deseja eliminar este utilizador?');">
                     <input type="hidden" name="id" value="<?= $user['id'] ?>">
                     <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
                 </form>

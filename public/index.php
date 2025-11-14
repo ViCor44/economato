@@ -72,7 +72,7 @@ try {
                 <?php endif; ?>
 
                 <?php if ((int)($utilizador_logado['role_id'] ?? 0) === ROLE_ADMIN): ?>
-                <a href="ver_logs.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <a href="<?= BASE_URL ?>/reports/logs.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                     <div class="flex items-center gap-4">
                         <div class="bg-yellow-100 text-yellow-600 p-3 rounded-full">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

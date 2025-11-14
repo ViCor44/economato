@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 14-Nov-2025 às 13:11
+-- Tempo de geração: 14-Nov-2025 às 17:35
 -- Versão do servidor: 10.4.32-MariaDB
 -- versão do PHP: 8.2.12
 
@@ -265,6 +265,28 @@ INSERT INTO `farda_emprestimos` (`id`, `colaborador_id`, `farda_id`, `quantidade
 -- --------------------------------------------------------
 
 --
+-- Estrutura da tabela `logs`
+--
+
+CREATE TABLE `logs` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED DEFAULT NULL,
+  `acao` varchar(255) NOT NULL,
+  `detalhes` text DEFAULT NULL,
+  `ip` varchar(50) DEFAULT NULL,
+  `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Extraindo dados da tabela `logs`
+--
+
+INSERT INTO `logs` (`id`, `user_id`, `acao`, `detalhes`, `ip`, `criado_em`) VALUES
+(6, 1, 'Eliminou utilizador', 'Utilizador ID 16 eliminado pelo admin ID 1', '191.188.127.2', '2025-11-14 16:34:02');
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura da tabela `roles`
 --
 
@@ -308,7 +330,7 @@ INSERT INTO `tamanhos` (`id`, `nome`) VALUES
 --
 
 CREATE TABLE `utilizadores` (
-  `id` int(10) UNSIGNED NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL,
   `nome` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
@@ -326,8 +348,7 @@ CREATE TABLE `utilizadores` (
 INSERT INTO `utilizadores` (`id`, `nome`, `email`, `password_hash`, `google_authenticator_secret`, `role_id`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 'admin', 'admin@gmail.com', '$2y$10$lTDNseVm5FFBBC54aXOeUer6tEosMRkJVoSS81I.PExD67LjUqtWC', NULL, 1, 1, '2025-11-10 22:39:45', '2025-11-10 22:39:45'),
 (8, 'Victor Correia', 'victor.a.correia@gmail.com', '$2y$10$lTDNseVm5FFBBC54aXOeUer6tEosMRkJVoSS81I.PExD67LjUqtWC', NULL, 2, 1, '2025-11-11 22:07:38', '2025-11-13 21:33:59'),
-(9, 'Elisabete Viana', 'elisabeteviana@slidesplash.com', '$2y$10$ncAMB7hcvCmtIi5HwS7sCuTEww/EjCdHogBIvCe7bVBFCEBkTGRte', 'F3WZWXAXNW4FZWE42JEOHGUIMCDLISUZ', 1, 1, '2025-11-14 09:40:03', '2025-11-14 09:41:45'),
-(10, 'Alberto Viana', 'ab@gmail.com', '$2y$10$K4heco9VyuL0vuk5s59qo.OLMLns0C4NpYOM0uRC75zx1U6slOEs2', 'X2EQJFQYASFRJTRLH6WJT7SYGBU3QYQQ', 3, 1, '2025-11-14 11:49:39', '2025-11-14 11:50:40');
+(9, 'Elisabete Viana', 'elisabeteviana@slidesplash.com', '$2y$10$ncAMB7hcvCmtIi5HwS7sCuTEww/EjCdHogBIvCe7bVBFCEBkTGRte', 'F3WZWXAXNW4FZWE42JEOHGUIMCDLISUZ', 1, 1, '2025-11-14 09:40:03', '2025-11-14 09:41:45');
 
 --
 -- Índices para tabelas despejadas
@@ -419,6 +440,13 @@ ALTER TABLE `farda_emprestimos`
   ADD KEY `fk_emprestimo_colaborador` (`colaborador_id`),
   ADD KEY `fk_emprestimo_farda` (`farda_id`),
   ADD KEY `fk_emprestimo_user` (`criado_por`);
+
+--
+-- Índices para tabela `logs`
+--
+ALTER TABLE `logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_logs_user` (`user_id`);
 
 --
 -- Índices para tabela `roles`
@@ -513,6 +541,12 @@ ALTER TABLE `farda_emprestimos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT de tabela `logs`
+--
+ALTER TABLE `logs`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT de tabela `roles`
 --
 ALTER TABLE `roles`
@@ -528,7 +562,7 @@ ALTER TABLE `tamanhos`
 -- AUTO_INCREMENT de tabela `utilizadores`
 --
 ALTER TABLE `utilizadores`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Restrições para despejos de tabelas
@@ -595,6 +629,12 @@ ALTER TABLE `farda_emprestimos`
   ADD CONSTRAINT `fk_emprestimo_colaborador` FOREIGN KEY (`colaborador_id`) REFERENCES `colaboradores` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_emprestimo_farda` FOREIGN KEY (`farda_id`) REFERENCES `fardas` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_emprestimo_user` FOREIGN KEY (`criado_por`) REFERENCES `utilizadores` (`id`) ON DELETE SET NULL;
+
+--
+-- Limitadores para a tabela `logs`
+--
+ALTER TABLE `logs`
+  ADD CONSTRAINT `fk_logs_user` FOREIGN KEY (`user_id`) REFERENCES `utilizadores` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,6 +1,7 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
+require_once '../src/log.php';
 
 // Carregar lista de fardas existentes
 $stmt = $pdo->query("
@@ -33,6 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$farda_id, $quantidade, $preco_compra, $utilizador_logado['id'] ?? null]);
 
             $pdo->commit();
+
+            adicionarLog(
+                $pdo,
+                "Adicionou stock",
+                "Farda ID $farda_id | Quantidade: $quantidade"
+            );
 
             header('Location: gerir_stock_farda.php?sucesso=1');
             exit;
