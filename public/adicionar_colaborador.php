@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO colaboradores (nome_completo, cartao, telefone, email, departamento_id, ativo)
+                INSERT INTO colaboradores (nome, cartao, telefone, email, departamento_id, ativo)
                 VALUES (?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([$nome, $cartao, $telefone, $email, $departamento_id, $ativo]);
