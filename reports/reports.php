@@ -105,6 +105,13 @@ require_once '../config/db.php';
         </div>
     </a>
 
+    <a href="relatorio_fardas_mais_atribuidas.php" 
+   class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg shadow font-semibold"
+   target="_blank">
+   📊 Relatório: Fardas Mais Atribuídas (IA)
+</a>
+
+
 </div>
 
 </main>

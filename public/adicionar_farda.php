@@ -1,20 +1,57 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
+require_once '../src/ean_functions.php'; // -> contém validate_ean13, generate_unique_ean, save_ean_png
 
 $errors = [];
 $success = '';
+
+// Carregar opções para selects
+$cores = $pdo->query("SELECT id, nome FROM cores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+$tamanhos = $pdo->query("SELECT id, nome FROM tamanhos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+$departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Valores para re-popular o form em caso de erro
+$old = $_POST ?? [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
     $cor_id = $_POST['cor_id'] ?? null;
     $tamanho_id = $_POST['tamanho_id'] ?? null;
-    $departamentos = $_POST['departamentos'] ?? [];
+    $departamentos_sel = $_POST['departamentos'] ?? [];
     $preco_unitario = str_replace(',', '.', $_POST['preco_unitario'] ?? '0');
     $quantidade = (int)($_POST['quantidade'] ?? 0);
+    $ean_input = trim($_POST['ean'] ?? '');
 
-    if (empty($nome) || empty($cor_id) || empty($tamanho_id) || empty($departamentos)) {
-        $errors[] = "Todos os campos obrigatórios devem ser preenchidos.";
+    // Validações básicas
+    if ($nome === '' || empty($cor_id) || empty($tamanho_id) || empty($departamentos_sel)) {
+        $errors[] = "Todos os campos obrigatórios devem ser preenchidos (nome, cor, tamanho e pelo menos 1 departamento).";
+    }
+
+    if (!is_numeric($preco_unitario) || (float)$preco_unitario < 0) {
+        $errors[] = "Preço unitário inválido.";
+    }
+
+    if ($quantidade < 0) $quantidade = 0;
+
+    // Se o utilizador forneceu um EAN, valida e verifica unicidade
+    if ($ean_input !== '') {
+        if (!validate_ean13($ean_input)) {
+            $errors[] = "EAN inválido — tem de ser 13 dígitos com checksum correcto.";
+        } else {
+            $stmt = $pdo->prepare("SELECT id FROM fardas WHERE ean = ?");
+            $stmt->execute([$ean_input]);
+            if ($stmt->fetch()) {
+                $errors[] = "Já existe uma farda com esse EAN.";
+            }
+        }
+    } else {
+        // Gerar EAN automático único (prefixo 200 por defeito)
+        try {
+            $ean_input = generate_unique_ean($pdo, '200');
+        } catch (Exception $e) {
+            $errors[] = "Erro ao gerar EAN automático: " . $e->getMessage();
+        }
     }
 
     if (empty($errors)) {
@@ -23,31 +60,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Inserir nova farda
             $stmt = $pdo->prepare("
-                INSERT INTO fardas (nome, cor_id, tamanho_id, preco_unitario, quantidade)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO fardas (nome, cor_id, tamanho_id, preco_unitario, quantidade, ean)
+                VALUES (?, ?, ?, ?, ?, ?)
             ");
-            $stmt->execute([$nome, $cor_id, $tamanho_id, $preco_unitario, $quantidade]);
+            $stmt->execute([$nome, $cor_id, $tamanho_id, $preco_unitario, $quantidade, $ean_input]);
             $farda_id = $pdo->lastInsertId();
 
             // Inserir relação com departamentos
             $stmtDep = $pdo->prepare("INSERT INTO farda_departamentos (farda_id, departamento_id) VALUES (?, ?)");
-            foreach ($departamentos as $dep_id) {
+            foreach ($departamentos_sel as $dep_id) {
                 $stmtDep->execute([$farda_id, $dep_id]);
             }
 
+            // Gerar e guardar imagem PNG do barcode
+            $outPath = __DIR__ . '/../public/barcodes/';
+            try {
+                save_ean_png($ean_input, $outPath);
+            } catch (Exception $e) {
+                // não abortamos a operação — apenas registamos a falha num log e avisamos
+                // Em ambiente real, loga o erro. Aqui devolvemos mensagem ao utilizador.
+                $errors[] = "Farda criada, mas falha ao gerar imagem do barcode: " . $e->getMessage();
+                $pdo->commit();
+                $success = "✅ Farda adicionada com EAN $ean_input, mas houve um problema ao gerar o PNG do barcode.";
+                // não fazemos rollback porque a farda já foi criada com sucesso
+                // atualiza $old para manter valores no form
+                $old = $_POST;
+                $old['ean'] = $ean_input;
+                // terminar aqui para não duplicar commit
+                goto render_form;
+            }
+
             $pdo->commit();
-            $success = "✅ Farda adicionada com sucesso!";
+            $success = "✅ Farda adicionada com sucesso! EAN: $ean_input";
+            // limpar o POST para evitar reenvio
+            $old = [];
         } catch (Exception $e) {
             $pdo->rollBack();
             $errors[] = "Erro ao adicionar farda: " . $e->getMessage();
         }
+    } else {
+        // manter valores para re-popular o formulário
+        $old = $_POST;
+        $old['ean'] = $ean_input;
     }
 }
 
-// Carregar opções
-$cores = $pdo->query("SELECT id, nome FROM cores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
-$tamanhos = $pdo->query("SELECT id, nome FROM tamanhos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
-$departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+render_form:
 ?>
 <!DOCTYPE html>
 <html lang="pt-PT" class="bg-gray-100">
@@ -81,7 +139,8 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Peça</label>
                 <input type="text" name="nome" required
-                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                       value="<?= htmlspecialchars($old['nome'] ?? '') ?>">
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -92,7 +151,9 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                         <select id="cor_id" name="cor_id" class="w-full px-4 py-2 border rounded-md" required>
                             <option value="">-- Escolha uma cor --</option>
                             <?php foreach ($cores as $cor): ?>
-                                <option value="<?= $cor['id'] ?>"><?= htmlspecialchars($cor['nome']) ?></option>
+                                <option value="<?= $cor['id'] ?>" <?= isset($old['cor_id']) && $old['cor_id']==$cor['id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cor['nome']) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
 
@@ -115,7 +176,9 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                         <select id="tamanho_id" name="tamanho_id" class="w-full px-4 py-2 border rounded-md" required>
                             <option value="">-- Escolha um tamanho --</option>
                             <?php foreach ($tamanhos as $t): ?>
-                                <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['nome']) ?></option>
+                                <option value="<?= $t['id'] ?>" <?= isset($old['tamanho_id']) && $old['tamanho_id']==$t['id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($t['nome']) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
 
@@ -135,10 +198,12 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Departamentos</label>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    <?php foreach ($departamentos as $d): ?>
+                    <?php foreach ($departamentos as $d): 
+                        $checked = in_array($d['id'], $old['departamentos'] ?? []) ? 'checked' : '';
+                    ?>
                         <label class="flex items-center space-x-2">
                             <input type="checkbox" name="departamentos[]" value="<?= $d['id'] ?>"
-                                   class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                   class="h-4 w-4 text-blue-600 border-gray-300 rounded" <?= $checked ?>>
                             <span class="text-gray-700 ml-4"><?= htmlspecialchars($d['nome']) ?></span>
                         </label>
                     <?php endforeach; ?>
@@ -149,13 +214,25 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Preço Unitário (€)</label>
                     <input type="number" step="0.01" min="0" name="preco_unitario" required
-                           class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                           value="<?= htmlspecialchars($old['preco_unitario'] ?? '0.00') ?>">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade Inicial</label>
                     <input type="number" name="quantidade" min="0" required
-                           class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
+                           class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                           value="<?= (int)($old['quantidade'] ?? 0) ?>">
                 </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">EAN (13 dígitos) — opcional</label>
+                <div class="flex gap-2">
+                    <input type="text" name="ean" pattern="\d{13}" maxlength="13" placeholder="opcional"
+                           class="p-2 border flex-1" value="<?= htmlspecialchars($old['ean'] ?? '') ?>">
+                    <button type="button" id="btn-gen" class="bg-blue-600 text-white px-4 py-2 rounded">Gerar</button>
+                </div>
+                <small class="text-gray-600">Se deixares vazio será gerado automaticamente um EAN único.</small>
             </div>
 
             <div class="flex justify-end">
@@ -166,61 +243,105 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             </div>
         </form>
     </main>
-    <script>
-        function adicionarOpcao(url, inputId, selectId) {
-            const valor = document.getElementById(inputId).value.trim();
-            if (valor === "") return;
 
-            fetch(url, {
-                method: "POST",
-                headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                body: "nome=" + encodeURIComponent(valor)
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.erro) {
-                    alert(data.erro);
-                } else {
-                    // adicionar opção ao dropdown
-                    const sel = document.getElementById(selectId);
-                    const opt = document.createElement("option");
-                    opt.value = data.id;
-                    opt.textContent = data.nome;
-                    opt.selected = true;
-                    sel.appendChild(opt);
+<script>
+    // Função que envia um POST para criar nova cor/tamanho e adiciona ao select
+    function adicionarOpcao(url, inputId, selectId) {
+    const valor = document.getElementById(inputId).value.trim();
+    if (valor === "") return;
 
-                    // esconder input e limpar
-                    const inp = document.getElementById(inputId);
-                    inp.value = "";
-                    inp.classList.add("hidden");
-                }
-            });
+    // bloquear UI brevemente
+    const btn = document.querySelector(`#${inputId}`).closest('div').querySelector('button') || null;
+    if (btn) btn.disabled = true;
+
+    fetch(url, {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: "nome=" + encodeURIComponent(valor)
+    })
+    .then(async r => {
+        if (!r.ok) {
+            const text = await r.text();
+            throw new Error(text || 'Erro no servidor ao criar opção');
+        }
+        return r.json();
+    })
+    .then(data => {
+        if (data.erro) {
+            alert(data.erro);
+            return;
         }
 
-        // COR
-        document.getElementById("btnAddCor").onclick = () => {
-            document.getElementById("novaCorInput").classList.toggle("hidden");
-            document.getElementById("novaCorInput").focus();
-        };
-        document.getElementById("novaCorInput").addEventListener("keydown", e => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                adicionarOpcao("nova_cor.php", "novaCorInput", "cor_id");
-            }
-        });
+        const sel = document.getElementById(selectId);
+        // cria opção nova e adiciona
+        const opt = document.createElement("option");
+        opt.value = data.id;
+        opt.textContent = data.nome;
+        sel.appendChild(opt);
 
-        // TAMANHO
-        document.getElementById("btnAddTamanho").onclick = () => {
-            document.getElementById("novoTamanhoInput").classList.toggle("hidden");
-            document.getElementById("novoTamanhoInput").focus();
-        };
-        document.getElementById("novoTamanhoInput").addEventListener("keydown", e => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                adicionarOpcao("novo_tamanho.php", "novoTamanhoInput", "tamanho_id");
-            }
-        });
-    </script>
+        // Define o select para o novo valor (mais confiável que opt.selected = true)
+        sel.value = data.id;
+
+        // Dispara o evento change (alguns plugins ou validação html precisam disto)
+        const ev = new Event('change', { bubbles: true });
+        sel.dispatchEvent(ev);
+
+        // esconder input e limpar
+        const inp = document.getElementById(inputId);
+        inp.value = "";
+        inp.classList.add("hidden");
+
+        // se estiveres a usar um plugin como Select2/Choices/TomSelect,
+        // chama aqui o método de refresh do plugin, por exemplo:
+        // if (window.jQuery && $(sel).data('select2')) { $(sel).trigger('change.select2'); }
+        // ou: if (sel.tom && sel.tom.refresh) sel.tom.refresh();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro ao criar opção: " + (err.message || err));
+    })
+    .finally(() => {
+        if (btn) btn.disabled = false;
+    });
+}
+
+// COR
+document.getElementById("btnAddCor").onclick = () => {
+    document.getElementById("novaCorInput").classList.toggle("hidden");
+    document.getElementById("novaCorInput").focus();
+};
+document.getElementById("novaCorInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        adicionarOpcao("nova_cor.php", "novaCorInput", "cor_id");
+    }
+});
+
+// TAMANHO
+document.getElementById("btnAddTamanho").onclick = () => {
+    document.getElementById("novoTamanhoInput").classList.toggle("hidden");
+    document.getElementById("novoTamanhoInput").focus();
+};
+document.getElementById("novoTamanhoInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        adicionarOpcao("novo_tamanho.php", "novoTamanhoInput", "tamanho_id");
+    }
+});
+
+    // Gerar EAN via endpoint gerar_ean.php (opcional) — se não existires, o servidor já gera EAN ao guardar
+    document.getElementById('btn-gen').addEventListener('click', function(){
+        fetch('gerar_ean.php')
+          .then(r => r.json())
+          .then(j => {
+             if (j.ean) document.querySelector('input[name=ean]').value = j.ean;
+             else alert('Erro ao gerar EAN: ' + (j.error||'Resposta inválida'));
+          }).catch(e => {
+              alert('Erro ao contactar o servidor para gerar EAN.');
+              console.error(e);
+          });
+    });
+</script>
 
 </body>
 </html>

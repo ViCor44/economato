@@ -6,6 +6,7 @@ define('DB_USER', 'root'); // O teu user da BD
 define('DB_PASS', '');     // A tua password da BD
 
 define('BASE_URL', '/economato');
+define('OPENAI_API_KEY', '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');
 
 define('ROLE_ADMIN', 1);
 define('ROLE_GESTOR', 2);

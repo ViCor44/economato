@@ -15,7 +15,12 @@ class ComposerStaticInitf64c0f42a180f64dd5c4971478d99adf
         'P' => 
         array (
             'PragmaRX\\Google2FA\\' => 19,
+            'Picqer\\Barcode\\' => 15,
             'ParagonIE\\ConstantTime\\' => 23,
+        ),
+        'O' => 
+        array (
+            'Orhanerday\\OpenAi\\' => 18,
         ),
         'M' => 
         array (
@@ -49,9 +54,17 @@ class ComposerStaticInitf64c0f42a180f64dd5c4971478d99adf
         array (
             0 => __DIR__ . '/..' . '/pragmarx/google2fa/src',
         ),
+        'Picqer\\Barcode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/picqer/php-barcode-generator/src',
+        ),
         'ParagonIE\\ConstantTime\\' => 
         array (
             0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
+        ),
+        'Orhanerday\\OpenAi\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/orhanerday/open-ai/src',
         ),
         'Masterminds\\' => 
         array (
