@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             adicionarLog(
                 $pdo,
                 "Devolução de farda",
-                "Colaborador ID $colaborador_id devolveu farda ID $farda_id | Quantidade: $quantidade | Estado: $estado"
+                "Colaborador ID $colaborador_id devolveu farda ID $farda_id | Quantidade: $quantidade_devolvida | Estado: $estado"
             );
 
         } catch (Exception $e) {

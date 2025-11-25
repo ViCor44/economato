@@ -15,7 +15,10 @@ try {
     $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
     // Configurar o PDO para lançar exceções em caso de erro
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // force native prepares e evita que inteiros sejam passados como strings
+    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 } catch (PDOException $e) {
     // Em produção, nunca mostrar o erro detalhado. Guardar num log.
     die("Erro: Não foi possível ligar à base de dados. " . $e->getMessage());
 }
+

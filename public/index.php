@@ -144,7 +144,7 @@ try {
                 </a>
 
                 <!-- 📊 Relatórios -->
-                <a href="<?= BASE_URL ?>/reports/reports.php" 
+                <a href="<?= BASE_URL ?>/reports/index.php" 
                 class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
 
                     <div class="flex items-center gap-4">

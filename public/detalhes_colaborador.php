@@ -83,7 +83,27 @@ try {
 
     <!-- 🔒 CACIFOS -->
     <section class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">🔒 Cacifos Atribuídos</h2>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">🔒 Cacifos Atribuídos</h2>
+
+            <div class="flex flex-wrap gap-3 mb-4">
+                <!-- ✅ Atribuir cacifo -->
+                <a href="list_lockers.php" class="ml-4"
+                    style="background-color:#16a34a; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                    onmouseover="this.style.backgroundColor='#15803d';"
+                    onmouseout="this.style.backgroundColor='#16a34a';">
+                    ➕ <span>Atribuir</span>
+                </a>
+
+                <!-- 🔄 Devolver cacifo -->
+                <a href="list_lockers.php?pesquisa=<?= htmlspecialchars($colaborador['nome']) ?>" class="ml-4"
+                    style="background-color:#dc2626; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                    onmouseover="this.style.backgroundColor='#b91c1c';"
+                    onmouseout="this.style.backgroundColor='#dc2626';">
+                    🔁 <span>Devolver</span>
+                </a>
+            </div>
+        </div>
         <?php if (count($cacifos) > 0): ?>
             <table class="min-w-full border border-gray-200 text-sm">
                 <thead class="bg-gray-100">
@@ -106,6 +126,7 @@ try {
         <?php else: ?>
             <p class="text-gray-600">Nenhum cacifo atribuído.</p>
         <?php endif; ?>
+        
     </section>
 
     <!-- 🧥 FARDAS -->
