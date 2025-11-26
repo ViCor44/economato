@@ -468,8 +468,6 @@ try {
 
         case 'devolucoes_motivo':
             $title = "Devoluções ({$inicio} → {$fim})";
-
-            // garantir que temos timestamps completos (se ainda não existirem no teu script)
             $inicioFull = $inicio . ' 00:00:00';
             $fimFull    = $fim . ' 23:59:59';
 
@@ -480,15 +478,14 @@ try {
                     t.nome AS tamanho,
                     fd.quantidade,
                     fd.motivo,
-                    fd.data_baixa,            -- ou fd.criado_em conforme o teu esquema
-                    fa.colaborador_id,
+                    fd.data_baixa,
+                    fd.colaborador_id,
                     col.nome AS colaborador
                 FROM farda_baixas fd
                 JOIN fardas f ON f.id = fd.farda_id
                 JOIN cores c ON c.id = f.cor_id
                 JOIN tamanhos t ON t.id = f.tamanho_id
-                LEFT JOIN farda_atribuicoes fa ON fa.id = fd.farda_id
-                LEFT JOIN colaboradores col ON col.id = fa.colaborador_id
+                LEFT JOIN colaboradores col ON col.id = fd.colaborador_id
                 WHERE fd.data_baixa BETWEEN ? AND ?
                 ORDER BY fd.data_baixa DESC
             ");
@@ -498,17 +495,18 @@ try {
             $columns = ['ID','Farda','Cor','Tamanho','Qtd','Motivo','Data','Colaborador'];
             $rows = array_map(function($r){
                 return [
-                    'ID' => $r['id'],
-                    'Farda' => $r['nome'],
-                    'Cor' => $r['cor'],
-                    'Tamanho' => $r['tamanho'],
-                    'Qtd' => $r['quantidade'],
-                    'Motivo' => $r['motivo'],
-                    'Data' => $r['data_baixa'],
-                    'Colaborador' => $r['colaborador'] ?? ('ID ' . ($r['colaborador_id'] ?? 'N/A'))
+                    'ID'         => $r['id'],
+                    'Farda'      => $r['nome'],
+                    'Cor'        => $r['cor'],
+                    'Tamanho'    => $r['tamanho'],
+                    'Qtd'        => $r['quantidade'],
+                    'Motivo'     => $r['motivo'],
+                    'Data'       => $r['data_baixa'],
+                    'Colaborador'=> $r['colaborador'] ?? '—'
                 ];
             }, $data);
             break;
+
 
         // ------------------- Cacifos -------------------
         case 'cacifos_lista':
