@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 14-Nov-2025 às 17:35
+-- Tempo de geração: 26-Nov-2025 às 22:56
 -- Versão do servidor: 10.4.32-MariaDB
 -- versão do PHP: 8.2.12
 
@@ -43,7 +43,8 @@ INSERT INTO `cacifos` (`id`, `numero`, `colaborador_id`, `avariado`, `atualizado
 (1, 2, 1, 0, '2025-11-11 18:50:00'),
 (2, 3, 1, 0, '2025-11-11 19:43:00'),
 (3, 320, 2, 0, '2025-11-14 09:16:47'),
-(4, 321, 2, 0, '2025-11-14 09:17:05');
+(4, 321, 2, 0, '2025-11-14 09:17:05'),
+(5, 46, NULL, 1, '2025-11-15 09:08:40');
 
 -- --------------------------------------------------------
 
@@ -67,8 +68,8 @@ CREATE TABLE `colaboradores` (
 --
 
 INSERT INTO `colaboradores` (`id`, `nome`, `telefone`, `email`, `cartao`, `departamento_id`, `ativo`, `criado_em`) VALUES
-(1, 'Joaquim', '', '', '34215487551', 2, 0, '2025-11-10 23:28:31'),
-(2, 'Liliana Vaz', '967654321', 'lili@gmail.com', '0000663109', 4, 1, '2025-11-14 09:11:05');
+(1, 'Joaquim', '', '', '34215487551', 2, 1, '2025-11-10 23:28:31'),
+(2, 'Liliana Vaz', '967654321', 'lili@gmail.com', '0000663109', 4, 0, '2025-11-14 09:11:05');
 
 -- --------------------------------------------------------
 
@@ -87,7 +88,8 @@ CREATE TABLE `cores` (
 
 INSERT INTO `cores` (`id`, `nome`) VALUES
 (2, 'Amarela'),
-(1, 'Azul');
+(1, 'Azul'),
+(5, 'Branco');
 
 -- --------------------------------------------------------
 
@@ -127,17 +129,20 @@ CREATE TABLE `fardas` (
   `quantidade` int(11) NOT NULL DEFAULT 0,
   `preco_unitario` decimal(10,2) NOT NULL DEFAULT 0.00,
   `criado_em` timestamp NOT NULL DEFAULT current_timestamp(),
-  `atualizado_em` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `atualizado_em` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `ean` varchar(13) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Extraindo dados da tabela `fardas`
 --
 
-INSERT INTO `fardas` (`id`, `nome`, `cor_id`, `tamanho_id`, `quantidade`, `preco_unitario`, `criado_em`, `atualizado_em`) VALUES
-(1, 'Polo', 1, 1, 28, 20.00, '2025-11-11 21:01:42', '2025-11-13 22:23:36'),
-(2, 'Calção', 1, 1, 30, 15.00, '2025-11-11 21:02:23', '2025-11-14 09:16:21'),
-(3, 'T-shirt', 2, 2, 50, 10.00, '2025-11-12 19:43:06', '2025-11-12 19:44:57');
+INSERT INTO `fardas` (`id`, `nome`, `cor_id`, `tamanho_id`, `quantidade`, `preco_unitario`, `criado_em`, `atualizado_em`, `ean`) VALUES
+(1, 'Polo', 1, 1, 28, 20.00, '2025-11-11 21:01:42', '2025-11-13 22:23:36', NULL),
+(2, 'Calção', 1, 1, 31, 15.00, '2025-11-11 21:02:23', '2025-11-25 22:00:28', NULL),
+(3, 'T-shirt', 2, 2, 50, 10.00, '2025-11-12 19:43:06', '2025-11-12 19:44:57', NULL),
+(4, 'Calças', 5, 5, 50, 25.00, '2025-11-24 21:14:52', '2025-11-24 21:14:52', '2000188927838'),
+(5, 'Casaco', 5, 5, 100, 25.00, '2025-11-24 21:18:23', '2025-11-24 22:16:50', '2000191031812');
 
 -- --------------------------------------------------------
 
@@ -159,7 +164,8 @@ CREATE TABLE `farda_atribuicoes` (
 
 INSERT INTO `farda_atribuicoes` (`id`, `colaborador_id`, `farda_id`, `quantidade`, `data_atribuicao`) VALUES
 (2, 1, 1, 1, '2025-11-11 21:12:44'),
-(3, 1, 2, 1, '2025-11-12 21:44:48');
+(5, 1, 2, 1, '2025-11-14 21:39:48'),
+(6, 1, 1, 1, '2025-11-14 21:39:58');
 
 -- --------------------------------------------------------
 
@@ -190,6 +196,13 @@ CREATE TABLE `farda_compras` (
   `criado_por` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Extraindo dados da tabela `farda_compras`
+--
+
+INSERT INTO `farda_compras` (`id`, `farda_id`, `quantidade_adicionada`, `preco_compra`, `data_compra`, `criado_por`) VALUES
+(1, 5, 50, 25.00, '2025-11-24 22:16:50', 1);
+
 -- --------------------------------------------------------
 
 --
@@ -210,7 +223,9 @@ INSERT INTO `farda_departamentos` (`id`, `farda_id`, `departamento_id`) VALUES
 (2, 1, 2),
 (5, 2, 2),
 (4, 2, 3),
-(3, 3, 1);
+(3, 3, 1),
+(6, 4, 4),
+(7, 5, 4);
 
 -- --------------------------------------------------------
 
@@ -282,7 +297,12 @@ CREATE TABLE `logs` (
 --
 
 INSERT INTO `logs` (`id`, `user_id`, `acao`, `detalhes`, `ip`, `criado_em`) VALUES
-(6, 1, 'Eliminou utilizador', 'Utilizador ID 16 eliminado pelo admin ID 1', '191.188.127.2', '2025-11-14 16:34:02');
+(6, 1, 'Eliminou utilizador', 'Utilizador ID 16 eliminado pelo admin ID 1', '191.188.127.2', '2025-11-14 16:34:02'),
+(7, 1, 'Eliminou utilizador', 'Utilizador \'Alberto Antunes\' eliminado pelo admin admin', '127.0.0.1', '2025-11-14 18:46:38'),
+(8, 1, 'Atribuição de farda', 'Colaborador ID 1 recebeu farda ID 2 x1', '127.0.0.1', '2025-11-14 21:39:48'),
+(9, 1, 'Atribuição de farda', 'Colaborador ID 1 recebeu farda ID 1 x1', '127.0.0.1', '2025-11-14 21:39:58'),
+(10, 1, 'Adicionou stock', 'Farda ID 5 | Quantidade: 50 | Preço compra: 25,00 | EAN: 2000191031812', '127.0.0.1', '2025-11-24 22:16:50'),
+(11, 1, 'Devolução de farda', 'Colaborador ID 1 devolveu farda ID 2 | Quantidade:  | Estado: boas_condicoes', '127.0.0.1', '2025-11-25 22:00:28');
 
 -- --------------------------------------------------------
 
@@ -321,6 +341,7 @@ CREATE TABLE `tamanhos` (
 
 INSERT INTO `tamanhos` (`id`, `nome`) VALUES
 (1, 'L'),
+(5, 'M'),
 (2, 'XL');
 
 -- --------------------------------------------------------
@@ -389,6 +410,7 @@ ALTER TABLE `departamentos`
 --
 ALTER TABLE `fardas`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ean` (`ean`),
   ADD KEY `cor_id` (`cor_id`),
   ADD KEY `tamanho_id` (`tamanho_id`);
 
@@ -478,7 +500,7 @@ ALTER TABLE `utilizadores`
 -- AUTO_INCREMENT de tabela `cacifos`
 --
 ALTER TABLE `cacifos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `colaboradores`
@@ -490,7 +512,7 @@ ALTER TABLE `colaboradores`
 -- AUTO_INCREMENT de tabela `cores`
 --
 ALTER TABLE `cores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `departamentos`
@@ -502,13 +524,13 @@ ALTER TABLE `departamentos`
 -- AUTO_INCREMENT de tabela `fardas`
 --
 ALTER TABLE `fardas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `farda_atribuicoes`
 --
 ALTER TABLE `farda_atribuicoes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `farda_baixas`
@@ -520,19 +542,19 @@ ALTER TABLE `farda_baixas`
 -- AUTO_INCREMENT de tabela `farda_compras`
 --
 ALTER TABLE `farda_compras`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `farda_departamentos`
 --
 ALTER TABLE `farda_departamentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de tabela `farda_devolucoes`
 --
 ALTER TABLE `farda_devolucoes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `farda_emprestimos`
@@ -544,7 +566,7 @@ ALTER TABLE `farda_emprestimos`
 -- AUTO_INCREMENT de tabela `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de tabela `roles`
@@ -556,13 +578,13 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de tabela `tamanhos`
 --
 ALTER TABLE `tamanhos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de tabela `utilizadores`
 --
 ALTER TABLE `utilizadores`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Restrições para despejos de tabelas
