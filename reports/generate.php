@@ -651,16 +651,41 @@ try {
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
             // substituir IDs por nomes quando possível (ex. na string detalhes)
             foreach ($data as &$row) {
-                // tenta extrair "Utilizador ID X" e trocar pelo nome se existir
+
+                // --- Substituir Utilizador ID pelo nome ---
                 if (preg_match_all('/(?:Utilizador|user) ID (\d+)/i', $row['detalhes'], $m)) {
                     foreach ($m[1] as $id) {
                         $s = $pdo->prepare("SELECT nome FROM utilizadores WHERE id = ?");
                         $s->execute([$id]);
                         $nome = $s->fetchColumn();
-                        if ($nome) $row['detalhes'] = str_ireplace("Utilizador ID $id", $nome, $row['detalhes']);
+                        if ($nome)
+                            $row['detalhes'] = str_ireplace("Utilizador ID $id", $nome, $row['detalhes']);
+                    }
+                }
+
+                // --- Substituir Colaborador ID pelo nome ---
+                if (preg_match_all('/Colaborador ID (\d+)/i', $row['detalhes'], $m)) {
+                    foreach ($m[1] as $id) {
+                        $s = $pdo->prepare("SELECT nome FROM colaboradores WHERE id = ?");
+                        $s->execute([$id]);
+                        $nome = $s->fetchColumn();
+                        if ($nome)
+                            $row['detalhes'] = str_ireplace("Colaborador ID $id", $nome, $row['detalhes']);
+                    }
+                }
+
+                // --- Substituir Farda ID pelo nome da peça ---
+                if (preg_match_all('/Farda ID (\d+)/i', $row['detalhes'], $m)) {
+                    foreach ($m[1] as $id) {
+                        $s = $pdo->prepare("SELECT nome FROM fardas WHERE id = ?");
+                        $s->execute([$id]);
+                        $nome = $s->fetchColumn();
+                        if ($nome)
+                            $row['detalhes'] = str_ireplace("Farda ID $id", $nome, $row['detalhes']);
                     }
                 }
             }
+
             $columns = ['ID','Data','Ação','Detalhes','Utilizador','IP'];
             $rows = array_map(function($r){ return ['ID'=>$r['id'],'Data'=>$r['criado_em'],'Ação'=>$r['acao'],'Detalhes'=>$r['detalhes'],'Utilizador'=>$r['usuario'] ?? '','IP'=>$r['ip']]; }, $data);
             break;
