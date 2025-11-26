@@ -10,6 +10,8 @@ define('BASE_URL', '/economato');
 define('ROLE_ADMIN', 1);
 define('ROLE_GESTOR', 2);
 define('ROLE_USER', 3);
+
+define('APP_NAME','CrewSync');
 try {
     // Usar PDO é a prática mais segura (evita SQL Injection)
     $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);

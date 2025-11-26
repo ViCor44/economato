@@ -57,16 +57,109 @@ function respondXLSX($filename, $columns, $rows) {
     exit;
 }
 
-function respondPDF($html, $filename) {
+// função melhorada para gerar PDF com header e footer
+function respondPDF($htmlBody, $filename, $title = '') {
+    // obter nome do utilizador que gerou (se disponível)
+    $geradoPor = '';
+    if (isset($GLOBALS['utilizador_logado']['nome'])) {
+        $geradoPor = $GLOBALS['utilizador_logado']['nome'];
+    } elseif (!empty($_SESSION['user_name'])) {
+        $geradoPor = $_SESSION['user_name'];
+    } elseif (!empty($_SESSION['user_id'])) {
+        $geradoPor = 'user_' . $_SESSION['user_id'];
+    } else {
+        $geradoPor = 'Sistema';
+    }
+
+    $timestamp = date('d/m/Y H:i');
+
+    // estilos para header/footer e margem da página
+    $css = "
+    <style>
+        @page {
+            margin: 90px 40px 70px 40px; /* top right bottom left */
+        }
+        body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color:#111; }
+        /* header (aparece fixo no topo) */
+        .pdf-header {
+            position: fixed;
+            top: -70px;
+            left: 0;
+            right: 0;
+            height: 70px;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .pdf-header .app {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .pdf-header .title {
+            font-size: 14px;
+            color: #374151;
+        }
+        /* footer (aparece fixo no rodapé) */
+        .pdf-footer {
+            position: fixed;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            padding: 8px 20px;
+            border-top: 1px solid #ddd;
+            font-size: 11px;
+            color: #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pdf-footer .left { }
+        .pdf-footer .right { }
+        .pagenum:before { content: counter(page) ' / ' counter(pages); }
+
+        /* pequenas melhorias para tabelas */
+        table { border-collapse: collapse; width:100%; font-size:12px; }
+        th, td { border: 1px solid #e5e7eb; padding: 6px 8px; text-align: left; vertical-align: top; }
+        th { background: #f3f4f6; font-weight:700; }
+    </style>
+    ";
+
+    // Construir HTML completo com header/footer
+    $appName = defined('APP_NAME') ? APP_NAME : 'CrewGest';
+    $headerHtml = "
+    <div class='pdf-header'>
+        <div class='app'>{$appName}</div>
+        <div class='title'>".htmlspecialchars($title)."</div>
+    </div>";
+
+    $footerHtml = "
+    <div class='pdf-footer'>
+        <div class='left'>Gerado por: ".htmlspecialchars($geradoPor)." — {$timestamp}</div>
+        <div class='right'>Página <span class='pagenum'></span></div>
+    </div>";
+
+    $fullHtml = '<!doctype html><html><head><meta charset=\"utf-8\">' . $css . '</head><body>'
+              . $headerHtml
+              . $footerHtml
+              // conteúdo principal precisa de um wrapper para respeitar os offsets
+              . "<main style='margin-top:0;'>" . $htmlBody . "</main>"
+              . '</body></html>';
+
+    // DOMPDF
     $options = new Options();
     $options->set('defaultFont', 'Arial');
     $dompdf = new Dompdf($options);
-    $dompdf->loadHtml($html);
+    $dompdf->loadHtml($fullHtml);
     $dompdf->setPaper('A4');
     $dompdf->render();
     $dompdf->stream($filename, ['Attachment' => true]);
     exit;
 }
+
 
 function renderHTMLPage($title, $columns, $rows, $currentQuery) {
     // simples página HTML com botões de export
@@ -248,7 +341,7 @@ try {
 
         // ------------------- Fardas -------------------
         case 'fardas_mais_atribuidas':
-            $title = "Fardas Mais Atribuídas ({$inicio} → {$fim})";
+            $title = "Fardas Mais Atribuídas";
             $sql = "
                 SELECT f.id, f.nome AS farda, c.nome AS cor, t.nome AS tamanho,
                        SUM(fa.quantidade) AS total_atribuido,
@@ -633,31 +726,34 @@ if ($format === 'csv') {
     $filename = "report_{$report}_" . date('Ymd_His') . ".xlsx";
     respondXLSX($filename, $columns, $rows);
 } elseif ($format === 'pdf') {
-    // gerar um HTML simples e passar ao Dompdf
+    // gerar um HTML simples (o corpo) e passar para a função respondPDF
     ob_start();
-    // header with light style for better PDFs
-    echo "<div style='font-family:Arial; margin:10px;'>";
-    echo "<h1 style='font-family:Arial; font-size:18px; margin-bottom:6px'>{$title}</h1>";
-    echo "<p style='font-size:12px; color:#555; margin-top:0'>Período: " . htmlspecialchars($inicio) . " → " . htmlspecialchars($fim) . "</p>";
-    echo "<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse; font-family:Arial; font-size:12px; width:100%; margin-top:10px'>";
+    // aqui podes manter exatamente o HTML de tabela que já tens
+    
+    echo "<p style='margin: 0 0 12px 0; font-size:12px; color:#555;'>
+            <strong>Período:</strong> "
+            . htmlspecialchars($inicio) . " - " . htmlspecialchars($fim) .
+        "</p>";    
+    echo "<table style='border-collapse:collapse; width:100%;'>";
     echo "<thead><tr>";
-    foreach ($columns as $c) echo "<th style='background:#f3f4f6; text-align:left;'>" . htmlspecialchars($c) . "</th>";
+    foreach ($columns as $c) echo "<th style='padding:6px;'>" . htmlspecialchars($c) . "</th>";
     echo "</tr></thead><tbody>";
     if (empty($rows)) {
         echo "<tr><td colspan='".count($columns)."' style='padding:8px;'>Nenhum registo encontrado.</td></tr>";
     } else {
         foreach ($rows as $r) {
             echo "<tr>";
-            foreach ($columns as $c) echo "<td style='vertical-align:top;'>" . nl2br(htmlspecialchars($r[$c] ?? '')) . "</td>";
+            foreach ($columns as $c) echo "<td>" . nl2br(htmlspecialchars($r[$c] ?? '')) . "</td>";
             echo "</tr>";
         }
     }
     echo "</tbody></table>";
-    echo "<p style='font-size:11px; color:#666; margin-top:12px'>Gerado em " . date('d/m/Y H:i') . "</p>";
-    echo "</div>";
+
+    // adicionar rodapé de geração (visível dentro do corpo também)
+
     $html = ob_get_clean();
     $filename = "report_{$report}_" . date('Ymd_His') . ".pdf";
-    respondPDF($html, $filename);
+    respondPDF($html, $filename, $title);
 } else {
     // HTML view com botões de exportação
     renderHTMLPage($title, $columns, $rows, $currentQuery);
