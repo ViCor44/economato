@@ -71,30 +71,31 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                                 <option value="stock_baixo">9. Stock baixo (abaixo do mínimo)</option>
                                 <option value="compras_periodo">10. Compras de fardas por período</option>
                                 <option value="devolucoes_motivo">11. Devoluções por motivo / estado</option>
+                                <option value="inativos_com_farda">12. Colaboradores inativos com farda</option>
                             </optgroup>
 
                             <!-- Cacifos -->
                             <optgroup label="Cacifos">
-                                <option value="cacifos_lista">12. Lista completa de cacifos</option>
-                                <option value="cacifos_ocupados">13. Cacifos ocupados</option>
-                                <option value="cacifos_livres">14. Cacifos livres</option>
-                                <option value="cacifos_avariados">15. Cacifos avariados</option>
-                                <option value="cacifos_colabs_inativos">16. Cacifos de colaboradores inativos</option>
+                                <option value="cacifos_lista">13. Lista completa de cacifos</option>
+                                <option value="cacifos_ocupados">14. Cacifos ocupados</option>
+                                <option value="cacifos_livres">15. Cacifos livres</option>
+                                <option value="cacifos_avariados">16. Cacifos avariados</option>
+                                <option value="cacifos_colabs_inativos">17. Cacifos de colaboradores inativos</option>
                             </optgroup>
 
                             <!-- Financeiros -->
                             <optgroup label="Financeiros">
-                                <option value="valor_total_stock">17. Valor total em stock</option>
-                                <option value="custo_por_colaborador">18. Custo de fardamento entregue por colaborador</option>
-                                <option value="custo_por_departamento">19. Custo total por departamento</option>
+                                <option value="valor_total_stock">18. Valor total em stock</option>
+                                <option value="custo_por_colaborador">19. Custo de fardamento entregue por colaborador</option>
+                                <option value="custo_por_departamento">20. Custo total por departamento</option>
                             </optgroup>
 
                             <!-- Diversos -->
                             <optgroup label="Diversos">
-                                <option value="logs_filtrados">20. Logs de sistema filtráveis</option>
-                                <option value="export_ean">21. Export EAN / códigos de barras (CSV)</option>
-                                <option value="itens_sem_ean">22. Itens de farda sem EAN</option>
-                                <option value="historico_atribuicoes">23. Histórico de atribuições</option>
+                                <option value="logs_filtrados">21. Logs de sistema filtráveis</option>
+                                <option value="export_ean">22. Export EAN / códigos de barras (CSV)</option>
+                                <option value="itens_sem_ean">23. Itens de farda sem EAN</option>
+                                <option value="historico_atribuicoes">24. Histórico de atribuições</option>
                             </optgroup>
                         </select>
                     </div>

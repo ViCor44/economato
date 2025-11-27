@@ -507,6 +507,65 @@ try {
             }, $data);
             break;
 
+        // ------------------- Colaboradores inativos com farda -------------------
+        // ------------------- Colaboradores inativos com farda -------------------
+        case 'inativos_com_farda':
+            $title = "Colaboradores Inativos com Fardas Atribuídas";
+
+            // 1) buscar colaboradores inativos que têm atribuições
+            $stmt = $pdo->prepare("
+                SELECT DISTINCT col.id, col.nome, col.cartao, col.telefone
+                FROM colaboradores col
+                JOIN farda_atribuicoes fa ON fa.colaborador_id = col.id
+                WHERE col.ativo = 0
+                ORDER BY col.nome ASC
+            ");
+            $stmt->execute();
+            $colabs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $columns = ['ID','Nome','Cartão','Telefone','Total Peças','Peças Atribuídas'];
+            $rows = [];
+
+            // 2) para cada colaborador, agregamos por peça (nome+cor+tamanho) e somamos a quantidade
+            $stmtPecas = $pdo->prepare("
+                SELECT f.id AS farda_id, f.nome AS farda, c.nome AS cor, t.nome AS tamanho, SUM(fa.quantidade) AS qty
+                FROM farda_atribuicoes fa
+                JOIN fardas f ON f.id = fa.farda_id
+                JOIN cores c ON c.id = f.cor_id
+                JOIN tamanhos t ON t.id = f.tamanho_id
+                WHERE fa.colaborador_id = ?
+                GROUP BY f.id
+                ORDER BY f.nome ASC
+            ");
+
+            foreach ($colabs as $col) {
+                $stmtPecas->execute([$col['id']]);
+                $pecas = $stmtPecas->fetchAll(PDO::FETCH_ASSOC);
+
+                $lista = [];
+                $totalPecas = 0;
+                foreach ($pecas as $p) {
+                    $q = (int)$p['qty'];
+                    $totalPecas += $q;
+                    // formatação: Nome (Cor/Tamanho) xQuantidade
+                    $nomeItem = $p['farda'] . " (" . $p['cor'] . "/" . $p['tamanho'] . ")";
+                    $lista[] = $nomeItem . " x" . $q;
+                }
+
+                // separar por ponto-e-vírgula e espaço — fica legível tanto em HTML como em CSV/PDF
+                $pecasText = $lista ? implode('; ', $lista) : '';
+
+                $rows[] = [
+                    'ID' => $col['id'],
+                    'Nome' => $col['nome'],
+                    'Cartão' => $col['cartao'] ?? '',
+                    'Telefone' => $col['telefone'] ?? '',
+                    'Total Peças' => $totalPecas,
+                    'Peças Atribuídas' => $pecasText
+                ];
+            }
+
+            break;
 
         // ------------------- Cacifos -------------------
         case 'cacifos_lista':
