@@ -126,6 +126,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p class="text-center text-sm text-gray-600 mt-6">
                     Não tem conta? <a href="registar.php" class="font-medium text-blue-600 hover:text-blue-500">Registe-se aqui.</a>
                 </p>
+                <p class="text-center text-sm text-gray-600 mt-6">
+                    Esqueceu a password? <a href="forgot_password.php" class="font-medium text-blue-600 hover:text-blue-500">Reset aqui.</a>
+                </p>
             </form>
         </div>
     </main>

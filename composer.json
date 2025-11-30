@@ -5,6 +5,7 @@
         "dompdf/dompdf": "^3.1",
         "orhanerday/open-ai": "^5.3",
         "picqer/php-barcode-generator": "^3.2",
-        "phpoffice/phpspreadsheet": "^5.3"
+        "phpoffice/phpspreadsheet": "^5.3",
+        "phpmailer/phpmailer": "^7.0"
     }
 }
