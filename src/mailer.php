@@ -6,7 +6,7 @@ defined('BASE_URL') or define('BASE_URL', 'http://127.0.0.1/economato');
 // CONFIGURAÇÕES SMTP — PREENCHER!
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_USER', 'slide.rocketchat@gmail.com'); 
-define('SMTP_PASS', 'abel jacr oqpd hdit');   // NÃO a password normal
+define('SMTP_PASS', '');   // NÃO a password normal
 define('SMTP_PORT', 587);
 define('SMTP_SECURE', 'tls');
 
