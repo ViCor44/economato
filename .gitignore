@@ -1,0 +1,38 @@
+# --- Configs sensíveis / env ---
+.env
+config/db.php
+src/mailer.php
+config/mail_config.php
+config/secret_keys.php
+
+# --- Storage / logs / caches / uploads ---
+storage/
+logs/
+tmp/
+cache/
+public/uploads/
+public/barcodes/
+
+# --- Dependências e builds ---
+/vendor/
+/node_modules/
+/composer.lock
+
+# --- IDE / OS files ---
+.idea/
+.vscode/
+*.log
+*.cache
+*.tmp
+.DS_Store
+Thumbs.db
+
+# --- Composer & PHP built artifacts ---
+*.phar
+
+# --- Ignore local database files (if any) ---
+*.sqlite
+*.db
+
+# --- Exceptions (exemplos / templates) ---
+!.env.example
