@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 26-Nov-2025 às 22:56
+-- Tempo de geração: 30-Nov-2025 às 21:37
 -- Versão do servidor: 10.4.32-MariaDB
 -- versão do PHP: 8.2.12
 
@@ -68,7 +68,7 @@ CREATE TABLE `colaboradores` (
 --
 
 INSERT INTO `colaboradores` (`id`, `nome`, `telefone`, `email`, `cartao`, `departamento_id`, `ativo`, `criado_em`) VALUES
-(1, 'Joaquim', '', '', '34215487551', 2, 1, '2025-11-10 23:28:31'),
+(1, 'Joaquim', '', '', '34215487551', 2, 0, '2025-11-10 23:28:31'),
 (2, 'Liliana Vaz', '967654321', 'lili@gmail.com', '0000663109', 4, 0, '2025-11-14 09:11:05');
 
 -- --------------------------------------------------------
@@ -141,8 +141,8 @@ INSERT INTO `fardas` (`id`, `nome`, `cor_id`, `tamanho_id`, `quantidade`, `preco
 (1, 'Polo', 1, 1, 28, 20.00, '2025-11-11 21:01:42', '2025-11-13 22:23:36', NULL),
 (2, 'Calção', 1, 1, 31, 15.00, '2025-11-11 21:02:23', '2025-11-25 22:00:28', NULL),
 (3, 'T-shirt', 2, 2, 50, 10.00, '2025-11-12 19:43:06', '2025-11-12 19:44:57', NULL),
-(4, 'Calças', 5, 5, 50, 25.00, '2025-11-24 21:14:52', '2025-11-24 21:14:52', '2000188927838'),
-(5, 'Casaco', 5, 5, 100, 25.00, '2025-11-24 21:18:23', '2025-11-24 22:16:50', '2000191031812');
+(4, 'Calças', 5, 5, 47, 25.00, '2025-11-24 21:14:52', '2025-11-26 23:35:08', '2000188927838'),
+(5, 'Casaco', 5, 5, 98, 25.00, '2025-11-24 21:18:23', '2025-11-26 22:48:43', '2000191031812');
 
 -- --------------------------------------------------------
 
@@ -176,10 +176,19 @@ INSERT INTO `farda_atribuicoes` (`id`, `colaborador_id`, `farda_id`, `quantidade
 CREATE TABLE `farda_baixas` (
   `id` int(11) NOT NULL,
   `farda_id` int(11) NOT NULL,
+  `colaborador_id` int(11) DEFAULT NULL,
   `quantidade` int(11) NOT NULL,
   `motivo` varchar(255) NOT NULL,
   `data_baixa` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Extraindo dados da tabela `farda_baixas`
+--
+
+INSERT INTO `farda_baixas` (`id`, `farda_id`, `colaborador_id`, `quantidade`, `motivo`, `data_baixa`) VALUES
+(1, 5, NULL, 2, 'Manchado', '2025-11-26 22:48:43'),
+(2, 4, NULL, 3, 'Danificado', '2025-11-26 23:35:08');
 
 -- --------------------------------------------------------
 
@@ -302,7 +311,26 @@ INSERT INTO `logs` (`id`, `user_id`, `acao`, `detalhes`, `ip`, `criado_em`) VALU
 (8, 1, 'Atribuição de farda', 'Colaborador ID 1 recebeu farda ID 2 x1', '127.0.0.1', '2025-11-14 21:39:48'),
 (9, 1, 'Atribuição de farda', 'Colaborador ID 1 recebeu farda ID 1 x1', '127.0.0.1', '2025-11-14 21:39:58'),
 (10, 1, 'Adicionou stock', 'Farda ID 5 | Quantidade: 50 | Preço compra: 25,00 | EAN: 2000191031812', '127.0.0.1', '2025-11-24 22:16:50'),
-(11, 1, 'Devolução de farda', 'Colaborador ID 1 devolveu farda ID 2 | Quantidade:  | Estado: boas_condicoes', '127.0.0.1', '2025-11-25 22:00:28');
+(11, 1, 'Devolução de farda', 'Colaborador ID 1 devolveu farda ID 2 | Quantidade:  | Estado: boas_condicoes', '127.0.0.1', '2025-11-25 22:00:28'),
+(12, 1, 'Baixa de stock', 'Farda \'Casaco\' (ID 5) - Baixa | Quantidade: 2 | Motivo: Manchado', '127.0.0.1', '2025-11-26 22:48:43'),
+(13, 1, 'Baixa de stock', 'Farda ID 4 | Quantidade: 3 | Motivo: Danificado | Colaborador: (nenhum)', '127.0.0.1', '2025-11-26 23:35:08');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `token_hash` char(64) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used` tinyint(1) NOT NULL DEFAULT 0,
+  `ip` varchar(45) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -368,7 +396,7 @@ CREATE TABLE `utilizadores` (
 
 INSERT INTO `utilizadores` (`id`, `nome`, `email`, `password_hash`, `google_authenticator_secret`, `role_id`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 'admin', 'admin@gmail.com', '$2y$10$lTDNseVm5FFBBC54aXOeUer6tEosMRkJVoSS81I.PExD67LjUqtWC', NULL, 1, 1, '2025-11-10 22:39:45', '2025-11-10 22:39:45'),
-(8, 'Victor Correia', 'victor.a.correia@gmail.com', '$2y$10$lTDNseVm5FFBBC54aXOeUer6tEosMRkJVoSS81I.PExD67LjUqtWC', NULL, 2, 1, '2025-11-11 22:07:38', '2025-11-13 21:33:59'),
+(8, 'Victor Correia', 'victor.a.correia@gmail.com', '$2y$10$OGX7Vse4NYz8sAvucKul4uapvApZ/eHro.nKu5EFy87LTAdn3FcYO', NULL, 2, 1, '2025-11-11 22:07:38', '2025-11-30 11:28:30'),
 (9, 'Elisabete Viana', 'elisabeteviana@slidesplash.com', '$2y$10$ncAMB7hcvCmtIi5HwS7sCuTEww/EjCdHogBIvCe7bVBFCEBkTGRte', 'F3WZWXAXNW4FZWE42JEOHGUIMCDLISUZ', 1, 1, '2025-11-14 09:40:03', '2025-11-14 09:41:45');
 
 --
@@ -471,6 +499,14 @@ ALTER TABLE `logs`
   ADD KEY `idx_logs_user` (`user_id`);
 
 --
+-- Índices para tabela `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `token_hash` (`token_hash`);
+
+--
 -- Índices para tabela `roles`
 --
 ALTER TABLE `roles`
@@ -536,7 +572,7 @@ ALTER TABLE `farda_atribuicoes`
 -- AUTO_INCREMENT de tabela `farda_baixas`
 --
 ALTER TABLE `farda_baixas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `farda_compras`
@@ -566,7 +602,13 @@ ALTER TABLE `farda_emprestimos`
 -- AUTO_INCREMENT de tabela `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT de tabela `password_resets`
+--
+ALTER TABLE `password_resets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de tabela `roles`
