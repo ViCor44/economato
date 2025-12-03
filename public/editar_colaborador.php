@@ -116,7 +116,8 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             </div>
 
             <div class="flex items-center">
-                <input type="checkbox" name="ativo" id="ativo" class="mr-2" <?= $colaborador['ativo'] ? 'checked' : '' ?>>
+                <input type="checkbox" name="ativo" id="ativo"
+                        style="margin-right:10px;" <?= $colaborador['ativo'] ? 'checked' : '' ?>>
                 <label for="ativo" class="text-gray-700">Colaborador Ativo</label>
             </div>
 

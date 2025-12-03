@@ -19,7 +19,7 @@ try {
 
     // Se houver termo de pesquisa, filtra por nome ou cor
     if ($pesquisa) {
-        $query .= " WHERE f.nome LIKE :pesq OR c.nome LIKE :pesq ";
+        $query .= " WHERE f.nome LIKE :pesq1 OR c.nome LIKE :pesq2 ";
     }
 
     $query .= " GROUP BY f.id ORDER BY f.nome ASC";
@@ -27,7 +27,13 @@ try {
     $stmt = $pdo->prepare($query);
 
     if ($pesquisa) {
-        $stmt->execute(['pesq' => "%$pesquisa%"]);
+        $val = "%{$pesquisa}%";
+        $params = ['pesq1' => $val, 'pesq2' => $val];
+
+        // opcional: log para debug (remove em produção)
+        // file_put_contents(__DIR__.'/../storage/sql_debug.log', $query . "\nPARAMS: ".var_export($params, true)."\n\n", FILE_APPEND);
+
+        $stmt->execute($params);
     } else {
         $stmt->execute();
     }
@@ -35,9 +41,13 @@ try {
     $fardas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
+    // opcional: registar mais info para debug
+    error_log("Erro SQL (carregar stock fardas): " . $e->getMessage());
     die("Erro ao carregar stock de fardas: " . $e->getMessage());
 }
 ?>
+<!-- restante HTML igual ao teu -->
+
 <!DOCTYPE html>
 <html lang="pt-PT" class="bg-gray-100">
 <head>
