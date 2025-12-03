@@ -8,7 +8,7 @@ $pesquisa = trim($_GET['pesquisa'] ?? '');
 try {
     $query = "
         SELECT f.id, f.nome, c.nome AS cor, t.nome AS tamanho,
-               f.preco_unitario, f.quantidade,
+               f.preco_unitario, f.quantidade, f.ean,
                GROUP_CONCAT(DISTINCT d.nome ORDER BY d.nome SEPARATOR ', ') AS departamentos
         FROM fardas f
         JOIN cores c ON f.cor_id = c.id
@@ -19,7 +19,7 @@ try {
 
     // Se houver termo de pesquisa, filtra por nome ou cor
     if ($pesquisa) {
-        $query .= " WHERE f.nome LIKE :pesq1 OR c.nome LIKE :pesq2 ";
+        $query .= " WHERE f.nome LIKE :pesq1 OR c.nome LIKE :pesq2 OR f.ean LIKE :pesq3 ";
     }
 
     $query .= " GROUP BY f.id ORDER BY f.nome ASC";
@@ -28,7 +28,7 @@ try {
 
     if ($pesquisa) {
         $val = "%{$pesquisa}%";
-        $params = ['pesq1' => $val, 'pesq2' => $val];
+        $params = ['pesq1' => $val, 'pesq2' => $val, 'pesq3' => $val];
 
         // opcional: log para debug (remove em produção)
         // file_put_contents(__DIR__.'/../storage/sql_debug.log', $query . "\nPARAMS: ".var_export($params, true)."\n\n", FILE_APPEND);
@@ -114,6 +114,7 @@ try {
                 <table class="min-w-full border border-gray-200 text-sm">
                     <thead class="bg-gray-100">
                         <tr>
+                            <th class="px-4 py-2 text-left">EAN</th>  
                             <th class="px-4 py-2 text-left">Nome</th>
                             <th class="px-4 py-2 text-left">Cor</th>
                             <th class="px-4 py-2 text-left">Tamanho</th>
@@ -126,6 +127,7 @@ try {
                     <tbody>
                         <?php foreach ($fardas as $f): ?>
                             <tr class="border-b hover:bg-gray-50">
+                                <td class="px-4 py-2"><?= htmlspecialchars($f['ean']) ?></td>
                                 <td class="px-4 py-2"><?= htmlspecialchars($f['nome']) ?></td>
                                 <td class="px-4 py-2"><?= htmlspecialchars($f['cor']) ?></td>
                                 <td class="px-4 py-2"><?= htmlspecialchars($f['tamanho']) ?></td>

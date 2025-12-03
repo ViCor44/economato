@@ -755,6 +755,13 @@ try {
             $rows = array_map(function($r){ return ['ID'=>$r['id'],'Nome'=>$r['nome'],'EAN'=>$r['ean']]; }, $data);
             break;
 
+        case 'print_ean':
+            // se queres apenas abrir outro ficheiro numa nova aba e não continuar a flow de render/exports
+            // envia JS que abre a nova aba e sai — evita chegar ao final do ficheiro onde $columns pode não existir
+            echo "<script>window.open('etiquetas_ean_from_pngs.php');</script>";
+            exit;
+            break;
+
         case 'itens_sem_ean':
             $title = "Itens de Farda sem EAN";
             $stmt = $pdo->query("SELECT id, nome, cor_id, tamanho_id FROM fardas WHERE IFNULL(ean,'') = '' ORDER BY nome ASC");

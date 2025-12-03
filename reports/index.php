@@ -94,8 +94,9 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                             <optgroup label="Diversos">
                                 <option value="logs_filtrados">21. Logs de sistema filtráveis</option>
                                 <option value="export_ean">22. Export EAN / códigos de barras (CSV)</option>
-                                <option value="itens_sem_ean">23. Itens de farda sem EAN</option>
-                                <option value="historico_atribuicoes">24. Histórico de atribuições</option>
+                                <option value="print_ean">23. Imprimir EAN (etiquetas a partir dos PNGs)</option>
+                                <option value="itens_sem_ean">24. Itens de farda sem EAN</option>
+                                <option value="historico_atribuicoes">25. Histórico de atribuições</option>
                             </optgroup>
                         </select>
                     </div>
@@ -104,8 +105,8 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                     <div id="boxDates" class="field hidden">
                         <label>Período</label>
                         <div style="display:flex; gap:8px;">
-                            <input type="date" name="inicio" value="<?= date('01-m-Y') ?>">
-                            <input type="date" name="fim" value="<?= date('d-m-Y') ?>">
+                            <input type="date" name="inicio" value="<?= date('Y-m-01') ?>">
+                            <input type="date" name="fim" value="<?= date('Y-m-d') ?>">
                         </div>
                     </div>
 
@@ -119,7 +120,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                     <!-- Departamento -->
                     <div id="boxDept" class="field hidden">
                         <label>Departamento (opcional)</label>
-                        <select name="departamento">
+                        <select name="departamento" id="departamento">
                             <option value="">-- Todos --</option>
                             <?php foreach ($departamentos as $d): ?>
                                 <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['nome']) ?></option>
@@ -182,6 +183,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
     const boxDept = document.getElementById('boxDept');
     const boxThreshold = document.getElementById('boxThreshold');
     const boxFreeText = document.getElementById('boxFreeText');
+    const form = document.getElementById('reportForm');
 
     function updateBoxes() {
         const val = report.value;
@@ -207,6 +209,35 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
     report.addEventListener('change', updateBoxes);
     // inicializar (se desejar preseleção)
     updateBoxes();
+
+    // Interceptar submit: se relatório for print_ean, abrir etiquetas_ean_from_pngs.php em nova aba
+    form.addEventListener('submit', function(e){
+        const val = report.value;
+        if (val === 'print_ean') {
+            e.preventDefault();
+
+            // construir query string com os filtros que fazem sentido para as etiquetas
+            const params = new URLSearchParams();
+
+            // departamento (opcional)
+            const deptEl = document.getElementById('departamento');
+            if (deptEl && deptEl.value) params.set('departamento', deptEl.value);
+
+            // filtro livre / termo (q)
+            const qEl = form.querySelector('input[name="q"]');
+            if (qEl && qEl.value.trim() !== '') params.set('q', qEl.value.trim());
+
+            // poderás querer passar também format / outras flags
+            // abrir numa nova aba a página que processa os PNGs localmente
+            const url = 'etiquetas_ean_from_pngs.php' + (params.toString() ? ('?' + params.toString()) : '');
+            window.open(url, '_blank');
+
+            // opcional: mostrar um pequeno feedback ao utilizador na mesma aba
+            // alert('A abrir etiquetas em nova aba...');
+            return false;
+        }
+        // caso contrário, deixa o form submeter normalmente para generate.php (já tem target="_blank")
+    });
 </script>
 
 </body>
