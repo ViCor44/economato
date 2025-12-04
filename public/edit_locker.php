@@ -29,7 +29,7 @@ if (!$cacifo) {
 }
 
 // carregar lista de colaboradores para select
-$colStmt = $pdo->query("SELECT id, nome FROM colaboradores WHERE ativo = 1 ORDER BY nome ASC");
+$colStmt = $pdo->query("SELECT id, nome FROM colaboradores ORDER BY nome ASC");
 $colaboradores = $colStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // valores iniciais

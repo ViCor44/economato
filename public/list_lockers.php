@@ -182,11 +182,6 @@ try {
         <button type="submit">Pesquisar</button>
     </form>
 
-    <div class="actions">
-        <a href="table_lockers.php">🔒 Cacifos Ocupados</a>
-        <a href="table_broken_lockers.php">⚠️ Cacifos Avariados</a>
-    </div>
-
     <div class="stats">
         <strong>Cacifos Livres:</strong> <?= $livres ?> |
         <strong>Cacifos Ocupados:</strong> <?= $ocupados ?> |
