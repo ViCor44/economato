@@ -8,7 +8,7 @@ if (isset($_SESSION['user_id'])) {
 
 require_once '../config/db.php';
 require_once '../vendor/autoload.php';
-require_once '../src/logger.php';
+require_once '../src/logger_file.php';
 
 $errors = [];
 
@@ -31,12 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // ⚠️ Verificar se a conta foi aprovada
                 if (!$user['is_active']) {
                     $errors[] = "A sua conta ainda não foi aprovada por um administrador.";
-                    log_event($pdo, 'WARNING', 'LOGIN_BLOCKED', "Tentativa de login em conta inativa: {$email}");
+                    log_event_file('WARNING', 'LOGIN_BLOCKED', "Tentativa de login em conta inativa: {$email}");
                 }
                 // ✅ Verificar password
                 elseif (password_verify($password, $user['password_hash'])) {
 
-                    log_event($pdo, 'INFO', 'LOGIN_SUCCESS', "Utilizador '{$email}' fez login com sucesso.", $user['id']);
+                    log_event_file('INFO', 'LOGIN_SUCCESS', "Utilizador '{$email}' fez login com sucesso.", $user['id']);
 
                     // 🔐 Se tiver 2FA ativo
                     if (!empty($user['google_authenticator_secret'])) {
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
 
                 } else {
-                    log_event($pdo, 'WARNING', 'LOGIN_FAILURE', "Tentativa de login falhada (senha incorreta) para '{$email}'.");
+                    log_event_file('WARNING', 'LOGIN_FAILURE', "Tentativa de login falhada (senha incorreta) para '{$email}'.");
                     $errors[] = "Credenciais inválidas.";
                 }
             } else {
