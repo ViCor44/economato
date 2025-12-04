@@ -83,8 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atribuir Cacifo <?= $numero ?> - CrewGest</title>
-    <link href="/slide_rh_app/public/css/style.css" rel="stylesheet">
+    <title>Atribuir Cacifo <?= $numero ?> - CrewGest</title>    
+    <link href="/economato/public/css/style.css" rel="stylesheet">
     <style>
         body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; }
         main { max-width: 700px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
