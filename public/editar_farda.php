@@ -1,6 +1,15 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
+require_once '../src/ean_functions.php'; // validate_ean13, generate_unique_ean, save_ean_png
+
+$errors = [];
+$success = '';
+
+// carregar selects
+$cores = $pdo->query("SELECT id, nome FROM cores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+$tamanhos = $pdo->query("SELECT id, nome FROM tamanhos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+$departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id <= 0) {
@@ -8,96 +17,123 @@ if ($id <= 0) {
     exit;
 }
 
-$errors = [];
-$success = '';
-
 try {
-    // Carregar farda
     $stmt = $pdo->prepare("SELECT * FROM fardas WHERE id = ?");
     $stmt->execute([$id]);
     $farda = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$farda) throw new Exception("Farda não encontrada.");
 
-    if (!$farda) {
-        throw new Exception("Farda não encontrada.");
-    }
-
-    // Carregar cores, tamanhos e departamentos
-    $cores = $pdo->query("SELECT id, nome FROM cores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
-    $tamanhos = $pdo->query("SELECT id, nome FROM tamanhos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
-    $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
-
-    // Carregar departamentos associados atualmente
+    // departamentos associados
     $stmtDeps = $pdo->prepare("SELECT departamento_id FROM farda_departamentos WHERE farda_id = ?");
     $stmtDeps->execute([$id]);
-    $deps_assoc = $stmtDeps->fetchAll(PDO::FETCH_COLUMN, 0); // array de ids
+    $deps_assoc = $stmtDeps->fetchAll(PDO::FETCH_COLUMN, 0);
 
 } catch (Exception $e) {
     die("Erro ao carregar dados: " . $e->getMessage());
 }
 
-// Processar submissão do formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
     $cor_id = $_POST['cor_id'] ?? null;
     $tamanho_id = $_POST['tamanho_id'] ?? null;
-    $departamentos_sel = $_POST['departamentos'] ?? []; // array de ids
-    $preco_unitario_raw = $_POST['preco_unitario'] ?? '';
-    $quantidade_raw = $_POST['quantidade'] ?? '';
+    $departamentos_sel = $_POST['departamentos'] ?? [];
+    $preco_unitario = str_replace(',', '.', $_POST['preco_unitario'] ?? '');
+    $quantidade = (int)($_POST['quantidade'] ?? 0);
+    $ean_input = trim($_POST['ean'] ?? '');
 
-    // Normalizar preço (aceitar vírgula)
-    $preco_unitario = str_replace(',', '.', trim($preco_unitario_raw));
-    $preco_unitario = $preco_unitario === '' ? null : (float)$preco_unitario;
-    $quantidade = is_numeric($quantidade_raw) ? (int)$quantidade_raw : null;
-
-    // Validações
+    // validações
     if ($nome === '') $errors[] = "O nome da peça é obrigatório.";
     if (empty($cor_id)) $errors[] = "Selecione uma cor.";
     if (empty($tamanho_id)) $errors[] = "Selecione um tamanho.";
     if (empty($departamentos_sel) || !is_array($departamentos_sel)) $errors[] = "Selecione pelo menos um departamento.";
-    if ($preco_unitario === null || $preco_unitario < 0) $errors[] = "Preço unitário inválido.";
-    if ($quantidade === null || $quantidade < 0) $errors[] = "Quantidade inválida.";
+    if ($preco_unitario === '' || !is_numeric($preco_unitario) || (float)$preco_unitario < 0) $errors[] = "Preço unitário inválido.";
+    if ($quantidade < 0) $errors[] = "Quantidade inválida.";
+
+    // EAN: se fornecido valida e unicidade (ignorar o próprio registo)
+    if ($ean_input !== '') {
+        if (!validate_ean13($ean_input)) {
+            $errors[] = "EAN inválido — tem de ser 13 dígitos com checksum correcto.";
+        } else {
+            $s = $pdo->prepare("SELECT id FROM fardas WHERE ean = ? AND id <> ?");
+            $s->execute([$ean_input, $id]);
+            if ($s->fetch()) $errors[] = "Outra farda já usa esse EAN.";
+        }
+    } else {
+        // gerar EAN único com prefixo 200 (ou outro que prefiras)
+        try {
+            $ean_input = generate_unique_ean($pdo, '200');
+        } catch (Exception $e) {
+            $errors[] = "Erro ao gerar EAN automático: " . $e->getMessage();
+        }
+    }
 
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
 
-            // Atualizar tabela fardas
-            $update = $pdo->prepare("
+            // guardar antigo EAN para possível limpeza de ficheiro
+            $ean_antigo = $farda['ean'] ?? '';
+
+            // atualizar farda
+            $stmt = $pdo->prepare("
                 UPDATE fardas
-                SET nome = ?, cor_id = ?, tamanho_id = ?, preco_unitario = ?, quantidade = ?
+                SET nome = ?, cor_id = ?, tamanho_id = ?, preco_unitario = ?, quantidade = ?, ean = ?
                 WHERE id = ?
             ");
-            $update->execute([$nome, $cor_id, $tamanho_id, $preco_unitario, $quantidade, $id]);
+            $stmt->execute([$nome, $cor_id, $tamanho_id, (float)$preco_unitario, $quantidade, $ean_input, $id]);
 
-            // Sincronizar departamentos:
-            // Opção simples: apagar associações antigas e inserir as novas (rápido e seguro)
+            // sincronizar departamentos: apagar e inserir
             $del = $pdo->prepare("DELETE FROM farda_departamentos WHERE farda_id = ?");
             $del->execute([$id]);
-
             $ins = $pdo->prepare("INSERT INTO farda_departamentos (farda_id, departamento_id) VALUES (?, ?)");
             foreach ($departamentos_sel as $dep_id) {
-                // garantir que dep_id é inteiro
                 $dep_id = (int)$dep_id;
-                if ($dep_id > 0) {
-                    $ins->execute([$id, $dep_id]);
-                }
+                if ($dep_id > 0) $ins->execute([$id, $dep_id]);
             }
 
+            // Commit antes de gerar ficheiro (se preferires gerar antes, adapta)
             $pdo->commit();
-            $success = "✅ Farda atualizada com sucesso.";
-            // atualizar variáveis locais para manter o formulário preenchido após submit
+
+            // actualizar variavel local farda
             $farda['nome'] = $nome;
             $farda['cor_id'] = $cor_id;
             $farda['tamanho_id'] = $tamanho_id;
-            $farda['preco_unitario'] = $preco_unitario;
+            $farda['preco_unitario'] = (float)$preco_unitario;
             $farda['quantidade'] = $quantidade;
+            $farda['ean'] = $ean_input;
             $deps_assoc = array_map('intval', $departamentos_sel);
 
+            // Gerar e salvar PNG EAN
+            $barcodeDir = __DIR__ . '/../public/barcodes';
+            if (!is_dir($barcodeDir)) {
+                @mkdir($barcodeDir, 0755, true);
+            }
+            try {
+                save_ean_png($ean_input, $barcodeDir); // deve criar <$ean>.png
+                // se EAN mudou, apagar PNG antigo (se existir e diferente)
+                if (!empty($ean_antigo) && $ean_antigo !== $ean_input) {
+                    $oldFile = $barcodeDir . '/' . $ean_antigo . '.png';
+                    if (file_exists($oldFile)) @unlink($oldFile);
+                }
+            } catch (Exception $ex) {
+                // não rollback — a base de dados já foi atualizada; avisar o utilizador
+                $errors[] = "Farda actualizada, mas falha ao gerar/guardar PNG do EAN: " . $ex->getMessage();
+            }
+
+            if (empty($errors)) {
+                $success = "✅ Farda actualizada com sucesso. EAN: {$ean_input}";
+            }
+
         } catch (Exception $e) {
-            $pdo->rollBack();
-            $errors[] = "Erro ao atualizar farda: " . $e->getMessage();
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $errors[] = "Erro ao actualizar farda: " . $e->getMessage();
         }
     }
+}
+
+// helper para preencher checkbox checked
+function is_dep_checked($id, $deps_assoc) {
+    return in_array((int)$id, array_map('intval', $deps_assoc));
 }
 
 ?>
@@ -133,9 +169,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" class="space-y-6">
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Peça</label>
-            <input type="text" name="nome" required
-                   class="w-full px-4 py-2 border rounded-md"
-                   value="<?= htmlspecialchars($farda['nome']) ?>">
+            <input type="text" name="nome" required class="w-full px-4 py-2 border rounded-md"
+                   value="<?= htmlspecialchars($farda['nome'] ?? '') ?>">
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,12 +202,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Departamentos (associar esta peça)</label>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                <?php foreach ($departamentos as $d): 
-                    $checked = in_array((int)$d['id'], array_map('intval', $deps_assoc));
-                ?>
+                <?php foreach ($departamentos as $d): ?>
                     <label class="flex items-center space-x-2">
                         <input type="checkbox" name="departamentos[]" value="<?= $d['id'] ?>"
-                               class="h-4 w-4" <?= $checked ? 'checked' : '' ?>>
+                               class="h-4 w-4" <?= is_dep_checked($d['id'], $deps_assoc) ? 'checked' : '' ?>>
                         <span class="text-gray-700"><?= htmlspecialchars($d['nome']) ?></span>
                     </label>
                 <?php endforeach; ?>
@@ -190,8 +223,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
                 <input type="number" name="quantidade" min="0" required
                        class="w-full px-4 py-2 border rounded-md"
-                       value="<?= (int)$farda['quantidade'] ?>">
+                       value="<?= (int)($farda['quantidade'] ?? 0) ?>">
             </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">EAN (13 dígitos)</label>
+            <div class="flex gap-2">
+                <input type="text" name="ean" pattern="\d{13}" maxlength="13" placeholder="opcional"
+                       class="p-2 border flex-1" value="<?= htmlspecialchars($farda['ean'] ?? '') ?>">
+                <button type="button" id="btn-gen" class="bg-blue-600 text-white px-4 py-2 rounded">Gerar</button>
+            </div>
+            <small class="text-gray-600">Se deixares vazio será gerado automaticamente um EAN único.</small>
+            <?php
+            // mostrar preview do PNG se existir
+            $pngPath = __DIR__ . '/../public/barcodes/' . ($farda['ean'] ?? '') . '.png';
+            if (!empty($farda['ean']) && file_exists($pngPath)): ?>
+                <div style="margin-top:8px">
+                    <strong>Preview:</strong><br>
+                    <img src="<?= BASE_URL ?>/public/barcodes/<?= rawurlencode($farda['ean']) ?>.png" alt="EAN" style="height:80px;">
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="flex justify-end gap-3">
@@ -200,6 +252,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </form>
 </main>
+
+<script>
+document.getElementById('btn-gen').addEventListener('click', function(){
+    fetch('gerar_ean.php')
+        .then(r => r.json())
+        .then(j => {
+            if (j.ean) document.querySelector('input[name=ean]').value = j.ean;
+            else alert('Erro ao gerar EAN: ' + (j.error || 'Resposta inválida'));
+        }).catch(e => {
+            alert('Erro ao contactar o servidor para gerar EAN.');
+            console.error(e);
+        });
+});
+</script>
 
 </body>
 </html>

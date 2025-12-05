@@ -1,17 +1,15 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
-require_once '../src/ean_functions.php'; // -> contém validate_ean13, generate_unique_ean, save_ean_png
+require_once '../src/ean_functions.php'; // -> validate_ean13, generate_unique_ean, save_ean_png
 
 $errors = [];
 $success = '';
-
-// Carregar opções para selects
+// carregar selects
 $cores = $pdo->query("SELECT id, nome FROM cores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 $tamanhos = $pdo->query("SELECT id, nome FROM tamanhos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-// Valores para re-popular o form em caso de erro
 $old = $_POST ?? [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -69,24 +67,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Inserir relação com departamentos
             $stmtDep = $pdo->prepare("INSERT INTO farda_departamentos (farda_id, departamento_id) VALUES (?, ?)");
             foreach ($departamentos_sel as $dep_id) {
-                $stmtDep->execute([$farda_id, $dep_id]);
+                $dep_id = (int)$dep_id;
+                if ($dep_id > 0) $stmtDep->execute([$farda_id, $dep_id]);
             }
 
             // Gerar e guardar imagem PNG do barcode
-            $outPath = __DIR__ . '/../public/barcodes/';
+            $outPath = __DIR__ . '/../public/barcodes';
+            if (!is_dir($outPath)) @mkdir($outPath, 0755, true);
+
             try {
-                save_ean_png($ean_input, $outPath);
+                save_ean_png($ean_input, $outPath); // espera-se que crie $outPath/<ean>.png
             } catch (Exception $e) {
-                // não abortamos a operação — apenas registamos a falha num log e avisamos
-                // Em ambiente real, loga o erro. Aqui devolvemos mensagem ao utilizador.
-                $errors[] = "Farda criada, mas falha ao gerar imagem do barcode: " . $e->getMessage();
+                // Não abortar inserção, mas avisar
                 $pdo->commit();
+                $errors[] = "Farda criada, mas falha ao gerar imagem do barcode: " . $e->getMessage();
                 $success = "✅ Farda adicionada com EAN $ean_input, mas houve um problema ao gerar o PNG do barcode.";
-                // não fazemos rollback porque a farda já foi criada com sucesso
-                // atualiza $old para manter valores no form
-                $old = $_POST;
-                $old['ean'] = $ean_input;
-                // terminar aqui para não duplicar commit
+                $old = []; // limpar o form parcialmente
                 goto render_form;
             }
 
@@ -146,7 +142,6 @@ render_form:
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Cor</label>
-
                     <div class="flex gap-2">
                         <select id="cor_id" name="cor_id" class="w-full px-4 py-2 border rounded-md" required>
                             <option value="">-- Escolha uma cor --</option>
@@ -156,22 +151,13 @@ render_form:
                                 </option>
                             <?php endforeach; ?>
                         </select>
-
-                        <button type="button" id="btnAddCor"
-                                style="background:#16a34a; color:white; font-weight:bold;
-                                    padding:0 12px; border-radius:6px;">
-                            +
-                        </button>
+                        <button type="button" id="btnAddCor" style="background:#16a34a; color:white; font-weight:bold; padding:0 12px; border-radius:6px;">+</button>
                     </div>
-
-                    <input type="text" id="novaCorInput"
-                        placeholder="Nova cor..."
-                        class="w-full px-3 py-2 border rounded-md mt-2 hidden">
+                    <input type="text" id="novaCorInput" placeholder="Nova cor..." class="w-full px-3 py-2 border rounded-md mt-2 hidden">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Tamanho</label>
-
                     <div class="flex gap-2">
                         <select id="tamanho_id" name="tamanho_id" class="w-full px-4 py-2 border rounded-md" required>
                             <option value="">-- Escolha um tamanho --</option>
@@ -181,17 +167,9 @@ render_form:
                                 </option>
                             <?php endforeach; ?>
                         </select>
-
-                        <button type="button" id="btnAddTamanho"
-                                style="background:#16a34a; color:white; font-weight:bold;
-                                    padding:0 12px; border-radius:6px;">
-                            +
-                        </button>
+                        <button type="button" id="btnAddTamanho" style="background:#16a34a; color:white; font-weight:bold; padding:0 12px; border-radius:6px;">+</button>
                     </div>
-
-                    <input type="text" id="novoTamanhoInput"
-                        placeholder="Novo tamanho..."
-                        class="w-full px-3 py-2 border rounded-md mt-2 hidden">
+                    <input type="text" id="novoTamanhoInput" placeholder="Novo tamanho..." class="w-full px-3 py-2 border rounded-md mt-2 hidden">
                 </div>
             </div>
 
@@ -202,8 +180,7 @@ render_form:
                         $checked = in_array($d['id'], $old['departamentos'] ?? []) ? 'checked' : '';
                     ?>
                         <label class="flex items-center space-x-2">
-                            <input type="checkbox" name="departamentos[]" value="<?= $d['id'] ?>"
-                                   class="h-4 w-4 text-blue-600 border-gray-300 rounded" <?= $checked ?>>
+                            <input type="checkbox" name="departamentos[]" value="<?= $d['id'] ?>" class="h-4 w-4 text-blue-600 border-gray-300 rounded" <?= $checked ?>>
                             <span class="text-gray-700 ml-4"><?= htmlspecialchars($d['nome']) ?></span>
                         </label>
                     <?php endforeach; ?>
@@ -233,11 +210,27 @@ render_form:
                     <button type="button" id="btn-gen" class="bg-blue-600 text-white px-4 py-2 rounded">Gerar</button>
                 </div>
                 <small class="text-gray-600">Se deixares vazio será gerado automaticamente um EAN único.</small>
+
+                <?php
+                // preview se já tivermos ean no campo old ou se o PNG existe
+                $previewEAN = $old['ean'] ?? '';
+                if (!$previewEAN && !empty($success)) {
+                    // se há sucesso e $ean_input foi gerado armazenado no sucesso, tenta extrair
+                    if (preg_match('/EAN: (\d{13})/', $success, $m)) $previewEAN = $m[1];
+                }
+                if ($previewEAN) {
+                    $pngPath = __DIR__ . '/../public/barcodes/' . $previewEAN . '.png';
+                    if (file_exists($pngPath)): ?>
+                        <div style="margin-top:8px">
+                            <strong>Preview:</strong><br>
+                            <img src="<?= BASE_URL ?>/public/barcodes/<?= rawurlencode($previewEAN) ?>.png" alt="EAN" style="height:80px;">
+                        </div>
+                    <?php endif;
+                } ?>
             </div>
 
             <div class="flex justify-end">
-                <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow">
                     Guardar Farda
                 </button>
             </div>
@@ -247,95 +240,81 @@ render_form:
 <script>
     // Função que envia um POST para criar nova cor/tamanho e adiciona ao select
     function adicionarOpcao(url, inputId, selectId) {
-    const valor = document.getElementById(inputId).value.trim();
-    if (valor === "") return;
+        const valor = document.getElementById(inputId).value.trim();
+        if (valor === "") return;
+        const btn = document.querySelector(`#${inputId}`).closest('div').querySelector('button') || null;
+        if (btn) btn.disabled = true;
+        fetch(url, {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: "nome=" + encodeURIComponent(valor)
+        })
+        .then(async r => {
+            if (!r.ok) {
+                const text = await r.text();
+                throw new Error(text || 'Erro no servidor ao criar opção');
+            }
+            return r.json();
+        })
+        .then(data => {
+            if (data.erro) { alert(data.erro); return; }
+            const sel = document.getElementById(selectId);
+            const opt = document.createElement("option");
+            opt.value = data.id;
+            opt.textContent = data.nome;
+            sel.appendChild(opt);
+            sel.value = data.id;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            document.getElementById(inputId).value = "";
+            document.getElementById(inputId).classList.add("hidden");
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro ao criar opção: " + (err.message || err));
+        })
+        .finally(() => { if (btn) btn.disabled = false; });
+    }
 
-    // bloquear UI brevemente
-    const btn = document.querySelector(`#${inputId}`).closest('div').querySelector('button') || null;
-    if (btn) btn.disabled = true;
-
-    fetch(url, {
-        method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: "nome=" + encodeURIComponent(valor)
-    })
-    .then(async r => {
-        if (!r.ok) {
-            const text = await r.text();
-            throw new Error(text || 'Erro no servidor ao criar opção');
-        }
-        return r.json();
-    })
-    .then(data => {
-        if (data.erro) {
-            alert(data.erro);
-            return;
-        }
-
-        const sel = document.getElementById(selectId);
-        // cria opção nova e adiciona
-        const opt = document.createElement("option");
-        opt.value = data.id;
-        opt.textContent = data.nome;
-        sel.appendChild(opt);
-
-        // Define o select para o novo valor (mais confiável que opt.selected = true)
-        sel.value = data.id;
-
-        // Dispara o evento change (alguns plugins ou validação html precisam disto)
-        const ev = new Event('change', { bubbles: true });
-        sel.dispatchEvent(ev);
-
-        // esconder input e limpar
-        const inp = document.getElementById(inputId);
-        inp.value = "";
-        inp.classList.add("hidden");
-
-        // se estiveres a usar um plugin como Select2/Choices/TomSelect,
-        // chama aqui o método de refresh do plugin, por exemplo:
-        // if (window.jQuery && $(sel).data('select2')) { $(sel).trigger('change.select2'); }
-        // ou: if (sel.tom && sel.tom.refresh) sel.tom.refresh();
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Erro ao criar opção: " + (err.message || err));
-    })
-    .finally(() => {
-        if (btn) btn.disabled = false;
+    // handlers para adicionar cor/tamanho
+    document.getElementById("btnAddCor").onclick = () => {
+        document.getElementById("novaCorInput").classList.toggle("hidden");
+        document.getElementById("novaCorInput").focus();
+    };
+    document.getElementById("novaCorInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") { e.preventDefault(); adicionarOpcao("nova_cor.php", "novaCorInput", "cor_id"); }
     });
-}
 
-// COR
-document.getElementById("btnAddCor").onclick = () => {
-    document.getElementById("novaCorInput").classList.toggle("hidden");
-    document.getElementById("novaCorInput").focus();
-};
-document.getElementById("novaCorInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        adicionarOpcao("nova_cor.php", "novaCorInput", "cor_id");
-    }
-});
+    document.getElementById("btnAddTamanho").onclick = () => {
+        document.getElementById("novoTamanhoInput").classList.toggle("hidden");
+        document.getElementById("novoTamanhoInput").focus();
+    };
+    document.getElementById("novoTamanhoInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") { e.preventDefault(); adicionarOpcao("novo_tamanho.php", "novoTamanhoInput", "tamanho_id"); }
+    });
 
-// TAMANHO
-document.getElementById("btnAddTamanho").onclick = () => {
-    document.getElementById("novoTamanhoInput").classList.toggle("hidden");
-    document.getElementById("novoTamanhoInput").focus();
-};
-document.getElementById("novoTamanhoInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        adicionarOpcao("novo_tamanho.php", "novoTamanhoInput", "tamanho_id");
-    }
-});
-
-    // Gerar EAN via endpoint gerar_ean.php (opcional) — se não existires, o servidor já gera EAN ao guardar
+    // Gerar EAN via endpoint gerar_ean.php
     document.getElementById('btn-gen').addEventListener('click', function(){
         fetch('gerar_ean.php')
           .then(r => r.json())
           .then(j => {
-             if (j.ean) document.querySelector('input[name=ean]').value = j.ean;
-             else alert('Erro ao gerar EAN: ' + (j.error||'Resposta inválida'));
+             if (j.ean) {
+                 document.querySelector('input[name=ean]').value = j.ean;
+                 // mostrar preview (reload pequeno): tenta carregar a imagem caso já exista
+                 const previewUrl = '<?= BASE_URL ?>/public/barcodes/' + j.ean + '.png';
+                 // se a tag de preview existir, substitui; se não, cria (simples)
+                 let img = document.querySelector('#ean-preview-img');
+                 if (!img) {
+                     const div = document.createElement('div');
+                     div.style.marginTop = '8px';
+                     div.innerHTML = '<strong>Preview:</strong><br>';
+                     img = document.createElement('img');
+                     img.id = 'ean-preview-img';
+                     img.style.height = '80px';
+                     div.appendChild(img);
+                     document.querySelector('input[name=ean]').closest('div').appendChild(div);
+                 }
+                 img.src = previewUrl + '?_=' + Date.now(); // cache-bust
+             } else alert('Erro ao gerar EAN: ' + (j.error||'Resposta inválida'));
           }).catch(e => {
               alert('Erro ao contactar o servidor para gerar EAN.');
               console.error(e);
