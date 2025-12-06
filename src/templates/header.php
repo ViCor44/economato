@@ -1,41 +1,67 @@
 <?php
-// /src/templates/header.php - Novo Design
+// /src/templates/header.php – versão com design unificado + barra superior
+
+$baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
+$appName = defined('APP_NAME') ? APP_NAME : 'CrewGest';
+$appVersion = defined('APP_VERSION') ? APP_VERSION : '1.0.0';
+$initials = htmlspecialchars(substr($appName,0,2));
+
+$logged = !empty($_SESSION['user_id']);
+$userName = $_SESSION['user_name'] ?? 'Utilizador';
+$userRole = $_SESSION['user_role_id'] ?? null;
+$showAdmin = ($logged && (int)$userRole === 1);
 ?>
+<style>
+.cg-separator {
+    background:#000; 
+    height:5px; 
+    width:100%;
+}
+.cg-header {
+    background:linear-gradient(180deg,#f8fafc 0%,#f3f4f6 100%);
+    border-bottom:1px solid rgba(15,23,42,0.05);
+}
+.cg-inner {
+    max-width:1100px;margin:0 auto;padding:16px 20px;
+    display:flex;align-items:center;gap:16px;
+}
+.cg-logo {
+    width:56px;height:56px;border-radius:12px;
+    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:18px;
+    box-shadow:0 6px 18px rgba(37,99,235,0.15);
+}
+.cg-brand{display:flex;flex-direction:column;text-decoration:none;color:inherit;}
+.cg-brand-title{font-size:18px;font-weight:700;color:#0f172a;}
+.cg-brand-sub{font-size:13px;color:#6b7280;margin-top:3px;}
+.cg-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.cg-pill{padding:6px 10px;background:#eef2ff;color:#2563eb;
+    border-radius:999px;font-size:13px;font-weight:700;}
+.cg-btn{background:#2563eb;color:#fff;text-decoration:none;font-weight:700;
+    padding:8px 12px;border-radius:10px;}
+.cg-btn-red{background:#ef4444;}
+</style>
 
-<div class="bg-stone-800 h-2  mt-4"></div>
+<header class="cg-header">
+    <div class="cg-inner">
 
-<header class="bg-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center gap-8">
-                <a href="/economato/public/index.php" class="text-2xl font-bold text-gray-800 hover:text-blue-600">CrewGest</a>
+        <a href="<?= $baseUrl ?>/public/index.php" class="cg-logo"><?= $initials ?></a>
 
-                <?php
-                // Teste final com lógica ultra-simplificada
-                $mostrar_link_admin = false; // Começa como falso
-                if (isset($_SESSION['user_role_id']) && (int)$_SESSION['user_role_id'] === 1) {
-                    // Se a role_id da sessão for estritamente igual ao número 1, mostra o link.
-                    $mostrar_link_admin = true;
-                }
-                if ($mostrar_link_admin):
-                ?>
-                    <nav class="flex border-l border-gray-200 pl-8">
-                        <a href="/economato/public/gerir_utilizadores.php" class="text-sm font-medium text-gray-600 hover:text-gray-900">Gerir Utilizadores</a>
-                    </nav>
-                <?php endif; ?>
-            </div>
+        <a href="<?= $baseUrl ?>/public/index.php" class="cg-brand">
+            <span class="cg-brand-title"><?= htmlspecialchars($appName) ?></span>
+            <span class="cg-brand-sub">Gestão simples e eficiente de fardas, stock e relatórios</span>
+            <span class="cg-pill">v<?= htmlspecialchars($appVersion) ?></span>
+        </a>
 
-            <div class="flex items-center gap-4">
-                <span class="text-gray-600 text-sm">
-                    Bem-vindo(a), 
-                    <a href="/economato/public/perfil.php" class="font-medium text-blue-600 hover:underline">
-                        <?= htmlspecialchars($_SESSION['user_name'] ?? 'Utilizador') ?>
-                    </a>
-                </span>
-                <a href="/economato/public/logout.php" class="text-red-600 hover:text-red-900 font-medium text-sm transition-colors">
-                    Sair
-                </a>
-            </div>
+        <div class="cg-right">
+            
+            <a href="<?= $baseUrl ?>/public/perfil.php" >
+                Olá, <?= htmlspecialchars($userName) ?>
+            </a>
+            <a href="<?= $baseUrl ?>/public/logout.php" class="cg-btn cg-btn-red">Sair</a>           
+
         </div>
     </div>
+    <div class="cg-separator"></div>
 </header>
