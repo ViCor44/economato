@@ -56,7 +56,7 @@ try {
     <title>Gestão de Stock de Farda - CrewGest</title>
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
 </head>
-<body class="p-8">
+<body>
 
     <?php include_once '../src/templates/header.php'; ?>
 

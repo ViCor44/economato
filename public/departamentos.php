@@ -74,7 +74,7 @@ $departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     </script>
 </head>
-<body class="p-8">
+<body>
 
 <?php include_once '../src/templates/header.php'; ?>
 

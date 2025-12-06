@@ -239,6 +239,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
         // caso contrário, deixa o form submeter normalmente para generate.php (já tem target="_blank")
     });
 </script>
+<?php include_once '../src/templates/footer.php'; ?>
 
 </body>
 </html>

@@ -114,7 +114,7 @@ unset($log); // evita referência acidental
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
 </head>
 
-<body class="p-8 bg-gray-100">
+<body>
 <?php include '../src/templates/header.php'; ?>
 
 <main class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow mt-8">
@@ -144,5 +144,6 @@ unset($log); // evita referência acidental
     </table>
 
 </main>
+<?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>
