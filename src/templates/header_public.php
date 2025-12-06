@@ -39,9 +39,9 @@ $initials = htmlspecialchars(substr($appName,0,2));
 <header class="cg-header">
     <div class="cg-inner">
 
-        <a href="<?= $baseUrl ?>/public/login.php" class="cg-logo"><?= $initials ?></a>
+        <a href="<?= $baseUrl ?>/public/about.php" class="cg-logo"><?= $initials ?></a>
 
-        <a href="<?= $baseUrl ?>/public/login.php" class="cg-brand">
+        <a href="<?= $baseUrl ?>/public/about.php" class="cg-brand">
             <span class="cg-brand-title"><?= htmlspecialchars($appName) ?></span>
             <span class="cg-brand-sub">Gestão de fardas, stock e relatórios</span>
         </a>
