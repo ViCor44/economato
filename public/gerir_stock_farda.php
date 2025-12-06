@@ -60,7 +60,7 @@ try {
 
     <?php include_once '../src/templates/header.php'; ?>
 
-    <main class="max-w-6xl mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8">
+    <main class="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-md mt-8 mb-8">
         <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
             <h1 class="text-3xl font-bold text-gray-800">Gestão de Stock de Farda</h1>
 
