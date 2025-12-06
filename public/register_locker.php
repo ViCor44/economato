@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../src/session_bootstrap.php';
 require_once '../config/db.php';
 
 // 🔒 Verificar login

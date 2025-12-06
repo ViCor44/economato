@@ -1,7 +1,7 @@
 <?php
 // Inicia a sessão. É seguro chamar isto múltiplas vezes.
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    require_once '../src/session_bootstrap.php';
 }
 
 // A verificação principal: o 'user_id' existe na sessão?

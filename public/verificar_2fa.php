@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../src/session_bootstrap.php';
 
 if (!isset($_SESSION['2fa_user_id'])) {
     header('Location: login.php');

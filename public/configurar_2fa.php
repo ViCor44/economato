@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../src/session_bootstrap.php';
 
 // Medida de segurança: se o utilizador não veio da página de registo, não pode estar aqui.
 if (!isset($_SESSION['registration_success']) || !$_SESSION['registration_success']) {
