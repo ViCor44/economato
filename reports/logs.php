@@ -111,13 +111,14 @@ unset($log); // evita referência acidental
 <head>
     <meta charset="UTF-8">
     <title>Logs do Sistema</title>
-    <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
+    <link href="../public/css/style.css" rel="stylesheet">
 </head>
 
-<body>
+<body class="bg-gray-100">
 <?php include '../src/templates/header.php'; ?>
 
-<main class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow mt-8">
+<main class="p-8 max-w-7xl mx-auto">
+    <div class="mx-auto bg-white p-8 rounded-2xl shadow-lg">
     <h1 class="text-3xl font-bold mb-6">📜 Logs do Sistema</h1>
 
     <table class="min-w-full border">
@@ -142,6 +143,7 @@ unset($log); // evita referência acidental
         <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
 
 </main>
 <?php include_once '../src/templates/footer.php'; ?>
