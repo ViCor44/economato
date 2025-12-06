@@ -266,6 +266,6 @@ document.getElementById('btn-gen').addEventListener('click', function(){
         });
 });
 </script>
-
+<?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>

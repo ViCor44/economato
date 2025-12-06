@@ -97,5 +97,6 @@ $qrCodeBase64 = base64_encode($qrCodeImage);
             </form>
         </div>
     </main>
+    <?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>

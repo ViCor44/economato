@@ -78,7 +78,7 @@ $departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <?php include_once '../src/templates/header.php'; ?>
 
-<main class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
+<main class="max-w-7xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-4 mb-4">
 
     <h1 class="text-2xl font-bold text-center mb-4">Gestão de Departamentos</h1>
 
@@ -154,6 +154,7 @@ $departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </table>
 
 </main>
+<?php include_once '../src/templates/footer.php'; ?>
 
 </body>
 </html>

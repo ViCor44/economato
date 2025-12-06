@@ -133,5 +133,6 @@ $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         <?php endif; ?>
     </main>
+    <?php include '../src/templates/footer.php'; ?>
 </body>
 </html>

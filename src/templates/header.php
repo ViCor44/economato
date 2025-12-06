@@ -54,14 +54,20 @@ $showAdmin = ($logged && (int)$userRole === 1);
             <span class="cg-pill">v<?= htmlspecialchars($appVersion) ?></span>
         </a>
 
-        <div class="cg-right">
-            
-            <a href="<?= $baseUrl ?>/public/perfil.php" >
+        <div class="cg-right flex items-center gap-3 text-sm">
+            <a href="<?= $baseUrl ?>/public/perfil.php"
+            class="text-blue-600 font-medium hover:underline">
                 Olá, <?= htmlspecialchars($userName) ?>
             </a>
-            <a href="<?= $baseUrl ?>/public/logout.php" class="cg-btn cg-btn-red">Sair</a>           
 
+            <span class="text-gray-400">|</span>
+
+            <a href="<?= $baseUrl ?>/public/logout.php"
+            class="text-red-600 hover:text-red-800 hover:underline">
+                Sair
+            </a>
         </div>
+
     </div>
     <div class="cg-separator"></div>
 </header>

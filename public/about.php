@@ -16,8 +16,8 @@ if (file_exists($versionFile)) {
 
 // informação da equipa (ajusta conforme necessário)
 $maintainers = [
-    ['name' => 'Equipa CrewGest', 'role' => 'Desenvolvimento & Suporte', 'email' => 'support@crewgest.example'],
-    ['name' => 'Administrador', 'role' => 'Admin Sistema', 'email' => 'admin@example.com'],
+    ['name' => 'Equipa CrewGest', 'role' => 'Desenvolvimento & Suporte', 'email' => 'victor.a.correia@gmail.com'],
+    ['name' => 'Administrador', 'role' => 'Admin Sistema', 'email' => 'victor.a.correia@gmail.com'],
 ];
 
 // links úteis
@@ -25,7 +25,7 @@ $links = [
     ['label' => 'Início', 'href' => $baseUrl . '/public/index.php'],
     ['label' => 'Documentação (README)', 'href' => $baseUrl . '/README.md'],
     ['label' => 'Relatórios', 'href' => $baseUrl . '/public/reports/index.php'],
-    ['label' => 'Contactar Suporte', 'href' => 'mailto:support@crewgest.example'],
+    ['label' => 'Contactar Suporte', 'href' => 'mailto:victor.a.correia@gmail.com'],
 ];
 
 ?>
@@ -86,10 +86,22 @@ $links = [
           <div class="subtitle">Gestão simples e eficiente de fardas, stock e relatórios — versão <?= htmlspecialchars($appVersion) ?></div>
         </div>
       </a>
-      <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-        <span class="pill">Produção interna</span>
-        <a class="btn" href="login.php">Entrar</a>
-      </div>
+<div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+    <span class="pill">Produção interna</span>
+
+    <a onclick="history.back()"
+       style="
+         padding:8px 12px;
+         border-radius:10px;
+         background:#eef2ff;
+         color:#2563eb;
+         font-weight:700;
+         text-decoration:none;
+       ">
+        Voltar
+    </a>
+</div>
+
     </div>
 
     <div class="grid">
@@ -134,12 +146,28 @@ $links = [
         </div>
 
         <div class="card" style="margin-top:14px">
-          <h3 style="margin:0 0 8px 0">Notas de segurança</h3>
-          <p class="small">As operações sensíveis (reset de password, envio de email) são tratadas com tokens e PHPMailer. Recomendamos configurar SMTP seguro e não usar credenciais de conta pessoal em produção.</p>
-          <div class="muted-block" style="margin-top:10px">
-            <strong>Atenção:</strong> Faz backup da base de dados regularmente e protege o acesso à pasta `public/` e aos ficheiros de configuração.
-          </div>
-        </div>
+  <h3 style="margin:0 0 8px 0">O que vem a seguir 🚀</h3>
+
+  <p class="small">
+    O CrewGest está em evolução contínua. Estas são algumas melhorias planeadas
+    para as próximas versões, com base na utilização real do sistema.
+  </p>
+
+  <ul style="margin-top:12px;padding-left:18px;color:#111827;font-size:14px">
+    <li>📦 Gestão avançada de stock (alertas automáticos e mínimos)</li>
+    <li>🏷️ Impressão em massa de etiquetas EAN por departamento</li>
+    <li>📊 Dashboards com indicadores-chave (KPIs)</li>
+    <li>🔐 Controlo de permissões por perfil de utilizador</li>
+    <li>🧾 Histórico detalhado e auditoria completa por ação</li>
+    <li>☁️ Preparação para exportação e integração futura</li>
+  </ul>
+
+  <div class="muted-block" style="margin-top:12px">
+    <strong>Nota:</strong> O foco é manter o sistema simples, rápido e adaptado
+    às necessidades reais da equipa.
+  </div>
+</div>
+
       </div>
 
       <aside>

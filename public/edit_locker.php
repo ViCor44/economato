@@ -158,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </form>
 </main>
+<?php include_once '../src/templates/footer.php'; ?>
 
 </body>
 </html>

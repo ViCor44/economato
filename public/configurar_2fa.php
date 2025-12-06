@@ -95,7 +95,8 @@ $qrCodeBase64 = base64_encode($qrCodeImage);
                 Percebido, ir para o Login
             </a>
         </div>
-    </div>
-
+    </div>~
+    </main>
+    <?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>

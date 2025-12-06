@@ -6,16 +6,22 @@ $pesquisa = trim($_GET['pesquisa'] ?? '');
 $colaboradores = [];
 
 try {
-    // 🔍 Buscar colaboradores (por nome OU cartão)
     if (!empty($pesquisa)) {
-        $stmt = $pdo->prepare("
+        $sql = "
             SELECT c.*, d.nome AS departamento_nome
             FROM colaboradores c
             LEFT JOIN departamentos d ON c.departamento_id = d.id
-            WHERE c.nome LIKE :pesquisa OR c.cartao LIKE :pesquisa
+            WHERE c.nome   LIKE :pesq_nome
+               OR c.cartao LIKE :pesq_cartao
             ORDER BY c.nome ASC
-        ");
-        $stmt->execute(['pesquisa' => "%$pesquisa%"]);
+        ";
+        $stmt = $pdo->prepare($sql);
+
+        $like = "%{$pesquisa}%";
+        $stmt->execute([
+            ':pesq_nome'   => $like,
+            ':pesq_cartao' => $like,
+        ]);
     } else {
         $stmt = $pdo->query("
             SELECT c.*, d.nome AS departamento_nome
@@ -26,6 +32,7 @@ try {
     }
 
     $colaboradores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("Erro ao carregar colaboradores: " . $e->getMessage());
 }
@@ -135,6 +142,6 @@ try {
         </table>
     </div>
 </main>
-
+<?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>

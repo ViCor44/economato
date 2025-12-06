@@ -141,5 +141,6 @@ $fardas = $stmtFardas->fetchAll(PDO::FETCH_ASSOC);
             </form>
         <?php endif; ?>
     </main>
+    <?php include '../src/templates/footer.php'; ?>
 </body>
 </html>

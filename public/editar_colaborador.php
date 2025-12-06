@@ -128,5 +128,6 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
         </form>
     </div>
 </main>
+<?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>

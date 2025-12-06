@@ -240,6 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (this.value === 'Outro') wrap.style.display = 'block'; else wrap.style.display = 'none';
     });
 </script>
+<?php include_once '../src/templates/footer.php'; ?>
 
 </body>
 </html>
