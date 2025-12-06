@@ -49,7 +49,7 @@ try {
     <title>Gestão de Utilizadores - Slide RH</title>
     <link href="/economato/public/css/style.css" rel="stylesheet">
 </head>
-<body class="p-8">
+<body>
 
     <?php include_once '../src/templates/header.php'; ?>
 
