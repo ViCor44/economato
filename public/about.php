@@ -1,33 +1,21 @@
 <?php
 // public/about.php
 declare(strict_types=1);
-
 // tenta usar constantes já definidas no projecto
 $baseUrl = defined('BASE_URL') ? BASE_URL : '';
 $appName = defined('APP_NAME') ? APP_NAME : 'CrewGest';
 $appVersion = defined('APP_VERSION') ? APP_VERSION : '1.0.0';
-
 // tenta ler ficheiro VERSION se existir
 $versionFile = __DIR__ . '/../VERSION';
 if (file_exists($versionFile)) {
     $v = trim(file_get_contents($versionFile));
     if ($v !== '') $appVersion = $v;
 }
-
 // informação da equipa (ajusta conforme necessário)
 $maintainers = [
     ['name' => 'Equipa CrewGest', 'role' => 'Desenvolvimento & Suporte', 'email' => 'victor.a.correia@gmail.com'],
     ['name' => 'Administrador', 'role' => 'Admin Sistema', 'email' => 'victor.a.correia@gmail.com'],
 ];
-
-// links úteis
-$links = [
-    ['label' => 'Início', 'href' => $baseUrl . '/public/index.php'],
-    ['label' => 'Documentação (README)', 'href' => $baseUrl . '/README.md'],
-    ['label' => 'Relatórios', 'href' => $baseUrl . '/public/reports/index.php'],
-    ['label' => 'Contactar Suporte', 'href' => 'mailto:victor.a.correia@gmail.com'],
-];
-
 ?>
 <!doctype html>
 <html lang="pt-PT">
@@ -36,171 +24,327 @@ $links = [
   <title>Sobre — <?= htmlspecialchars($appName) ?></title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" href="<?= htmlspecialchars($baseUrl) ?>/public/images/favicon.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    :root{
-      --bg:#f6f7fb; --card:#fff; --muted:#6b7280; --accent:#2563eb; --accent-dark:#1d4ed8;
-      --radius:14px; --shadow: 0 8px 30px rgba(16,24,40,0.08);
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text-primary: #212529;
+      --text-muted: #6c757d;
+      --accent: #0d6efd;
+      --accent-light: #e7f1ff;
+      --success: #198754;
+      --warning: #ffc107;
+      --info: #0dcaf0;
+      --radius: 0.375rem;
+      --shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+      --transition: all 0.3s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
-    html,body{height:100%; margin:0; background:linear-gradient(180deg,#f8fafc 0%,var(--bg) 100%);}
-    .site{max-width:1100px;margin:36px auto;padding:20px;}
-    .top { display:flex; align-items:center; gap:18px; margin-bottom:20px;}
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text-primary);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #dee2e6;
+    }
     .brand {
-      display:flex; align-items:center; gap:14px; text-decoration:none; color:inherit;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     .logo {
-      width:64px; height:64px; border-radius:12px; background:linear-gradient(135deg,var(--accent),var(--accent-dark));
-      display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:20px;
-      box-shadow: 0 6px 18px rgba(37,99,235,0.15);
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.25rem;
+      border-radius: 0.25rem;
     }
-    h1{margin:0;font-size:22px;color:#0f172a}
-    .subtitle{color:var(--muted); margin-top:6px}
-    .grid{display:grid; grid-template-columns: 1fr 360px; gap:20px; margin-top:18px; align-items:start}
-    .card{background:var(--card); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow)}
-    .lead{font-size:15px; color:#111827; margin-bottom:12px}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:var(--accent);font-weight:600;font-size:13px}
-    ul.features{list-style:none;padding:0;margin:12px 0 0 0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
-    ul.features li{background:#f8fafc;border:1px solid #eef2ff;padding:10px;border-radius:10px;color:#111827;font-weight:600;font-size:14px}
-    .meta{display:flex; gap:12px; flex-wrap:wrap; margin-top:12px}
-    .meta .m{background:#fbfdff;padding:8px;border-radius:8px;border:1px solid #eef2ff;color:#0f172a;font-weight:600}
-    .small{font-size:13px;color:var(--muted)}
-    .contacts {display:flex; flex-direction:column; gap:10px}
-    .contact-item{display:flex; gap:10px; align-items:center}
-    .contact-item .avatar{width:44px;height:44;border-radius:8px;background:#eef2ff;color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700}
-    .links{display:flex;flex-direction:column;gap:8px}
-    a.btn{display:inline-block;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:700;color:#fff;background:var(--accent)}
-    .muted-block{background:#fffaf0;border-left:4px solid #f59e0b;padding:10px;border-radius:8px;color:#92400e}
-    .changelog{font-family:monospace,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0b1220;color:#cbd5e1;padding:12px;border-radius:8px}
-    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
-    @media (max-width:900px){ .grid{grid-template-columns:1fr} .logo{width:56px;height:56px}}
+    .app-name {
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .user-info {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .user-info a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .dashboard-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid #dee2e6;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      text-align: center;
+    }
+    .card:hover {
+      box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
+    }
+    .icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem auto;
+      font-size: 1.5rem;
+      color: #fff;
+    }
+    .icon-blue { background: #0d6efd; }
+    .icon-green { background: #198754; }
+    .icon-yellow { background: #ffc107; color: #212529; }
+    .icon-purple { background: #6f42c1; }
+    .icon-orange { background: #fd7e14; }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--card);
+      border: 1px solid #dee2e6;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .section h2 {
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin: 0;
+    }
+    .section p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    ul.features {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    ul.features li {
+      background: var(--accent-light);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+    }
+    .changelog {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: var(--radius);
+      font-family: monospace;
+      color: var(--text-muted);
+    }
+    .contacts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .contact {
+      text-align: center;
+    }
+    .muted-block {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 1rem;
+      border-radius: var(--radius);
+      color: #856404;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .back-btn:hover {
+      background: #0a58ca;
+    }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      ul.features { flex-direction: column; align-items: center; }
+    }
   </style>
 </head>
 <body>
-  
-  <div class="site">
-    <div class="top">
-      <a class="brand">
-        <div class="logo"><?= htmlspecialchars(substr($appName,0,2)) ?></div>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">Cr</div>
         <div>
-          <h1><?= htmlspecialchars($appName) ?> <span class="small" style="font-weight:600;color:var(--muted)">— Sobre</span></h1>
-          <div class="subtitle">Gestão simples e eficiente de fardas, stock e relatórios — versão <?= htmlspecialchars($appVersion) ?></div>
+          <div class="app-name">CrewGest</div>
+          <div class="subtitle">Gestão simples e eficiente de fardas, stock e relatórios.</div>
         </div>
-      </a>
-<div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-    <span class="pill">Produção interna</span>
-
-    <a onclick="history.back()"
-       style="
-         padding:8px 12px;
-         border-radius:10px;
-         background:#eef2ff;
-         color:#2563eb;
-         font-weight:700;
-         text-decoration:none;
-       ">
-        Voltar
-    </a>
-</div>
-
-    </div>
-
-    <div class="grid">
-      <div>
-        <div class="card">
-          <p class="lead">O <?= htmlspecialchars($appName) ?> ajuda equipas a gerir fardas, controlar stock, emitir relatórios e manter um histórico auditável de movimentos. Foi desenhado para ser prático, leve e fácil de adaptar ao fluxo das organizações.</p>
-
-          <h3 style="margin-top:12px;margin-bottom:8px">O que faz</h3>
-          <ul class="features" aria-label="Funcionalidades">
-            <li>Gestão de stock</li>
-            <li>Atribuição de fardas</li>
-            <li>Relatórios exportáveis (PDF, Excel, CSV)</li>
-            <li>Geração e impressão de EAN / códigos de barra</li>
-            <li>Registo de devoluções e avarias</li>
-            <li>Logs auditáveis de operações</li>
-            <li>Recuperação de password por email</li>
-            <li>Integração com PHPMailer</li>
-          </ul>
-
-          <div style="margin-top:18px">
-            <h3 style="margin:0 0 8px 0">Porquê usar</h3>
-            <p class="small">Projetado para reduzir tempo administrativo, evitar perdas e facilitar a triagem. Ajustável por departamentos e com filtros para relatórios práticos — ideal para equipas operacionais.</p>
-            <div class="meta" role="list">
-              <div class="m">Leve e rápido</div>
-              <div class="m">Código aberto possível</div>
-              <div class="m">Exportações fáceis</div>
-            </div>
-          </div>
-
-          <div style="margin-top:18px">
-            <h3 style="margin-bottom:8px">Stack técnico</h3>
-            <p class="small">PHP 7.4+/8.x, MySQL/MariaDB, Composer, PHPMailer, Dompdf, PhpSpreadsheet, HTML/CSS responsivo.</p>
-          </div>
-
-          <div style="margin-top:18px">
-            <h3 style="margin-bottom:8px">Changelog recente</h3>
-            <div class="changelog">
-              v<?= htmlspecialchars($appVersion) ?> — Melhorias UI, export PDF com header/footer, geração EAN + preview.<br>
-              v1.0.0 — Lançamento inicial com gestão de fardas e relatórios.
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:14px">
-  <h3 style="margin:0 0 8px 0">O que vem a seguir 🚀</h3>
-
-  <p class="small">
-    O CrewGest está em evolução contínua. Estas são algumas melhorias planeadas
-    para as próximas versões, com base na utilização real do sistema.
-  </p>
-
-  <ul style="margin-top:12px;padding-left:18px;color:#111827;font-size:14px">
-    <li>📦 Gestão avançada de stock (alertas automáticos e mínimos)</li>
-    <li>🏷️ Impressão em massa de etiquetas EAN por departamento</li>
-    <li>📊 Dashboards com indicadores-chave (KPIs)</li>
-    <li>🔐 Controlo de permissões por perfil de utilizador</li>
-    <li>🧾 Histórico detalhado e auditoria completa por ação</li>
-    <li>☁️ Preparação para exportação e integração futura</li>
-  </ul>
-
-  <div class="muted-block" style="margin-top:12px">
-    <strong>Nota:</strong> O foco é manter o sistema simples, rápido e adaptado
-    às necessidades reais da equipa.
-  </div>
-</div>
-
       </div>
+      <div>
+        <a href="javascript:history.back()" class="back-btn">Voltar</a>
+      </div>
+    </header>
 
-      <aside>
-        <div class="card">
-          <h3 style="margin:0 0 8px 0">Contactos & Equipa</h3>
-          <div class="contacts">
-            <?php foreach ($maintainers as $m): ?>
-              <div class="contact-item" role="article">
-                <div class="avatar"><?= htmlspecialchars(substr($m['name'],0,2)) ?></div>
-                <div>
-                  <div style="font-weight:700"><?= htmlspecialchars($m['name']) ?></div>
-                  <div class="small"><?= htmlspecialchars($m['role']) ?></div>
-                  <div class="small" style="margin-top:6px"><a href="mailto:<?= htmlspecialchars($m['email']) ?>"><?= htmlspecialchars($m['email']) ?></a></div>
-                </div>
-              </div>
-            <?php endforeach; ?>
-          </div>
+    <h1 class="dashboard-title">Sobre o Sistema</h1>
 
-          <hr style="margin:12px 0;border:none;border-top:1px solid #f1f5f9">
-
-          
-        </div>
-
-        <div class="card" style="margin-top:14px">
-          <h4 style="margin:0 0 8px 0">Licença & Créditos</h4>
-          <p class="small">Projeto interno — ajusta a licença conforme necessário. Bibliotecas utilizadas: Dompdf, PHPMailer, PhpSpreadsheet. Obrigado a todas as equipes que contribuíram.</p>
-        </div>
-      </aside>
+    <div class="section">
+      <div class="section-header">
+        <i class="fas fa-info-circle icon icon-blue"></i>
+        <h2>Visão Geral</h2>
+      </div>
+      <p>O CrewGest é uma aplicação projetada para simplificar a gestão de fardas, stock e relatórios em equipas operacionais. Com uma interface intuitiva, permite controlar inventários, atribuir itens e gerar análises de forma eficiente.</p>
     </div>
+
+    <div class="section">
+      <div class="section-header">
+        <i class="fas fa-tools icon icon-green"></i>
+        <h2>Funcionalidades</h2>
+      </div>
+      <ul class="features">
+        <li>Gestão de stock de fardas</li>
+        <li>Atribuição e registo de itens</li>
+        <li>Relatórios em PDF, Excel e CSV</li>
+        <li>Geração de códigos EAN</li>
+        <li>Registo de devoluções e avarias</li>
+        <li>Logs auditáveis</li>
+        <li>Recuperação de password</li>
+        <li>Integração com email</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <i class="fas fa-question-circle icon icon-yellow"></i>
+        <h2>Porquê Usar</h2>
+      </div>
+      <p>Reduza tempo administrativo, minimize perdas e melhore a organização. Ideal para departamentos com necessidades específicas de relatórios e controlo.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <i class="fas fa-code icon icon-purple"></i>
+        <h2>Stack Técnico</h2>
+      </div>
+      <p>PHP 7.4+/8.x, MySQL/MariaDB, Composer, PHPMailer, Dompdf, PhpSpreadsheet, HTML/CSS responsivo.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <i class="fas fa-history icon icon-orange"></i>
+        <h2>Changelog Recente</h2>
+      </div>
+      <div class="changelog">
+        v<?= htmlspecialchars($appVersion) ?> — Melhorias UI, export PDF com header/footer, geração EAN + preview.<br>
+        v1.0.0 — Lançamento inicial com gestão de fardas e relatórios.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <i class="fas fa-rocket icon icon-blue"></i>
+        <h2>O Que Vem a Seguir</h2>
+      </div>
+      <p>O CrewGest evolui com base no feedback da equipa. Aqui estão algumas melhorias planeadas:</p>
+      <ul class="features">
+        <li>Alertas de stock baixo</li>
+        <li>Impressão em massa de etiquetas</li>
+        <li>Dashboards com KPIs</li>
+        <li>Permissões por utilizador</li>
+        <li>Auditoria detalhada</li>
+        <li>Integrações externas</li>
+      </ul>
+      <div class="muted-block">
+        <strong>Nota:</strong> Mantemos o foco na simplicidade e adaptação às necessidades reais.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <i class="fas fa-users icon icon-green"></i>
+        <h2>Equipa e Contactos</h2>
+      </div>
+      <div class="contacts">
+        <?php foreach ($maintainers as $m): ?>
+          <div class="contact">
+            <i class="fas fa-user-circle icon icon-blue"></i>
+            <div class="card-title"><?= htmlspecialchars($m['name']) ?></div>
+            <div class="card-desc"><?= htmlspecialchars($m['role']) ?></div>
+            <a href="mailto:<?= htmlspecialchars($m['email']) ?>"><?= htmlspecialchars($m['email']) ?></a>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <i class="fas fa-balance-scale icon icon-yellow"></i>
+        <h2>Licença e Créditos</h2>
+      </div>
+      <p>Projeto interno. Bibliotecas: Dompdf, PHPMailer, PhpSpreadsheet. Obrigado às comunidades open-source.</p>
+    </div>
+
+    <a href="javascript:history.back()" class="back-btn">Voltar</a>
 
     <footer>
-      <div>© <?= date('Y') ?> <?= htmlspecialchars($appName) ?> — Versão <?= htmlspecialchars($appVersion) ?></div>
-      <div style="margin-top:6px" class="small">Feito com ♥ — precisa de ajustes? Contacta a equipa.</div>
+      © <?= date('Y') ?> CrewGest | <a href="#">Sobre o sistema</a>
     </footer>
   </div>
 </body>

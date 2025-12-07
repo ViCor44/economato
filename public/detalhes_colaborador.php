@@ -51,7 +51,7 @@ try {
 
 <?php include_once '../src/templates/header.php'; ?>
 
-<main class="max-w-5xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
+<main class="max-w-5xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8 mb-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-3xl font-bold text-gray-800">
             👤 <?= htmlspecialchars($colaborador['nome']) ?>
@@ -179,7 +179,18 @@ try {
     onmouseout="this.style.backgroundColor='#16a34a';"
     target="_blank">
         📄 <span>Gerar Termo de Farda</span>
-</a>
+    </a>
+    
+    <a href="gerar_termo_entrega.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
+    style="background-color:#16a34a; color:#fff; font-weight:600; 
+           display:flex; align-items:center; gap:8px; padding:8px 16px; 
+           border-radius:8px; text-decoration:none; 
+           box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+    onmouseover="this.style.backgroundColor='#15803d';"
+    onmouseout="this.style.backgroundColor='#16a34a';"
+    target="_blank">
+        📄 <span>Gerar Termo de Entrega</span>
+    </a>
 
 </div>
 
