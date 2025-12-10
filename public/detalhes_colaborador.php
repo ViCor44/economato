@@ -1,7 +1,6 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
-
 // Verifica se o ID foi passado
 $colaborador_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
