@@ -42,7 +42,7 @@ $showAdmin = ($logged && (int)$userRole === 1);
     padding:8px 12px;border-radius:10px;}
 .cg-btn-red{background:#ef4444;}
 </style>
-
+<script src="/economato/public/js/assistant.js"></script>
 <header class="cg-header">
     <div class="cg-inner">
 

@@ -3,12 +3,10 @@ require_once '../src/auth_guard.php';
 require_once '../config/db.php';
 // Verifica se o ID foi passado
 $colaborador_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
 if ($colaborador_id <= 0) {
     header("Location: colaboradores.php");
     exit;
 }
-
 try {
     // 🔹 Buscar dados do colaborador (agora com telefone e email)
     $stmt = $pdo->prepare("
@@ -19,11 +17,9 @@ try {
     ");
     $stmt->execute(['id' => $colaborador_id]);
     $colaborador = $stmt->fetch(PDO::FETCH_ASSOC);
-
     if (!$colaborador) {
         die("Colaborador não encontrado.");
     }
-
     // 🔹 Buscar cacifos atribuídos
     $stmtCacifos = $pdo->prepare("
         SELECT numero, avariado
@@ -33,7 +29,6 @@ try {
     ");
     $stmtCacifos->execute(['id' => $colaborador_id]);
     $cacifos = $stmtCacifos->fetchAll(PDO::FETCH_ASSOC);
-
 } catch (PDOException $e) {
     die("Erro ao carregar detalhes do colaborador: " . $e->getMessage());
 }
@@ -46,18 +41,15 @@ try {
     <title>Detalhes do Colaborador - CrewGest</title>
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
 </head>
-<body class="p-8">
-
+<body class="p-4 md:p-8">
 <?php include_once '../src/templates/header.php'; ?>
-
-<main class="max-w-5xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8 mb-8">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">
+<main class="max-w-5xl mx-auto bg-white rounded-2xl shadow-md p-4 md:p-8 mt-8 mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
             👤 <?= htmlspecialchars($colaborador['nome']) ?>
         </h1>
         <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
     </div>
-
     <!-- 🧾 Dados principais -->
     <section class="mb-8">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Informações Pessoais</h2>
@@ -79,12 +71,10 @@ try {
             </p>
         </div>
     </section>
-
     <!-- 🔒 CACIFOS -->
     <section class="mb-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">🔒 Cacifos Atribuídos</h2>
-
             <div class="flex flex-wrap gap-3 mb-4">
                 <!-- ✅ Atribuir cacifo -->
                 <a href="list_lockers.php" class="ml-4"
@@ -93,7 +83,6 @@ try {
                     onmouseout="this.style.backgroundColor='#16a34a';">
                     ➕ <span>Atribuir</span>
                 </a>
-
                 <!-- 🔄 Devolver cacifo -->
                 <a href="list_lockers.php?pesquisa=<?= htmlspecialchars($colaborador['nome']) ?>" class="ml-4"
                     style="background-color:#dc2626; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
@@ -104,39 +93,38 @@ try {
             </div>
         </div>
         <?php if (count($cacifos) > 0): ?>
-            <table class="min-w-full border border-gray-200 text-sm">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="text-left px-4 py-2 border-b">Número</th>
-                        <th class="text-left px-4 py-2 border-b">Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($cacifos as $c): ?>
+            <div class="overflow-x-auto">
+                <table class="min-w-full border border-gray-200 text-sm">
+                    <thead class="bg-gray-100">
                         <tr>
-                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($c['numero']) ?></td>
-                            <td class="px-4 py-2 border-b">
-                                <?= $c['avariado'] ? '<span class="text-red-600">Avariado</span>' : '<span class="text-green-600">OK</span>' ?>
-                            </td>
+                            <th class="text-left px-4 py-2 border-b">Número</th>
+                            <th class="text-left px-4 py-2 border-b">Estado</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($cacifos as $c): ?>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-2 border-b"><?= htmlspecialchars($c['numero']) ?></td>
+                                <td class="px-4 py-2 border-b">
+                                    <?= $c['avariado'] ? '<span class="text-red-600">Avariado</span>' : '<span class="text-green-600">OK</span>' ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         <?php else: ?>
             <p class="text-gray-600">Nenhum cacifo atribuído.</p>
         <?php endif; ?>
-        
+       
     </section>
-
     <!-- 🧥 FARDAS -->
     <section class="mt-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
                 🧥 Fardas Atribuídas
             </h2>
-
             <div class="flex flex-wrap gap-3 mb-4">
-
     <!-- ✅ Atribuir farda -->
     <a href="atribuir_farda.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
         style="background-color:#16a34a; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
@@ -144,7 +132,6 @@ try {
         onmouseout="this.style.backgroundColor='#16a34a';">
         ➕ <span>Atribuir</span>
     </a>
-
     <!-- 🔄 Devolver farda -->
     <a href="devolucao_farda.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
         style="background-color:#dc2626; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
@@ -152,7 +139,6 @@ try {
         onmouseout="this.style.backgroundColor='#dc2626';">
         🔁 <span>Devolver</span>
     </a>
-
     <!-- 🟣 Emprestar farda -->
     <a href="emprestar_farda.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
         style="background-color:#7c3aed; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
@@ -160,7 +146,6 @@ try {
         onmouseout="this.style.backgroundColor='#7c3aed';">
         🧥 <span>Emprestar</span>
     </a>
-
     <!-- 🟧 Devolver empréstimo -->
     <a href="devolver_emprestimo.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
         style="background-color:#ea580c; color:#fff; font-weight:600; display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:8px; text-decoration:none; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
@@ -168,37 +153,33 @@ try {
         onmouseout="this.style.backgroundColor='#ea580c';">
         ↩️ <span>Devolver Empréstimo</span>
     </a>
-
     <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
-    style="background-color:#16a34a; color:#fff; font-weight:600; 
-           display:flex; align-items:center; gap:8px; padding:8px 16px; 
-           border-radius:8px; text-decoration:none; 
+    style="background-color:#16a34a; color:#fff; font-weight:600;
+           display:flex; align-items:center; gap:8px; padding:8px 16px;
+           border-radius:8px; text-decoration:none;
            box-shadow:0 2px 4px rgba(0,0,0,0.1);"
     onmouseover="this.style.backgroundColor='#15803d';"
     onmouseout="this.style.backgroundColor='#16a34a';"
     target="_blank">
         📄 <span>Gerar Termo de Farda</span>
     </a>
-    
+   
     <a href="gerar_termo_entrega.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
-    style="background-color:#16a34a; color:#fff; font-weight:600; 
-           display:flex; align-items:center; gap:8px; padding:8px 16px; 
-           border-radius:8px; text-decoration:none; 
+    style="background-color:#16a34a; color:#fff; font-weight:600;
+           display:flex; align-items:center; gap:8px; padding:8px 16px;
+           border-radius:8px; text-decoration:none;
            box-shadow:0 2px 4px rgba(0,0,0,0.1);"
     onmouseover="this.style.backgroundColor='#15803d';"
     onmouseout="this.style.backgroundColor='#16a34a';"
     target="_blank">
         📄 <span>Gerar Termo de Entrega</span>
     </a>
-
 </div>
-
         </div>
-
         <?php
         // Buscar fardas atribuídas ao colaborador
         $stmt = $pdo->prepare("
-            SELECT 
+            SELECT
                 f.nome,
                 c.nome AS cor,
                 t.nome AS tamanho,
@@ -215,10 +196,8 @@ try {
         ");
         $stmt->execute(['id' => $colaborador['id']]);
         $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         $total_geral = 0;
         ?>
-
         <?php if ($fardas_atribuidas): ?>
             <div class="overflow-x-auto">
                 <table class="min-w-full border border-gray-200 text-sm mt-2">
@@ -234,7 +213,7 @@ try {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($fardas_atribuidas as $f): 
+                        <?php foreach ($fardas_atribuidas as $f):
                             $total_item = $f['quantidade_total'] * $f['preco_unitario'];
                             $total_geral += $total_item;
                         ?>

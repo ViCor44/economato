@@ -108,14 +108,14 @@ render_form:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adicionar Farda - CrewGest</title>
+    <title>Nova Farda - CrewGest</title>
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
     <?php include_once '../src/templates/header.php'; ?>
 
     <main class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">➕ Adicionar Farda</h1>
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">➕ Nova Farda</h1>
 
         <?php if ($success): ?>
             <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-4">
@@ -321,6 +321,11 @@ render_form:
           });
     });
 </script>
+<?php
+        // Podemos definir o contexto para personalizar a mensagem inicial
+        $aiContext = 'fardas'; // ou 'etiquetas', 'dashboard', etc.
+        include __DIR__ . '/../src/templates/assistant_widget.php';
+    ?>
 <?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>

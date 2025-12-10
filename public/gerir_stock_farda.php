@@ -88,7 +88,7 @@ try {
                 style="background-color:#16a34a; color:#fff; font-weight:600; padding:8px 18px; border-radius:8px; text-decoration:none; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
                 onmouseover="this.style.backgroundColor='#15803d'"
                 onmouseout="this.style.backgroundColor='#16a34a'">
-                ➕ Adicionar Farda
+                ➕ Nova Farda
                 </a>
                 <a href="adicionar_stock.php" class="ml-4"
                 style="background-color:#16a34a; color:#fff; font-weight:600; padding:8px 18px; border-radius:8px; text-decoration:none; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
@@ -145,6 +145,11 @@ try {
             </div>
         <?php endif; ?>
     </main>
+    <?php
+        // Podemos definir o contexto para personalizar a mensagem inicial
+        $aiContext = 'fardas'; // ou 'etiquetas', 'dashboard', etc.
+        include __DIR__ . '/../src/templates/assistant_widget.php';
+    ?>
     <?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>

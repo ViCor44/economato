@@ -174,9 +174,29 @@ body{font-family:Arial,sans-serif;color:#111;margin:20px}
 .title{font-size:16px;color:#111}
 .section{margin-top:18px;margin-bottom:26px}
 .section h3{background:#f3f4f6;padding:8px 12px;border-radius:6px}
-.grid{display:flex;flex-wrap:wrap;gap:10px}
-.card{border:1px solid #e6e6e6;border-radius:6px;padding:8px;width:220px;box-sizing:border-box;background:#fff}
-.card img{display:block;max-width:200px;height:auto;margin:0 auto 6px auto}
+.grid {
+    display: block;
+    font-size: 0; /* evita espaços em branco entre inline-blocks */
+}
+
+.card {
+    display: inline-block;
+    width: 27%;              /* 3 por linha */
+    margin: 0 1.5% 14px 1.5%;
+    font-size: 12px;         /* repõe o tamanho de texto dentro da card */
+    vertical-align: top;
+    border: 1px solid #e6e6e6;
+    border-radius: 6px;
+    padding: 8px;
+    box-sizing: border-box;
+    background: #fff;
+}
+.card img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto 6px auto;
+}
 .meta{font-size:12px;color:#333}
 .small{font-size:11px;color:#666;margin-top:6px}
 .footer{font-size:11px;color:#666;margin-top:18px}

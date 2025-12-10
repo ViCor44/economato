@@ -142,6 +142,11 @@ try {
         </table>
     </div>
 </main>
+    <?php
+        // Podemos definir o contexto para personalizar a mensagem inicial
+        $aiContext = 'colaboradores'; // ou 'etiquetas', 'dashboard', etc.
+        include __DIR__ . '/../src/templates/assistant_widget.php';
+    ?>
 <?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>
