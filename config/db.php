@@ -20,6 +20,14 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     // force native prepares e evita que inteiros sejam passados como strings
     $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+    $pdoSuper = new PDO(
+        "mysql:host=localhost;dbname=super_login;charset=utf8mb4",
+        "root",
+        "",
+        [ PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ]
+    );
+
 } catch (PDOException $e) {
     // Em produção, nunca mostrar o erro detalhado. Guardar num log.
     die("Erro: Não foi possível ligar à base de dados. " . $e->getMessage());

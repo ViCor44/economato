@@ -6,6 +6,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // A verificação principal: o 'user_id' existe na sessão?
 if (!isset($_SESSION['user_id'])) {
+
+    var_dump($_SESSION);
+exit;
+
     // Se não existir, o utilizador não está logado.
     // Redireciona-o para a página de login e termina o script.
     header('Location: login.php');
