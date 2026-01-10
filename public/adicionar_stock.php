@@ -140,8 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="flex justify-end gap-3 mt-6">
-            <a href="gerir_stock_farda.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Cancelar</a>
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">Guardar</button>
+            <a href="gerir_stock_farda.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 ">Cancelar</a>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 ml-4">Guardar</button>
         </div>
     </form>
 </main>
