@@ -20,7 +20,7 @@ if (!$token) {
 
 /* validar token */
 $stmt = $pdoSuper->prepare("
-    SELECT t.admin_id, t.system_id
+    SELECT t.admin_id, t.system_key
     FROM admin_tokens t
     WHERE t.token = ?
       AND t.used = 0
@@ -42,9 +42,9 @@ $pdoSuper->prepare("
 $stmt = $pdoSuper->prepare("
     SELECT user_id
     FROM admin_user_map
-    WHERE admin_id = ? AND system_id = ?
+    WHERE admin_id = ? AND system_key = ?
 ");
-$stmt->execute([$t['admin_id'], $t['system_id']]);
+$stmt->execute([$t['admin_id'], $t['system_key']]);
 $map = $stmt->fetch();
 
 if (!$map) {
