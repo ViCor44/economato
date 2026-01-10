@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="p-8">
 <?php include_once '../src/templates/header.php'; ?>
 
-<main class="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8">
+<main class="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8 mb-8">
     <h1 class="text-2xl font-bold text-gray-800 mb-6">📦 Adicionar Stock de Farda</h1>
 
     <?php if (!empty($erro)): ?>
