@@ -27,24 +27,26 @@ $maintainers = [
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     :root {
-      --bg: #f8f9fa;
-      --card: #ffffff;
-      --text-primary: #212529;
-      --text-muted: #6c757d;
-      --accent: #0d6efd;
-      --accent-light: #e7f1ff;
-      --success: #198754;
-      --warning: #ffc107;
-      --info: #0dcaf0;
-      --radius: 0.375rem;
-      --shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+      --bg-gradient-start: #6B46C1;
+      --bg-gradient-end: #553C9A;
+      --card: rgba(255, 255, 255, 0.95);
+      --text-primary: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.8);
+      --accent: #4299E1;
+      --accent-light: rgba(66, 153, 225, 0.2);
+      --success: #48BB78;
+      --warning: #ECC94B;
+      --info: #4299E1;
+      --logo-bg: #B794F4;
+      --shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.2);
       --transition: all 0.3s ease;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --radius: 0.375rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     html, body {
       height: 100%;
       margin: 0;
-      background: var(--bg);
+      background: linear-gradient(to bottom, var(--bg-gradient-start), var(--bg-gradient-end));
       color: var(--text-primary);
     }
     .container {
@@ -58,7 +60,7 @@ $maintainers = [
       justify-content: space-between;
       margin-bottom: 2rem;
       padding-bottom: 1rem;
-      border-bottom: 1px solid #dee2e6;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     }
     .brand {
       display: flex;
@@ -68,8 +70,8 @@ $maintainers = [
     .logo {
       width: 40px;
       height: 40px;
-      background: var(--accent);
-      color: #fff;
+      background: var(--logo-bg);
+      color: var(--bg-gradient-end);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -106,15 +108,16 @@ $maintainers = [
     }
     .card {
       background: var(--card);
-      border: 1px solid #dee2e6;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: var(--radius);
       padding: 1.5rem;
       box-shadow: var(--shadow);
       transition: var(--transition);
       text-align: center;
+      color: #4A5568;
     }
     .card:hover {
-      box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
+      box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.15);
     }
     .icon {
       width: 3rem;
@@ -127,11 +130,11 @@ $maintainers = [
       font-size: 1.5rem;
       color: #fff;
     }
-    .icon-blue { background: #0d6efd; }
-    .icon-green { background: #198754; }
-    .icon-yellow { background: #ffc107; color: #212529; }
-    .icon-purple { background: #6f42c1; }
-    .icon-orange { background: #fd7e14; }
+    .icon-blue { background: var(--accent); }
+    .icon-green { background: var(--success); }
+    .icon-yellow { background: var(--warning); color: #212529; }
+    .icon-purple { background: var(--bg-gradient-start); }
+    .icon-orange { background: #ED64A6; }
     .card-title {
       font-size: 1.1rem;
       font-weight: 500;
@@ -139,15 +142,16 @@ $maintainers = [
     }
     .card-desc {
       font-size: 0.875rem;
-      color: var(--text-muted);
+      color: #718096;
     }
     .section {
       margin-top: 2rem;
       padding: 1.5rem;
       background: var(--card);
-      border: 1px solid #dee2e6;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      color: #4A5568;
     }
     .section-header {
       text-align: center;
@@ -157,6 +161,7 @@ $maintainers = [
       font-size: 1.25rem;
       font-weight: 500;
       margin: 0;
+      color: #2D3748;
     }
     .section p {
       line-height: 1.6;
@@ -175,13 +180,14 @@ $maintainers = [
       padding: 0.5rem 1rem;
       border-radius: var(--radius);
       font-size: 0.875rem;
+      color: var(--accent);
     }
     .changelog {
-      background: #f8f9fa;
+      background: #F7FAFC;
       padding: 1rem;
       border-radius: var(--radius);
       font-family: monospace;
-      color: var(--text-muted);
+      color: #718096;
     }
     .contacts {
       display: grid;
@@ -192,11 +198,11 @@ $maintainers = [
       text-align: center;
     }
     .muted-block {
-      background: #fff3cd;
-      border: 1px solid #ffeeba;
+      background: #FEF3C7;
+      border: 1px solid #FDE68A;
       padding: 1rem;
       border-radius: var(--radius);
-      color: #856404;
+      color: #92400E;
     }
     footer {
       margin-top: 2rem;
@@ -220,7 +226,7 @@ $maintainers = [
       transition: var(--transition);
     }
     .back-btn:hover {
-      background: #0a58ca;
+      background: #3182CE;
     }
     @media (max-width: 768px) {
       .grid { grid-template-columns: 1fr; }

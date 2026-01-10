@@ -79,150 +79,250 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="/economato/public/css/style.css" rel="stylesheet">
     <style>
         body {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            background: linear-gradient(to bottom, #6B46C1, #553C9A);
             height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+
+        .info-section {
+            width: 40%;
+            background: linear-gradient(to bottom, #6B46C1, #553C9A);
+            color: white;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            /*color: #fff;*/
-            font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Para evitar scroll desnecessário */
-        }
-        header {
-            width: 100%;
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: fadeInDown 1s ease-out forwards;
-        }
-        .form-container {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 2.5rem;
-    box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    max-width: 420px;
-    width: 100%;
-    margin-top: 4rem;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInUp 1s ease-out 0.5s forwards;
-}
-        @keyframes fadeInDown {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .form-container h1 {
-            color: #1f2937;
-            font-size: 1.875rem;
-            font-weight: 700;
-        }
-        .form-container p {
-            color: #6b7280;
-        }
-        .input-group {
+            justify-content: center;
+            padding: 4rem;
             position: relative;
+        }
+
+        .info-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -50px;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(to right, #553C9A, transparent);
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #B794F4;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            color: #553C9A;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo-subtext {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .info-section h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-section p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .sobre-link {
+            color: #4299E1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-section {
+            width: 60%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top-left-radius: 50px;
+            border-bottom-left-radius: 50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .form-container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .input-group {
             margin-bottom: 1.5rem;
         }
+
         .input-group label {
-            color: #374151;
+            display: block;
             font-size: 0.875rem;
-            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #4A5568;
         }
+
         .input-group input {
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
             width: 100%;
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-        .input-group input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        button {
-            background: #2563eb;
-            color: #fff;
-            font-weight: 600;
             padding: 0.75rem;
-            border-radius: 0.5rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.375rem;
+            background: #F7FAFC;
+        }
+
+        button {
             width: 100%;
-            transition: background 0.3s ease, transform 0.1s ease;
+            padding: 0.75rem;
+            background: #4299E1;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
         }
-        button:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
+
+        .links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.875rem;
         }
-        .link {
-            color: #3b82f6;
-            font-weight: 500;
+
+        .links a {
+            color: #4299E1;
             text-decoration: none;
         }
-        .link:hover {
-            text-decoration: underline;
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .info-section {
+                width: 100%;
+                height: 40%;
+                border-bottom-right-radius: 50px;
+                border-bottom-left-radius: 50px;
+                padding: 2rem;
+                text-align: center;
+            }
+
+            .info-section::after {
+                display: none;
+            }
+
+            .form-section {
+                width: 100%;
+                height: 60%;
+                border-top-left-radius: 50px;
+                border-top-right-radius: 50px;
+            }
+
+            .logo {
+                justify-content: center;
+            }
+        }
+        .cg-logo {
+            width:56px;height:56px;border-radius:12px;
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            display:flex;align-items:center;justify-content:center;
+            color:#fff;font-weight:700;font-size:18px;
+            box-shadow:0 6px 18px rgba(37,99,235,0.15);
         }
     </style>
 </head>
 <body>
-
-    <?php include_once '../src/templates/header_public.php'; ?>
-
-    <div class="form-container">
-        <h1 class="text-center mb-2">Bem-vindo ao CrewGest</h1>
-        <p class="text-center mb-8">Faça login para aceder ao sistema.</p>
-
-        <?php if (!empty($errors)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">
-                <ul>
-                    <?php foreach ($errors as $error): ?>
-                        <li><?= htmlspecialchars($error) ?></li>
-                    <?php endforeach; ?>
-                </ul>
+    <div class="container">
+        <!-- Lado Esquerdo: Informações -->
+        <div class="info-section">
+            <div class="logo">
+                <div class="cg-logo mr-4">Cr
+                <!-- Placeholder para ícone; substitua por SVG ou imagem real se disponível -->
+                </div>
+                <div>
+                    <div class="logo-text">CrewGest</div>
+                    <div class="logo-subtext">Gestão de fardas, stock e inventários</div>
+                </div>
             </div>
-        <?php endif; ?>
+            <h1>Bem-vindo ao CrewGest</h1>
+            <p>Gestão de fardas, stock e inventários de forma simples e eficiente.</p>
+            <a href="about.php" class="sobre-link">Sobre</a>
+        </div>
 
-        <form action="login.php" method="POST">
-            <div class="input-group">
-                <label for="email" class="block mb-1">Email</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" 
-                    required>
+        <!-- Lado Direito: Formulário de Login -->
+        <div class="form-section">
+            <div class="form-container">
+                <h2>Login</h2>
+
+                <?php if (!empty($errors)): ?>
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-6" role="alert">
+                        <ul>
+                            <?php foreach ($errors as $error): ?>
+                                <li><?= htmlspecialchars($error) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+
+                <form action="login.php" method="POST">
+                    <div class="input-group">
+                        <label for="email">Email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" 
+                            required>
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required>
+                    </div>
+                    <button type="submit">Entrar</button>
+                    <div class="links">
+                        <span>Não tem conta? <a href="registar.php">Registe-se</a></span>
+                        <a href="forgot_password.php">Esqueci-me da password</a>
+                    </div>
+                </form>
             </div>
-            <div class="input-group">
-                <label for="password" class="block mb-1">Password</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    required>
-            </div>
-            <button type="submit">Entrar</button>
-            <p class="text-center text-sm mt-6">
-                Não tem conta? <a href="registar.php" class="link">Registe-se aqui.</a>
-            </p>
-            <p class="text-center text-sm mt-4">
-                Esqueceu a password? <a href="forgot_password.php" class="link">Reset aqui.</a>
-            </p>
-        </form>
+        </div>
     </div>
 </body>
 </html>
