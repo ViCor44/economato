@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // actualizar na BD
     try {
-        $uStmt = $pdo->prepare("UPDATE cacifos SET colaborador_id = ?, avariado = ?, estado = ? WHERE numero = ?");
+        $uStmt = $pdo->prepare("UPDATE cacifos SET colaborador_id = ?, avariado = ? WHERE numero = ?");
         // passar NULL correcto para colaborador_id se necessário; PDO cuidará do binding
         $uStmt->execute([$colaborador_post, $avariado_post, $numero]);
 
