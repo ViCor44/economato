@@ -21,11 +21,14 @@ try {
             SELECT c.numero, c.avariado, col.nome AS colaborador, col.cartao
             FROM cacifos c
             LEFT JOIN colaboradores col ON c.colaborador_id = col.id
-            WHERE col.nome LIKE :pesq
-            OR col.cartao LIKE :pesq
+            WHERE col.nome LIKE :pesq_nome
+            OR col.cartao LIKE :pesq_cartao
             ORDER BY c.numero ASC
         ");
-        $stmt->execute(['pesq' => "%$pesquisa%"]);
+        $stmt->execute([
+            'pesq_nome'   => "%$pesquisa%",
+            'pesq_cartao' => "%$pesquisa%"
+        ]);
     } else {
         $stmt = $pdo->query("
             SELECT c.numero, c.avariado, col.nome AS colaborador, col.cartao

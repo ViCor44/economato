@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 30-Nov-2025 às 21:37
+-- Tempo de geração: 12-Jan-2026 às 13:06
 -- Versão do servidor: 10.4.32-MariaDB
 -- versão do PHP: 8.2.12
 
@@ -68,7 +68,7 @@ CREATE TABLE `colaboradores` (
 --
 
 INSERT INTO `colaboradores` (`id`, `nome`, `telefone`, `email`, `cartao`, `departamento_id`, `ativo`, `criado_em`) VALUES
-(1, 'Joaquim', '', '', '34215487551', 2, 0, '2025-11-10 23:28:31'),
+(1, 'Joaquim', '', '', '34215487551', 2, 1, '2025-11-10 23:28:31'),
 (2, 'Liliana Vaz', '967654321', 'lili@gmail.com', '0000663109', 4, 0, '2025-11-14 09:11:05');
 
 -- --------------------------------------------------------
@@ -138,11 +138,13 @@ CREATE TABLE `fardas` (
 --
 
 INSERT INTO `fardas` (`id`, `nome`, `cor_id`, `tamanho_id`, `quantidade`, `preco_unitario`, `criado_em`, `atualizado_em`, `ean`) VALUES
-(1, 'Polo', 1, 1, 28, 20.00, '2025-11-11 21:01:42', '2025-11-13 22:23:36', NULL),
-(2, 'Calção', 1, 1, 31, 15.00, '2025-11-11 21:02:23', '2025-11-25 22:00:28', NULL),
-(3, 'T-shirt', 2, 2, 50, 10.00, '2025-11-12 19:43:06', '2025-11-12 19:44:57', NULL),
+(1, 'Polo', 1, 1, 28, 20.00, '2025-11-11 21:01:42', '2025-12-05 22:52:33', '2009751398938'),
+(2, 'Calção', 1, 1, 31, 15.00, '2025-11-11 21:02:23', '2025-12-05 22:50:16', '2009750083095'),
+(3, 'T-shirt', 2, 2, 50, 10.00, '2025-11-12 19:43:06', '2025-12-22 11:48:06', '2004040864538'),
 (4, 'Calças', 5, 5, 47, 25.00, '2025-11-24 21:14:52', '2025-11-26 23:35:08', '2000188927838'),
-(5, 'Casaco', 5, 5, 98, 25.00, '2025-11-24 21:18:23', '2025-11-26 22:48:43', '2000191031812');
+(5, 'Casaco', 5, 5, 98, 25.00, '2025-11-24 21:18:23', '2025-11-26 22:48:43', '2000191031812'),
+(6, 'Calção', 1, 2, 30, 25.00, '2025-12-03 21:15:38', '2025-12-03 21:15:38', '2007965303496'),
+(7, 'Chapéu', 1, 5, 50, 10.00, '2025-12-05 23:05:07', '2025-12-05 23:05:07', '2004975903562');
 
 -- --------------------------------------------------------
 
@@ -229,12 +231,17 @@ CREATE TABLE `farda_departamentos` (
 --
 
 INSERT INTO `farda_departamentos` (`id`, `farda_id`, `departamento_id`) VALUES
-(2, 1, 2),
-(5, 2, 2),
-(4, 2, 3),
-(3, 3, 1),
+(15, 1, 2),
+(14, 2, 2),
+(13, 2, 3),
+(19, 3, 1),
 (6, 4, 4),
-(7, 5, 4);
+(7, 5, 4),
+(10, 6, 2),
+(9, 6, 3),
+(18, 7, 2),
+(17, 7, 3),
+(16, 7, 6);
 
 -- --------------------------------------------------------
 
@@ -395,7 +402,7 @@ CREATE TABLE `utilizadores` (
 --
 
 INSERT INTO `utilizadores` (`id`, `nome`, `email`, `password_hash`, `google_authenticator_secret`, `role_id`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin@gmail.com', '$2y$10$lTDNseVm5FFBBC54aXOeUer6tEosMRkJVoSS81I.PExD67LjUqtWC', NULL, 1, 1, '2025-11-10 22:39:45', '2025-11-10 22:39:45'),
+(1, 'admin', 'admin@gmail.com', '$2y$10$OGX7Vse4NYz8sAvucKul4uapvApZ/eHro.nKu5EFy87LTAdn3FcYO', NULL, 1, 1, '2025-11-10 22:39:45', '2025-12-27 22:33:16'),
 (8, 'Victor Correia', 'victor.a.correia@gmail.com', '$2y$10$OGX7Vse4NYz8sAvucKul4uapvApZ/eHro.nKu5EFy87LTAdn3FcYO', NULL, 2, 1, '2025-11-11 22:07:38', '2025-11-30 11:28:30'),
 (9, 'Elisabete Viana', 'elisabeteviana@slidesplash.com', '$2y$10$ncAMB7hcvCmtIi5HwS7sCuTEww/EjCdHogBIvCe7bVBFCEBkTGRte', 'F3WZWXAXNW4FZWE42JEOHGUIMCDLISUZ', 1, 1, '2025-11-14 09:40:03', '2025-11-14 09:41:45');
 
@@ -560,7 +567,7 @@ ALTER TABLE `departamentos`
 -- AUTO_INCREMENT de tabela `fardas`
 --
 ALTER TABLE `fardas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de tabela `farda_atribuicoes`
@@ -584,7 +591,7 @@ ALTER TABLE `farda_compras`
 -- AUTO_INCREMENT de tabela `farda_departamentos`
 --
 ALTER TABLE `farda_departamentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de tabela `farda_devolucoes`
