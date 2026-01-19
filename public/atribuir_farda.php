@@ -5,7 +5,7 @@ require_once '../src/log.php';
 
 $colaborador_id = $_GET['colaborador_id'] ?? 0;
 
-// Obter colaborador e departamento
+// 🔍 Obter colaborador e departamento
 $stmt = $pdo->prepare("
     SELECT c.id, c.nome, d.id AS departamento_id, d.nome AS departamento_nome
     FROM colaboradores c
@@ -13,15 +13,16 @@ $stmt = $pdo->prepare("
     WHERE c.id = ?
 ");
 $stmt->execute([$colaborador_id]);
-$colaborador = $stmt->fetch();
+$colaborador = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$colaborador) {
     die("Colaborador não encontrado.");
 }
 
-// Buscar fardas compatíveis (associadas ao departamento do colaborador)
+// 🔍 Buscar fardas compatíveis (com stock visível)
 $stmtFardas = $pdo->prepare("
-    SELECT DISTINCT f.id, f.nome, c.nome AS cor, t.nome AS tamanho
+    SELECT DISTINCT 
+        f.id, f.nome, c.nome AS cor, t.nome AS tamanho, f.quantidade
     FROM fardas f
     JOIN cores c ON f.cor_id = c.id
     JOIN tamanhos t ON f.tamanho_id = t.id
@@ -35,30 +36,72 @@ $fardas = $stmtFardas->fetchAll(PDO::FETCH_ASSOC);
 $errors = [];
 $success = '';
 
+/* =========================
+   PROCESSAR ATRIBUIÇÃO
+   ========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $farda_id = $_POST['farda_id'] ?? 0;
+
+    $farda_id   = (int)($_POST['farda_id'] ?? 0);
     $quantidade = (int)($_POST['quantidade'] ?? 0);
 
-    if ($farda_id && $quantidade > 0) {
+    if ($farda_id <= 0 || $quantidade <= 0) {
+        $errors[] = "Selecione uma farda e uma quantidade válida.";
+    }
+
+    if (empty($errors)) {
         try {
+            $pdo->beginTransaction();
+
+            // 🔒 Buscar stock com lock
             $stmt = $pdo->prepare("
-                INSERT INTO farda_atribuicoes (colaborador_id, farda_id, quantidade, data_atribuicao)
-                VALUES (?, ?, ?, NOW())
+                SELECT quantidade
+                FROM fardas
+                WHERE id = ?
+                FOR UPDATE
+            ");
+            $stmt->execute([$farda_id]);
+            $farda = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$farda) {
+                throw new Exception("Farda não encontrada.");
+            }
+
+            if ($farda['quantidade'] < $quantidade) {
+                throw new Exception(
+                    "Stock insuficiente. Disponível: {$farda['quantidade']}."
+                );
+            }
+
+            // 🔽 Atualizar stock
+            $stmt = $pdo->prepare("
+                UPDATE fardas
+                SET quantidade = quantidade - ?
+                WHERE id = ?
+            ");
+            $stmt->execute([$quantidade, $farda_id]);
+
+            // ➕ Criar atribuição
+            $stmt = $pdo->prepare("
+                INSERT INTO farda_atribuicoes
+                (colaborador_id, farda_id, quantidade, estado, data_atribuicao)
+                VALUES (?, ?, ?, 'atribuida', NOW())
             ");
             $stmt->execute([$colaborador_id, $farda_id, $quantidade]);
+
+            $pdo->commit();
+
             $success = "Farda atribuída com sucesso!";
 
             adicionarLog(
                 $pdo,
                 "Atribuição de farda",
-                "Colaborador ID $colaborador_id recebeu farda ID $farda_id x$quantidade"
-            );    
+                "Colaborador ID {$colaborador_id} recebeu farda ID {$farda_id} x{$quantidade}"
+            );
 
-        } catch (PDOException $e) {
-            $errors[] = "Erro ao atribuir farda: " . $e->getMessage();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $errors[] = $e->getMessage();
         }
-    } else {
-        $errors[] = "Selecione uma farda e uma quantidade válida.";
     }
 }
 ?>
@@ -70,56 +113,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
-    <?php include_once '../src/templates/header.php'; ?>
 
-    <main class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">👕 Atribuir Farda</h1>
-        <p class="text-gray-700 mb-6">
-            Atribuir farda ao colaborador <strong><?= htmlspecialchars($colaborador['nome']) ?></strong><br>
-            <span class="text-sm text-gray-500">(Departamento: <?= htmlspecialchars($colaborador['departamento_nome'] ?? '—') ?>)</span>
-        </p>
+<?php include_once '../src/templates/header.php'; ?>
 
-        <?php if ($success): ?>
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-4">
-                <?= htmlspecialchars($success) ?>
-            </div>
-        <?php endif; ?>
+<main class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">👕 Atribuir Farda</h1>
 
-        <?php if ($errors): ?>
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-4">
-                <ul class="list-disc pl-5">
-                    <?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
+    <p class="text-gray-700 mb-6">
+        Atribuir farda ao colaborador <strong><?= htmlspecialchars($colaborador['nome']) ?></strong><br>
+        <span class="text-sm text-gray-500">
+            (Departamento: <?= htmlspecialchars($colaborador['departamento_nome'] ?? '—') ?>)
+        </span>
+    </p>
 
-        <form method="POST" class="space-y-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Peça de Farda</label>
-                <select name="farda_id" class="w-full px-4 py-2 border rounded-md" required>
-                    <option value="">-- Selecione uma farda --</option>
-                    <?php foreach ($fardas as $f): ?>
-                        <option value="<?= $f['id'] ?>">
-                            <?= htmlspecialchars("{$f['nome']} ({$f['cor']} - {$f['tamanho']})") ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+    <?php if ($success): ?>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-4">
+            <?= htmlspecialchars($success) ?>
+        </div>
+    <?php endif; ?>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
-                <input type="number" name="quantidade" min="1"
-                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500" required>
-            </div>
+    <?php if ($errors): ?>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-4">
+            <ul class="list-disc pl-5">
+                <?php foreach ($errors as $e): ?>
+                    <li><?= htmlspecialchars($e) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
 
-            <div class="flex justify-end">
-                <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow">
-                    Atribuir
-                </button>                
-            </div>
-        </form>
-    </main>
-    <?php include_once '../src/templates/footer.php'; ?>
+    <form method="POST" class="space-y-6">
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Peça de Farda
+            </label>
+            <select name="farda_id" class="w-full px-4 py-2 border rounded-md" required>
+                <option value="">-- Selecione uma farda --</option>
+                <?php foreach ($fardas as $f): ?>
+                    <option value="<?= $f['id'] ?>">
+                        <?= htmlspecialchars(
+                            "{$f['nome']} ({$f['cor']} - {$f['tamanho']}) — Stock: {$f['quantidade']}"
+                        ) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Quantidade
+            </label>
+            <input type="number" name="quantidade" min="1"
+                   class="w-full px-4 py-2 border rounded-md" required>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow">
+                Atribuir
+            </button>
+        </div>
+
+    </form>
+</main>
+
+<?php include_once '../src/templates/footer.php'; ?>
+
 </body>
 </html>
