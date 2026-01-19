@@ -39,6 +39,7 @@ $stmt = $pdo->prepare("
     JOIN cores c ON f.cor_id = c.id
     JOIN tamanhos t ON f.tamanho_id = t.id
     WHERE fa.colaborador_id = ?
+      AND fa.estado = 'atribuida'
     GROUP BY f.id, f.nome, c.nome, t.nome, f.preco_unitario
     ORDER BY f.nome ASC
 ");

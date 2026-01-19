@@ -10,8 +10,8 @@ if ($colaborador_id <= 0) {
     exit;
 }
 
-// Buscar nome do colaborador
-$stmt = $pdo->prepare("SELECT nome FROM colaboradores WHERE id = ?");
+// Buscar colaborador
+$stmt = $pdo->prepare("SELECT id, nome FROM colaboradores WHERE id = ?");
 $stmt->execute([$colaborador_id]);
 $colaborador = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -22,89 +22,77 @@ if (!$colaborador) {
 $success = '';
 $errors = [];
 
-// 🔄 Processar devolução
+// 🔄 PROCESSAR DEVOLUÇÃO (pré-registo)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $atribuicao_id = (int)$_POST['atribuicao_id'];
-    $farda_id = (int)$_POST['farda_id'];
-    $quantidade_devolvida = (int)$_POST['quantidade_devolvida'];
-    $estado = $_POST['estado'] ?? '';
+    $atribuicao_id   = (int)($_POST['atribuicao_id'] ?? 0);
+    $estado_devolucao = $_POST['estado_devolucao'] ?? '';
 
-    if ($quantidade_devolvida <= 0) {
-        $errors[] = "A quantidade devolvida deve ser maior que 0.";
+    if ($atribuicao_id <= 0) {
+        $errors[] = "Atribuição inválida.";
     }
 
-    if (!in_array($estado, ['boas_condicoes', 'reciclagem'])) {
-        $errors[] = "Selecione o estado da peça devolvida.";
+    if (!in_array($estado_devolucao, ['stock', 'reciclagem'], true)) {
+        $errors[] = "Selecione o estado da farda.";
     }
 
     if (empty($errors)) {
         try {
             $pdo->beginTransaction();
 
-            // Buscar quantidade atribuída
-            $stmt = $pdo->prepare("SELECT quantidade FROM farda_atribuicoes WHERE id = ?");
-            $stmt->execute([$atribuicao_id]);
-            $atr = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$atr) {
-                throw new Exception("Atribuição não encontrada.");
-            }
-
-            if ($quantidade_devolvida > $atr['quantidade']) {
-                throw new Exception("A quantidade devolvida não pode ser superior à atribuída.");
-            }
-
-            // ➕ Registar devolução
+            // 🔄 Marcar como devolvida (rascunho)
             $stmt = $pdo->prepare("
-                INSERT INTO farda_devolucoes (atribuicao_id, colaborador_id, farda_id, quantidade, estado)
-                VALUES (?, ?, ?, ?, ?)
+                UPDATE farda_atribuicoes
+                SET
+                    estado = 'marcada_devolucao',
+                    estado_devolucao = ?,
+                    data_devolucao = NOW()
+                WHERE id = ?
+                  AND colaborador_id = ?
+                  AND estado IN ('atribuida', 'marcada_devolucao')
             ");
-            $stmt->execute([$atribuicao_id, $colaborador_id, $farda_id, $quantidade_devolvida, $estado]);
+            $stmt->execute([
+                $estado_devolucao,
+                $atribuicao_id,
+                $colaborador_id
+            ]);
 
-            // 🔄 Atualizar stock se vier em boas condições
-            if ($estado === 'boas_condicoes') {
-                $pdo->prepare("UPDATE fardas SET quantidade = quantidade + ? WHERE id = ?")
-                    ->execute([$quantidade_devolvida, $farda_id]);
-            }
-
-            // 🔄 Atualizar a atribuição
-            if ($quantidade_devolvida < $atr['quantidade']) {
-                $pdo->prepare("
-                    UPDATE farda_atribuicoes 
-                    SET quantidade = quantidade - ? 
-                    WHERE id = ?
-                ")->execute([$quantidade_devolvida, $atribuicao_id]);
-            } else {
-                $pdo->prepare("DELETE FROM farda_atribuicoes WHERE id = ?")
-                    ->execute([$atribuicao_id]);
+            if ($stmt->rowCount() === 0) {
+                throw new Exception("Não foi possível atualizar a atribuição.");
             }
 
             $pdo->commit();
-            $success = "Devolução registada com sucesso!";
+            $success = "Devolução registada. Gere o termo para concluir.";
 
             adicionarLog(
                 $pdo,
-                "Devolução de farda",
-                "Colaborador ID $colaborador_id devolveu farda ID $farda_id | Quantidade: $quantidade_devolvida | Estado: $estado"
+                "Pré-devolução de farda",
+                "Colaborador ID {$colaborador_id} marcou devolução (estado: {$estado_devolucao})"
             );
 
         } catch (Exception $e) {
             $pdo->rollBack();
-            $errors[] = "Erro ao processar devolução: " . $e->getMessage();
+            $errors[] = "Erro ao registar devolução: " . $e->getMessage();
         }
     }
 }
 
-// 🔍 Buscar peças atribuídas
+// 🔍 Buscar fardas atribuídas (ainda abertas)
 $stmt = $pdo->prepare("
-    SELECT fa.id AS atribuicao_id, f.id AS farda_id, f.nome, 
-           c.nome AS cor, t.nome AS tamanho, fa.quantidade
+    SELECT
+        fa.id AS atribuicao_id,
+        f.nome,
+        c.nome AS cor,
+        t.nome AS tamanho,
+        fa.quantidade,
+        fa.estado,
+        fa.estado_devolucao
     FROM farda_atribuicoes fa
     JOIN fardas f ON fa.farda_id = f.id
     JOIN cores c ON f.cor_id = c.id
     JOIN tamanhos t ON f.tamanho_id = t.id
     WHERE fa.colaborador_id = ?
+      AND fa.estado IN ('atribuida', 'marcada_devolucao')
     ORDER BY f.nome ASC
 ");
 $stmt->execute([$colaborador_id]);
@@ -123,7 +111,7 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <main class="max-w-4xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
 
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">♻️ Devolução de Farda</h1>
+    <h1 class="text-3xl font-bold mb-2 text-gray-800">♻️ Devolução de Farda</h1>
     <p class="text-gray-600 mb-6">
         Colaborador: <strong><?= htmlspecialchars($colaborador['nome']) ?></strong>
     </p>
@@ -145,8 +133,9 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php endif; ?>
 
     <?php if (empty($fardas_atribuidas)): ?>
-        <p class="text-gray-600">Este colaborador não tem fardas atribuídas.</p>
-
+        <p class="text-gray-600">
+            Este colaborador não tem fardas atribuídas pendentes.
+        </p>
     <?php else: ?>
 
         <div class="space-y-4">
@@ -158,19 +147,24 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?= htmlspecialchars($f['nome']) ?>
                             (<?= htmlspecialchars($f['cor']) ?>, <?= htmlspecialchars($f['tamanho']) ?>)
                         </p>
-                        <p class="text-gray-600 text-sm">
-                            Quantidade atribuída: <?= $f['quantidade'] ?>
+                        <p class="text-sm text-gray-600">
+                            Quantidade: <?= $f['quantidade'] ?>
                         </p>
+
+                        <?php if ($f['estado'] === 'marcada_devolucao'): ?>
+                            <p class="text-sm mt-1 text-green-600 font-medium">
+                                ✔ Marcada para devolução
+                                (<?= $f['estado_devolucao'] === 'stock' ? 'volta ao stock' : 'reciclagem' ?>)
+                            </p>
+                        <?php endif; ?>
                     </div>
 
                     <button
-                        onclick="abrirDevolucao(
+                        onclick="abrirModal(
                             <?= $f['atribuicao_id'] ?>,
-                            <?= $f['farda_id'] ?>,
                             '<?= htmlspecialchars($f['nome']) ?>',
                             '<?= htmlspecialchars($f['cor']) ?>',
-                            '<?= htmlspecialchars($f['tamanho']) ?>',
-                            <?= $f['quantidade'] ?>
+                            '<?= htmlspecialchars($f['tamanho']) ?>'
                         )"
                         class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                         ♻️ Devolver
@@ -182,65 +176,83 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <?php endif; ?>
 
-</main>
+    <div class="mt-8 border-t pt-6 text-right">
 
+        <?php if (!empty($fardas_atribuidas)): ?>
+
+            <a href="gerar_termo_devolucao.php?colaborador_id=<?= $colaborador_id ?>"           
+                style="background-color:#16a34a; color:#fff; font-weight:600;
+                    display:inline-flex; align-items:center; gap:8px; padding:8px 16px;
+                    border-radius:8px; text-decoration:none;
+                    box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                onmouseover="this.style.backgroundColor='#15803d';"
+                onmouseout="this.style.backgroundColor='#16a34a';"
+                target="_blank">
+                📄 <span>Gerar Termo de Devolução</span>
+            </a>
+
+        <?php else: ?>
+
+            <span
+                style="background-color:#e5e7eb; color:#6b7280; font-weight:600;
+                    display:inline-flex; align-items:center; gap:8px; padding:8px 16px;
+                    border-radius:8px;
+                    box-shadow:0 2px 4px rgba(0,0,0,0.1);
+                    cursor:not-allowed;"
+                title="Não existem fardas atribuídas para gerar termo">
+                📄 <span>Gerar Termo de Devolução</span>
+            </span>
+
+            <p class="text-sm text-gray-500 mt-2">
+                Não existem fardas atribuídas a este colaborador.
+            </p>
+
+        <?php endif; ?>
+    </div>
+</main>
 
 <!-- ==================== MODAL ==================== -->
 <div id="modalDevolucao" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
     <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
 
-        <h2 id="tituloDevolucao" class="text-xl font-bold mb-4"></h2>
+        <h2 id="tituloModal" class="text-xl font-bold mb-4"></h2>
 
         <form method="POST">
-
             <input type="hidden" name="atribuicao_id" id="atribuicao_id">
-            <input type="hidden" name="farda_id" id="farda_id">
 
-            <label class="block mb-2 font-medium">Quantidade devolvida</label>
-            <input type="number" name="quantidade_devolvida" id="quantidade_devolvida"
-                   class="w-full border rounded-md px-3 py-2 mb-4" required min="1">
-
-            <label class="block mb-2 font-medium">Estado da peça</label>
-            <select name="estado" id="estado"
-                    class="w-full border rounded-md px-3 py-2 mb-4" required>
+            <label class="block mb-2 font-medium">Estado da farda devolvida</label>
+            <select name="estado_devolucao" class="w-full border rounded-md px-3 py-2 mb-4" required>
                 <option value="">Selecione...</option>
-                <option value="boas_condicoes">Boas condições (volta ao stock)</option>
+                <option value="stock">Boas condições (volta ao stock)</option>
                 <option value="reciclagem">Reciclagem (não volta ao stock)</option>
             </select>
 
             <div class="flex justify-end gap-3 mt-4">
-                <button type="button" onclick="fecharDevolucao()" class="px-4 py-2 bg-gray-200 rounded-md">
+                <button type="button" onclick="fecharModal()" class="px-4 py-2 bg-gray-200 rounded-md mr-4">
                     Cancelar
                 </button>
-                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md">
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md">
                     Confirmar
                 </button>
             </div>
-
         </form>
+
     </div>
 </div>
 
-
 <script>
-function abrirDevolucao(atribuicaoId, fardaId, nome, cor, tamanho, quantidade) {
-    document.getElementById("modalDevolucao").classList.remove("hidden");
-
-    document.getElementById("atribuicao_id").value = atribuicaoId;
-    document.getElementById("farda_id").value = fardaId;
-
-    const q = document.getElementById("quantidade_devolvida");
-    q.max = quantidade;
-    q.value = 1;
-
-    document.getElementById("tituloDevolucao").innerText =
+function abrirModal(atribuicaoId, nome, cor, tamanho) {
+    document.getElementById('modalDevolucao').classList.remove('hidden');
+    document.getElementById('atribuicao_id').value = atribuicaoId;
+    document.getElementById('tituloModal').innerText =
         `Devolver: ${nome} (${cor}, ${tamanho})`;
 }
 
-function fecharDevolucao() {
-    document.getElementById("modalDevolucao").classList.add("hidden");
+function fecharModal() {
+    document.getElementById('modalDevolucao').classList.add('hidden');
 }
 </script>
+
 <?php include_once '../src/templates/footer.php'; ?>
 
 </body>

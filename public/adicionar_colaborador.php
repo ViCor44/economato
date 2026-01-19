@@ -127,7 +127,7 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                 </div>                
                 <div>
                     <label class="block text-gray-700 font-medium mb-1">Número do Cartão</label>
-                    <input type="text" name="cartao" class="w-full px-4 py-2 border rounded-md" placeholder="Aproxime ou digite o número do cartão" required>
+                    <input type="text" name="cartao" class="w-full px-4 py-2 border rounded-md" placeholder="Aproxime ou digite o número do cartão">
                 </div>
             </div>            
 
