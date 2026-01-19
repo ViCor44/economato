@@ -8,38 +8,76 @@ $success = '';
 // Processar formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
+    $numero_funcionario = trim($_POST['numero_funcionario'] ?? '');
     $cartao = trim($_POST['cartao'] ?? '');
     $telefone = trim($_POST['telefone'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $departamento_id = $_POST['departamento_id'] ?? null;
     $ativo = isset($_POST['ativo']) ? 1 : 0;
 
+    $foto_nome = null;
+
     // Validação
     if (empty($nome)) $errors[] = "O nome é obrigatório.";
+    if (empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório.";
     if (empty($cartao)) $errors[] = "O número do cartão é obrigatório.";
-    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "O email inserido não é válido.";
+    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "O email inserido não é válido.";
+    }
     if (empty($departamento_id)) $errors[] = "Selecione um departamento.";
 
-    // Verificar duplicado de cartão
+    // Verificar duplicados
     if (empty($errors)) {
-        $stmt = $pdo->prepare("SELECT id FROM colaboradores WHERE cartao = ?");
-        $stmt->execute([$cartao]);
+        $stmt = $pdo->prepare("
+            SELECT id FROM colaboradores 
+            WHERE cartao = ? OR numero_funcionario = ?
+        ");
+        $stmt->execute([$cartao, $numero_funcionario]);
+
         if ($stmt->fetch()) {
-            $errors[] = "O cartão já está associado a outro colaborador.";
+            $errors[] = "O cartão ou número de funcionário já existe.";
         }
     }
 
-    // Inserir novo colaborador
+    // Upload da foto
+    if (!empty($_FILES['foto']['name'])) {
+        $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+        $permitidas = ['jpg', 'jpeg', 'png', 'webp'];
+
+        if (!in_array($ext, $permitidas)) {
+            $errors[] = "Formato de imagem inválido (jpg, png, webp).";
+        } else {
+            $foto_nome = uniqid('colab_') . '.' . $ext;
+            $destino = __DIR__ . '/../public/uploads/colaboradores/' . $foto_nome;
+
+            if (!move_uploaded_file($_FILES['foto']['tmp_name'], $destino)) {
+                $errors[] = "Erro ao fazer upload da foto.";
+            }
+        }
+    }
+
+    // Inserir colaborador
     if (empty($errors)) {
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO colaboradores (nome, cartao, telefone, email, departamento_id, ativo)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO colaboradores
+                (nome, numero_funcionario, cartao, telefone, email, departamento_id, ativo, foto)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->execute([$nome, $cartao, $telefone, $email, $departamento_id, $ativo]);
+            $stmt->execute([
+                $nome,
+                $numero_funcionario,
+                $cartao,
+                $telefone,
+                $email,
+                $departamento_id,
+                $ativo,
+                $foto_nome
+            ]);
+
             $success = "✅ Colaborador adicionado com sucesso!";
         } catch (PDOException $e) {
-            $errors[] = "Erro ao adicionar colaborador: " . $e->getMessage();
+            $errors[] = "Erro ao adicionar colaborador.";
         }
     }
 }
@@ -71,18 +109,27 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             </div>
         <?php endif; ?>
 
-        <form method="POST" class="space-y-6">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+
             <!-- Nome -->
             <div>
                 <label class="block text-gray-700 font-medium mb-1">Nome Completo</label>
                 <input type="text" name="nome" class="w-full px-4 py-2 border rounded-md" required>
             </div>
 
-            <!-- Cartão -->
-            <div>
-                <label class="block text-gray-700 font-medium mb-1">Número do Cartão</label>
-                <input type="text" name="cartao" class="w-full px-4 py-2 border rounded-md" placeholder="Aproxime ou digite o número do cartão" required>
-            </div>
+            <!-- Número de Funcionário e Cartão -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">Número de Funcionário</label>
+                    <input type="text" name="numero_funcionario"
+                        class="w-full px-4 py-2 border rounded-md"
+                        required>
+                </div>                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-1">Número do Cartão</label>
+                    <input type="text" name="cartao" class="w-full px-4 py-2 border rounded-md" placeholder="Aproxime ou digite o número do cartão" required>
+                </div>
+            </div>            
 
             <!-- Telefone e Email -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -94,6 +141,15 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                     <label class="block text-gray-700 font-medium mb-1">Email</label>
                     <input type="email" name="email" class="w-full px-4 py-2 border rounded-md" placeholder="exemplo@email.com">
                 </div>
+            </div>
+
+            <!-- Foto -->
+             <div>
+                <label class="block text-gray-700 font-medium mb-1">Foto do Colaborador</label>
+                <input type="file" name="foto"
+                    accept="image/*"
+                    class="w-full px-4 py-2 border rounded-md bg-white">
+                <p class="text-sm text-gray-500 mt-1">Opcional (JPG, PNG, WEBP)</p>
             </div>
 
             <!-- Departamento -->

@@ -45,16 +45,41 @@ try {
 <?php include_once '../src/templates/header.php'; ?>
 <main class="max-w-5xl mx-auto bg-white rounded-2xl shadow-md p-4 md:p-8 mt-8 mb-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
-            👤 <?= htmlspecialchars($colaborador['nome']) ?>
-        </h1>
+        <div class="flex items-center gap-4">
+            <?php if (!empty($colaborador['foto'])): ?>
+                <img src="<?= BASE_URL ?>/public/uploads/colaboradores/<?= htmlspecialchars($colaborador['foto']) ?>"
+                    alt="Foto do colaborador"
+                    style="
+                        width:160px;
+                        height:160px;
+                        object-fit:cover;
+                        border-radius:50%;
+                        border:1px solid #e5e7eb;
+                        box-shadow:0 1px 3px rgba(0,0,0,0.1);
+                        flex-shrink:0;
+                    ">
+            <?php else: ?>
+                <div class="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-2xl">
+                    👤
+                </div>
+            <?php endif; ?>
+
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
+                    <?= htmlspecialchars($colaborador['nome']) ?>
+                </h1>
+                <p class="text-sm text-gray-600">
+                    Nº Funcionário: <strong><?= htmlspecialchars($colaborador['numero_funcionario']) ?></strong>
+                </p>
+            </div>
+        </div>
         <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
     </div>
+
     <!-- 🧾 Dados principais -->
     <section class="mb-8">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Informações Pessoais</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <p><strong>ID:</strong> <?= $colaborador['id'] ?></p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">            
             <p><strong>Cartão:</strong> <?= htmlspecialchars($colaborador['cartao']) ?></p>
             <p><strong>Telefone:</strong> <?= htmlspecialchars($colaborador['telefone'] ?: '—') ?></p>
             <p><strong>Email:</strong> <?= htmlspecialchars($colaborador['email'] ?: '—') ?></p>
@@ -161,7 +186,7 @@ try {
     onmouseover="this.style.backgroundColor='#15803d';"
     onmouseout="this.style.backgroundColor='#16a34a';"
     target="_blank">
-        📄 <span>Gerar Termo de Farda</span>
+        📄 <span>Gerar Termo de Entrega</span>
     </a>
    
     <a href="gerar_termo_entrega.php?colaborador_id=<?= $colaborador['id'] ?>" class="ml-4"
@@ -172,7 +197,7 @@ try {
     onmouseover="this.style.backgroundColor='#15803d';"
     onmouseout="this.style.backgroundColor='#16a34a';"
     target="_blank">
-        📄 <span>Gerar Termo de Entrega</span>
+        📄 <span>Gerar Termo de Devolução</span>
     </a>
 </div>
         </div>

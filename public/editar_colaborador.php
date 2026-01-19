@@ -21,37 +21,86 @@ if (!$colaborador) {
     exit;
 }
 
-// Processar atualização
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
+    $numero_funcionario = trim($_POST['numero_funcionario'] ?? '');
     $cartao = trim($_POST['cartao'] ?? '');
     $telefone = trim($_POST['telefone'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $departamento_id = $_POST['departamento_id'] ?? null;
     $ativo = isset($_POST['ativo']) ? 1 : 0;
 
-    if (empty($nome)) $errors[] = "O nome é obrigatório.";
-    if (empty($cartao)) $errors[] = "O número do cartão é obrigatório.";
-    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "O email inserido não é válido.";
+    $foto_nome = $colaborador['foto']; // manter foto atual
 
-    // Evitar cartões duplicados
-    $stmt = $pdo->prepare("SELECT id FROM colaboradores WHERE cartao = ? AND id <> ?");
-    $stmt->execute([$cartao, $id]);
-    if ($stmt->fetch()) {
-        $errors[] = "O cartão já está associado a outro colaborador.";
+    // Validações
+    if (empty($nome)) $errors[] = "O nome é obrigatório.";
+    if (empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório.";
+    if (empty($cartao)) $errors[] = "O número do cartão é obrigatório.";
+    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "O email inserido não é válido.";
     }
 
+    // Duplicados (cartão ou nº funcionário)
+    $stmt = $pdo->prepare("
+        SELECT id FROM colaboradores
+        WHERE (cartao = ? OR numero_funcionario = ?) AND id <> ?
+    ");
+    $stmt->execute([$cartao, $numero_funcionario, $id]);
+
+    if ($stmt->fetch()) {
+        $errors[] = "O cartão ou número de funcionário já pertence a outro colaborador.";
+    }
+
+    // Upload de nova foto (se existir)
+    if (!empty($_FILES['foto']['name'])) {
+        $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+        $permitidas = ['jpg', 'jpeg', 'png', 'webp'];
+
+        if (!in_array($ext, $permitidas)) {
+            $errors[] = "Formato de imagem inválido.";
+        } else {
+            $foto_nome = uniqid('colab_') . '.' . $ext;
+            $destino = __DIR__ . '/../public/uploads/colaboradores/' . $foto_nome;
+
+            if (!move_uploaded_file($_FILES['foto']['tmp_name'], $destino)) {
+                $errors[] = "Erro ao fazer upload da foto.";
+            }
+        }
+    }
+
+    // Atualizar colaborador
     if (empty($errors)) {
         try {
             $stmt = $pdo->prepare("
-                UPDATE colaboradores 
-                SET nome = ?, cartao = ?, telefone = ?, email = ?, departamento_id = ?, ativo = ? 
+                UPDATE colaboradores SET
+                    nome = ?,
+                    numero_funcionario = ?,
+                    cartao = ?,
+                    telefone = ?,
+                    email = ?,
+                    departamento_id = ?,
+                    ativo = ?,
+                    foto = ?
                 WHERE id = ?
             ");
-            $stmt->execute([$nome, $cartao, $telefone, $email, $departamento_id, $ativo, $id]);
+
+            $stmt->execute([
+                $nome,
+                $numero_funcionario,
+                $cartao,
+                $telefone,
+                $email,
+                $departamento_id,
+                $ativo,
+                $foto_nome,
+                $id
+            ]);
+
             $success = "✅ Dados do colaborador atualizados com sucesso!";
+            // refrescar dados
+            $colaborador = array_merge($colaborador, $_POST, ['foto' => $foto_nome]);
         } catch (PDOException $e) {
-            $errors[] = "Erro ao atualizar colaborador: " . $e->getMessage();
+            $errors[] = "Erro ao atualizar colaborador.";
         }
     }
 }
@@ -82,10 +131,20 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             </div>
         <?php endif; ?>
 
-        <form method="POST" class="space-y-6">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+
             <div>
                 <label class="block text-gray-700 font-medium mb-1">Nome Completo</label>
                 <input type="text" name="nome" value="<?= htmlspecialchars($colaborador['nome']) ?>" class="w-full px-4 py-2 border rounded-md" required>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Número de Funcionário</label>
+                <input type="text"
+                    name="numero_funcionario"
+                    value="<?= htmlspecialchars($colaborador['numero_funcionario']) ?>"
+                    class="w-full px-4 py-2 border rounded-md"
+                    required>
             </div>
 
             <div>
@@ -102,6 +161,26 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                     <label class="block text-gray-700 font-medium mb-1">Email</label>
                     <input type="email" name="email" value="<?= htmlspecialchars($colaborador['email']) ?>" class="w-full px-4 py-2 border rounded-md">
                 </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Foto do Colaborador</label>
+
+                <?php if (!empty($colaborador['foto'])): ?>
+                    <img src="<?= BASE_URL ?>/public/uploads/colaboradores/<?= htmlspecialchars($colaborador['foto']) ?>"
+                        class="h-24 w-24 object-cover rounded-full mb-3 border">
+                <?php else: ?>
+                    <p class="text-sm text-gray-500 mb-2">Sem foto associada</p>
+                <?php endif; ?>
+
+                <input type="file"
+                    name="foto"
+                    accept="image/*"
+                    class="w-full px-4 py-2 border rounded-md bg-white">
+
+                <p class="text-sm text-gray-500 mt-1">
+                    Enviar nova foto apenas se quiser substituir a atual
+                </p>
             </div>
 
             <div>

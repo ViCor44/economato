@@ -11,8 +11,9 @@ try {
             SELECT c.*, d.nome AS departamento_nome
             FROM colaboradores c
             LEFT JOIN departamentos d ON c.departamento_id = d.id
-            WHERE c.nome   LIKE :pesq_nome
-               OR c.cartao LIKE :pesq_cartao
+            WHERE c.nome LIKE :pesq_nome
+                OR c.cartao LIKE :pesq_cartao
+                OR c.numero_funcionario LIKE :pesq_num
             ORDER BY c.nome ASC
         ";
         $stmt = $pdo->prepare($sql);
@@ -21,6 +22,7 @@ try {
         $stmt->execute([
             ':pesq_nome'   => $like,
             ':pesq_cartao' => $like,
+            ':pesq_num'    => $like,
         ]);
     } else {
         $stmt = $pdo->query("
@@ -91,7 +93,7 @@ try {
         <table class="min-w-full text-sm text-gray-700">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="text-left px-6 py-3 border-b">Nome</th>
+                    <th class="text-left px-6 py-3 border-b">Colaborador</th>
                     <th class="text-left px-6 py-3 border-b">Cartão</th>
                     <th class="text-left px-6 py-3 border-b">Telefone</th>
                     <th class="text-left px-6 py-3 border-b">Email</th>
@@ -111,10 +113,36 @@ try {
                     <?php foreach ($colaboradores as $c): ?>
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-6 py-3 border-b">
-                                <a href="detalhes_colaborador.php?id=<?= $c['id'] ?>" 
-                                   class="text-blue-600 hover:underline font-medium">
-                                    <?= htmlspecialchars($c['nome']) ?>
-                                </a>
+                                <div class="flex items-center gap-4">
+                                    <?php if (!empty($c['foto'])): ?>
+                                        <img src="<?= BASE_URL ?>/public/uploads/colaboradores/<?= htmlspecialchars($c['foto']) ?>"
+                                            alt="Foto"
+                                            style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;">
+                                    <?php else: ?>
+                                        <div style="
+                                            width:64px;
+                                            height:64px;
+                                            border-radius:50%;
+                                            background:#e5e7eb;
+                                            display:flex;
+                                            align-items:center;
+                                            justify-content:center;
+                                            color:#6b7280;
+                                            font-size:20px;">
+                                            👤
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <div>
+                                        <a href="detalhes_colaborador.php?id=<?= $c['id'] ?>"
+                                        class="text-blue-600 hover:underline font-medium block">
+                                            <?= htmlspecialchars($c['nome']) ?>
+                                        </a>
+                                        <span class="text-xs text-gray-500">
+                                            Nº <?= htmlspecialchars($c['numero_funcionario']) ?>
+                                        </span>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-6 py-3 border-b"><?= htmlspecialchars($c['cartao'] ?: '—') ?></td>
                             <td class="px-6 py-3 border-b"><?= htmlspecialchars($c['telefone'] ?: '—') ?></td>
