@@ -154,6 +154,24 @@ try {
     <!-- 🔒 CACIFOS -->
     <section class="mb-8">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">🔒 Cacifos Atribuídos</h2>
+        
+        <div class="flex flex-wrap gap-3 mb-4">
+
+            <!-- ➕ Atribuir cacifo -->
+            <a href="list_lockers.php"
+            class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
+                    bg-green-100 text-green-700 hover:bg-green-200 transition mr-4">
+                ➕ <span>Atribuir</span>
+            </a>
+
+            <!-- 🔁 Devolver cacifo -->
+            <a href="list_lockers.php?pesquisa=<?= htmlspecialchars($colaborador['nome']) ?>"
+            class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
+                    bg-red-100 text-red-700 hover:bg-red-200 transition">
+                🔁 <span>Devolver</span>
+            </a>
+
+        </div>
 
         <?php if ($cacifos): ?>
             <table class="min-w-full border border-gray-200 text-sm">
@@ -230,6 +248,66 @@ try {
     <!-- 🧥 FARDAS -->
     <section class="mt-8">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">🧥 Fardas Atribuídas</h2>
+        
+        <div class="flex flex-wrap gap-3 mb-4">
+
+            <!-- ➕ Atribuir farda -->
+            <a href="atribuir_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+            style="background-color:#16a34a;color:#fff;font-weight:600;
+                    display:flex;align-items:center;gap:8px;
+                    padding:8px 16px;border-radius:8px;text-decoration:none;
+                    box-shadow:0 2px 4px rgba(0,0,0,0.1);"  class="mr-4"
+            onmouseover="this.style.backgroundColor='#15803d';"
+            onmouseout="this.style.backgroundColor='#16a34a';">
+                ➕ <span>Atribuir</span>
+            </a>
+
+            <!-- 🔁 Devolver farda -->
+            <a href="devolucao_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+            style="background-color:#dc2626;color:#fff;font-weight:600;
+                    display:flex;align-items:center;gap:8px;
+                    padding:8px 16px;border-radius:8px;text-decoration:none;
+                    box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
+            onmouseover="this.style.backgroundColor='#b91c1c';"
+            onmouseout="this.style.backgroundColor='#dc2626';">
+                🔁 <span>Devolver</span>
+            </a>
+
+            <!-- 🟣 Emprestar -->
+            <a href="emprestar_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+            style="background-color:#7c3aed;color:#fff;font-weight:600;
+                    display:flex;align-items:center;gap:8px;
+                    padding:8px 16px;border-radius:8px;text-decoration:none;
+                    box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
+            onmouseover="this.style.backgroundColor='#6d28d9';"
+            onmouseout="this.style.backgroundColor='#7c3aed';">
+                🧥 <span>Emprestar</span>
+            </a>
+
+            <!-- ↩️ Devolver empréstimo -->
+            <a href="devolver_emprestimo.php?colaborador_id=<?= $colaborador['id'] ?>"
+            style="background-color:#ea580c;color:#fff;font-weight:600;
+                    display:flex;align-items:center;gap:8px;
+                    padding:8px 16px;border-radius:8px;text-decoration:none;
+                    box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
+            onmouseover="this.style.backgroundColor='#c2410c';"
+            onmouseout="this.style.backgroundColor='#ea580c';">
+                ↩️ <span>Devolver Empréstimo</span>
+            </a>
+
+            <!-- 📄 Termo de entrega -->
+            <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+            target="_blank"
+            style="background-color:#2563eb;color:#fff;font-weight:600;
+                    display:flex;align-items:center;gap:8px;
+                    padding:8px 16px;border-radius:8px;text-decoration:none;
+                    box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
+            onmouseover="this.style.backgroundColor='#1d4ed8';"
+            onmouseout="this.style.backgroundColor='#2563eb';">
+                📄 <span>Gerar Termo</span>
+            </a>
+
+        </div>
 
         <?php
         $stmt = $pdo->prepare("
