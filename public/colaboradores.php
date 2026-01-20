@@ -3,6 +3,8 @@ require_once '../src/auth_guard.php';
 require_once '../config/db.php';
 
 $pesquisa = trim($_GET['pesquisa'] ?? '');
+$mostrar_inativos = isset($_GET['mostrar_inativos']) && $_GET['mostrar_inativos'] == '1';
+
 $colaboradores = [];
 
 try {
@@ -27,14 +29,21 @@ try {
 
     $params = [];
 
+    /* 🔴 FILTRO ATIVOS / INATIVOS (FALTAVA ISTO) */
+    if (!$mostrar_inativos) {
+        $sql .= " AND c.ativo = 1 ";
+    }
+
+
+    // 🔍 Pesquisa
     if ($pesquisa !== '') {
 
         if (ctype_digit($pesquisa)) {
-            // 🔢 Pesquisa EXATA por número de funcionário
+            // 🔢 Número de funcionário → EXATO
             $sql .= " AND c.numero_funcionario = ? ";
             $params[] = (int)$pesquisa;
         } else {
-            // 🔎 Pesquisa textual
+            // 🔎 Texto
             $sql .= " AND (
                 c.nome LIKE ?
                 OR c.cartao LIKE ?
@@ -45,6 +54,11 @@ try {
             $params[] = $like;
             $params[] = $like;
         }
+    }
+
+    // ✅ Por defeito: apenas ativos
+    if (!$mostrar_inativos) {
+        $sql .= " AND c.ativo = 1 ";
     }
 
     $sql .= "
@@ -82,16 +96,29 @@ try {
         </a>
     </div>
 
-    <!-- 🔍 Pesquisa -->
-    <form method="GET" class="mb-6 flex items-center gap-2">
-        <input type="text" name="pesquisa"
-               placeholder="🔍 Nome, cartão ou nº funcionário"
-               value="<?= htmlspecialchars($pesquisa) ?>"
-               class="flex-1 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500">
-        <button type="submit"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md">
-            Pesquisar
-        </button>
+    <!-- 🔍 Pesquisa + filtro -->
+    <form method="GET" class="mb-6 space-y-3">
+
+        <input type="hidden" name="mostrar_inativos" value="0">
+
+        <div class="flex items-center gap-2">
+            <input type="text" name="pesquisa"
+                value="<?= htmlspecialchars($pesquisa) ?>"
+                placeholder="🔍 Nome, cartão ou nº funcionário"
+                class="flex-1 px-4 py-2 border rounded-md">
+
+            <button type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md">
+                Pesquisar
+            </button>
+        </div>
+
+        <label class="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" name="mostrar_inativos" value="1"
+                <?= $mostrar_inativos ? 'checked' : '' ?>>
+            Mostrar colaboradores inativos
+        </label>
+
     </form>
 
     <!-- 📋 Tabela -->
@@ -123,7 +150,7 @@ try {
                 ?>
                 <tr class="<?= $temDivida ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50' ?>">
 
-                    <!-- Colaborador -->
+                    <!-- 👤 Colaborador -->
                     <td class="px-6 py-3 border-b">
                         <div class="flex items-center gap-4">
                             <?php if (!empty($c['foto'])): ?>
@@ -135,7 +162,6 @@ try {
                                             color:#6b7280;flex-shrink:0;">
                                     👤
                                 </div>
-
                             <?php endif; ?>
 
                             <div>
@@ -166,7 +192,7 @@ try {
                     <td class="px-6 py-3 border-b text-center">
                         <?= $c['ativo']
                             ? '<span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">Ativo</span>'
-                            : '<span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">Inativo</span>' ?>
+                            : '<span class="px-3 py-1 rounded-full bg-gray-200 text-gray-600 text-xs font-semibold">Inativo</span>' ?>
                     </td>
 
                     <td class="px-6 py-3 border-b text-right">
