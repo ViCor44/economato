@@ -119,6 +119,13 @@ try {
         ")->execute(array_merge([$termo_id], $ids));
     }
 
+    // 🔒 Inativar colaborador
+    $pdo->prepare("
+        UPDATE colaboradores
+        SET ativo = 0
+        WHERE id = ?
+    ")->execute([$colaborador_id]);
+
     $pdo->commit();
 
 } catch (Exception $e) {

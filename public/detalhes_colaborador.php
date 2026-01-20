@@ -69,6 +69,8 @@ try {
     $stmt->execute([$colaborador_id]);
     $fardas_em_divida = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $colaboradorInativo = !$colaborador['ativo'];
+
 } catch (PDOException $e) {
     die("Erro ao carregar detalhes do colaborador: " . $e->getMessage());
 }
@@ -157,19 +159,38 @@ try {
         
         <div class="flex flex-wrap gap-3 mb-4">
 
-            <!-- ➕ Atribuir cacifo -->
+        <?php if ($colaboradorInativo): ?>
+
+            <span class="px-4 py-2 rounded-lg text-sm font-semibold
+                        bg-gray-100 text-gray-400 cursor-not-allowed 
+                        ">
+                ➕ Atribuir
+            </span>
+
+            <span class="px-4 py-2 rounded-lg text-sm font-semibold
+                        bg-gray-100 text-gray-400 cursor-not-allowed">
+                🔁 Devolver
+            </span>
+
+            <span class="text-sm text-red-600 ml-2">
+                ⚠ Colaborador inativo
+            </span>
+
+        <?php else: ?>
+
             <a href="list_lockers.php"
             class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
-                    bg-green-100 text-green-700 hover:bg-green-200 transition mr-4">
+                    bg-green-100 text-green-700 hover:bg-green-200 transition">
                 ➕ <span>Atribuir</span>
             </a>
 
-            <!-- 🔁 Devolver cacifo -->
             <a href="list_lockers.php?pesquisa=<?= htmlspecialchars($colaborador['nome']) ?>"
             class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
                     bg-red-100 text-red-700 hover:bg-red-200 transition">
                 🔁 <span>Devolver</span>
             </a>
+
+        <?php endif; ?>
 
         </div>
 
@@ -251,6 +272,25 @@ try {
         
         <div class="flex flex-wrap gap-3 mb-4">
 
+        <?php if ($colaboradorInativo): ?>
+
+            <?php
+            $btnDisabled = 'px-4 py-2 rounded-lg text-sm font-semibold
+                            bg-gray-100 text-gray-400 cursor-not-allowed';
+            ?>
+
+            <span class="<?= $btnDisabled ?>">➕ Atribuir</span>
+            <span class="<?= $btnDisabled ?>">🔁 Devolver</span>
+            <span class="<?= $btnDisabled ?>">🧥 Emprestar</span>
+            <span class="<?= $btnDisabled ?>">↩️ Devolver Empréstimo</span>
+            <span class="<?= $btnDisabled ?>">📄 Gerar Termo</span>
+
+            <span class="text-sm text-red-600 ml-2">
+                ⚠ Colaborador inativo
+            </span>
+
+        <?php else: ?>
+
             <!-- ➕ Atribuir farda -->
             <a href="atribuir_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
             style="background-color:#16a34a;color:#fff;font-weight:600;
@@ -307,6 +347,7 @@ try {
                 📄 <span>Gerar Termo</span>
             </a>
 
+        <?php endif; ?>
         </div>
 
         <?php
