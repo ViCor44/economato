@@ -131,9 +131,11 @@ try {
                                      style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;">
                             <?php else: ?>
                                 <div style="width:64px;height:64px;border-radius:50%;background:#e5e7eb;
-                                            display:flex;align-items:center;justify-content:center;color:#6b7280;">
+                                            display:flex;align-items:center;justify-content:center;
+                                            color:#6b7280;flex-shrink:0;">
                                     👤
                                 </div>
+
                             <?php endif; ?>
 
                             <div>

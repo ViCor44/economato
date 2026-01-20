@@ -35,20 +35,39 @@ try {
     $cacifos = $stmtCacifos->fetchAll(PDO::FETCH_ASSOC);
 
     // 🔔 Verificar dívida de fardamento
-    $stmtDivida = $pdo->prepare("
+    $stmt = $pdo->prepare("
         SELECT 
             COUNT(*) AS total_itens,
             SUM(fa.quantidade * f.preco_unitario) AS total_divida
         FROM farda_atribuicoes fa
-        JOIN fardas f ON fa.farda_id = f.id
+        JOIN fardas f ON f.id = fa.farda_id
         WHERE fa.colaborador_id = ?
-          AND fa.estado = 'em_divida'
+        AND fa.estado = 'em_divida'
     ");
-    $stmtDivida->execute([$colaborador_id]);
-    $divida = $stmtDivida->fetch(PDO::FETCH_ASSOC);
+    $stmt->execute([$colaborador_id]);
+    $divida = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $temDivida   = ($divida['total_itens'] ?? 0) > 0;
-    $valorDivida = $divida['total_divida'] ?? 0;
+    $temDivida = ((int)$divida['total_itens'] > 0);
+    $valorDivida = (float)($divida['total_divida'] ?? 0);
+
+    $stmt = $pdo->prepare("
+        SELECT
+            fa.id,
+            f.nome,
+            c.nome AS cor,
+            t.nome AS tamanho,
+            fa.quantidade,
+            f.preco_unitario,
+            (fa.quantidade * f.preco_unitario) AS total
+        FROM farda_atribuicoes fa
+        JOIN fardas f ON f.id = fa.farda_id
+        JOIN cores c ON c.id = f.cor_id
+        JOIN tamanhos t ON t.id = f.tamanho_id
+        WHERE fa.colaborador_id = ?
+        AND fa.estado = 'em_divida'
+    ");
+    $stmt->execute([$colaborador_id]);
+    $fardas_em_divida = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     die("Erro ao carregar detalhes do colaborador: " . $e->getMessage());
@@ -161,6 +180,52 @@ try {
             <p class="text-gray-600">Nenhum cacifo atribuído.</p>
         <?php endif; ?>
     </section>
+
+    <?php if (!empty($fardas_em_divida)): ?>
+    <section class="mb-8">
+        <h2 class="text-xl font-semibold text-red-700 mb-4 flex items-center gap-2">
+            ⚠ Fardas em Dívida
+        </h2>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full border border-red-200 text-sm">
+                <thead class="bg-red-50">
+                    <tr>
+                        <th class="px-4 py-2 border-b">Peça</th>
+                        <th class="px-4 py-2 border-b">Cor</th>
+                        <th class="px-4 py-2 border-b">Tamanho</th>
+                        <th class="px-4 py-2 border-b text-center">Qtd</th>
+                        <th class="px-4 py-2 border-b text-right">Valor (€)</th>
+                        <th class="px-4 py-2 border-b text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($fardas_em_divida as $f): ?>
+                        <tr class="bg-red-50 hover:bg-red-100">
+                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['nome']) ?></td>
+                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['cor']) ?></td>
+                            <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['tamanho']) ?></td>
+                            <td class="px-4 py-2 border-b text-center"><?= $f['quantidade'] ?></td>
+                            <td class="px-4 py-2 border-b text-right font-semibold">
+                                <?= number_format($f['total'], 2, ',', '.') ?>
+                            </td>
+                            <td class="px-4 py-2 border-b text-right">
+                                <form method="POST" action="regularizar_divida.php">
+                                    <input type="hidden" name="atribuicao_id" value="<?= (int)$f['id'] ?>">
+                                    <button type="submit"
+                                        class="px-3 py-1 bg-blue-600 text-white rounded-md text-xs font-semibold hover:bg-green-700">
+                                        💶 Regularizar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <?php endif; ?>
+
 
     <!-- 🧥 FARDAS -->
     <section class="mt-8">
