@@ -788,6 +788,52 @@ try {
             $rows = array_map(function($r){ return ['ID'=>$r['id'],'Data'=>$r['data_atribuicao'],'Colaborador'=>$r['colaborador'],'Peça'=>$r['farda'],'Qtd'=>$r['quantidade']]; }, $data);
             break;
 
+        case 'colaboradores_com_dividas':
+
+            $title = "Colaboradores com Dívidas de Fardamento";
+
+            $sql = "
+                SELECT
+                    c.id AS colaborador_id,
+                    c.nome AS colaborador,
+                    c.numero_funcionario,
+                    d.nome AS departamento,
+                    SUM(fa.quantidade * f.preco_unitario) AS total_divida,
+                    COUNT(fa.id) AS itens_em_divida
+                FROM farda_atribuicoes fa
+                JOIN colaboradores c ON fa.colaborador_id = c.id
+                LEFT JOIN departamentos d ON c.departamento_id = d.id
+                JOIN fardas f ON fa.farda_id = f.id
+                WHERE fa.estado = 'em_divida'
+                GROUP BY c.id, c.nome, c.numero_funcionario, d.nome
+                ORDER BY total_divida DESC
+            ";
+
+            $stmt = $pdo->query($sql);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $columns = [
+                'ID',
+                'Colaborador',
+                'Nº Funcionário',
+                'Departamento',
+                'Itens em Dívida',
+                'Total em Dívida (€)'
+            ];
+
+            $rows = array_map(function ($r) {
+                return [
+                    'ID' => $r['colaborador_id'],
+                    'Colaborador' => $r['colaborador'],
+                    'Nº Funcionário' => $r['numero_funcionario'] ?? '',
+                    'Departamento' => $r['departamento'] ?? '—',
+                    'Itens em Dívida' => $r['itens_em_divida'],
+                    'Total em Dívida (€)' => number_format($r['total_divida'], 2, ',', '.')
+                ];
+            }, $data);
+
+            break;
+
         // ------------------- Defaults / not found -------------------
         default:
             http_response_code(400);
