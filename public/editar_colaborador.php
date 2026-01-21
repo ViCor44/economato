@@ -32,6 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $foto_nome = $colaborador['foto']; // manter foto atual
 
+    $sector = trim($_POST['sector'] ?? null);
+    if ($sector === '') {
+        $sector = null;
+    }
+
     // Validações
     if (empty($nome)) $errors[] = "O nome é obrigatório.";
     if (empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório.";
@@ -79,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     telefone = ?,
                     email = ?,
                     departamento_id = ?,
+                    sector = ?,
                     ativo = ?,
                     foto = ?
                 WHERE id = ?
@@ -91,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $telefone,
                 $email,
                 $departamento_id,
+                $sector,
                 $ativo,
                 $foto_nome,
                 $id
@@ -185,13 +192,25 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
 
             <div>
                 <label class="block text-gray-700 font-medium mb-1">Departamento</label>
-                <select name="departamento_id" class="w-full px-4 py-2 border rounded-md" required>
+                <select name="departamento_id" class="w-full px-4 py-2 border rounded-md mb-4" required>
                     <?php foreach ($departamentos as $d): ?>
                         <option value="<?= $d['id'] ?>" <?= ($d['id'] == $colaborador['departamento_id']) ? 'selected' : '' ?>>
                             <?= htmlspecialchars($d['nome']) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
+                <div id="boxSector" class="<?= (
+                    stripos($colaborador['departamento_nome'] ?? '', 'piscinas') === false
+                ) ? 'hidden' : '' ?>">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Sector (Piscinas)
+                    </label>
+                    <input type="text"
+                        name="sector"
+                        id="sector"
+                        value="<?= htmlspecialchars($colaborador['sector'] ?? '') ?>"
+                        class="w-full px-4 py-2 border rounded-md">
+                </div>
             </div>
 
             <div class="flex items-center">
@@ -208,5 +227,26 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
     </div>
 </main>
 <?php include_once '../src/templates/footer.php'; ?>
+<script>
+    const departamentoSelect = document.querySelector('select[name="departamento_id"]');
+    const boxSector = document.getElementById('boxSector');
+    const sectorInput = document.getElementById('sector');
+
+    function toggleSector() {
+        const text =
+            departamentoSelect.options[departamentoSelect.selectedIndex]?.text.toLowerCase();
+
+        if (text && text.includes('piscinas')) {
+            boxSector.classList.remove('hidden');
+        } else {
+            boxSector.classList.add('hidden');
+            sectorInput.value = '';
+        }
+    }
+
+    departamentoSelect.addEventListener('change', toggleSector);
+    toggleSector();
+</script>
+
 </body>
 </html>
