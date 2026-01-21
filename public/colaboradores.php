@@ -37,13 +37,13 @@ try {
 
     // 🔍 Pesquisa
     if ($pesquisa !== '') {
-
-        if (ctype_digit($pesquisa)) {
-            // 🔢 Número de funcionário → EXATO
+        if (ctype_digit($pesquisa) && strlen($pesquisa) <= 4) {
+            // 🔢 Nº funcionário (curto → exato)
             $sql .= " AND c.numero_funcionario = ? ";
             $params[] = (int)$pesquisa;
+
         } else {
-            // 🔎 Texto
+            // 🔎 Nome, email OU cartão (numérico ou texto)
             $sql .= " AND (
                 c.nome LIKE ?
                 OR c.cartao LIKE ?
