@@ -17,6 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $foto_nome = null;
 
+    $sector = trim($_POST['sector'] ?? null);
+    if ($sector === '') {
+        $sector = null;
+    }
+
     // Validação
     if (empty($nome)) $errors[] = "O nome é obrigatório.";
     if (empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório.";
@@ -61,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $pdo->prepare("
                 INSERT INTO colaboradores
-                (nome, numero_funcionario, cartao, telefone, email, departamento_id, ativo, foto)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (nome, numero_funcionario, cartao, telefone, email, departamento_id, sector, ativo, foto)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $nome,
@@ -71,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $telefone,
                 $email,
                 $departamento_id,
+                $sector,
                 $ativo,
                 $foto_nome
             ]);
@@ -163,6 +169,17 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                 </select>
             </div>
 
+            <!-- Sector (Piscinas) -->
+            <div id="boxSector" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Sector (Piscinas)
+                </label>
+                <input type="text"
+                    name="sector"
+                    id="sector"
+                    class="w-full px-4 py-2 border rounded-md">
+            </div>
+
             <!-- Ativo -->
             <div class="flex items-center">
                 <input type="checkbox" name="ativo" id="ativo" class="mr-2" checked>
@@ -178,5 +195,24 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
     </div>
 </main>
 <?php include_once '../src/templates/footer.php'; ?>
+<script>
+    const departamentoSelect = document.querySelector('select[name="departamento_id"]');
+    const boxSector = document.getElementById('boxSector');
+
+    function toggleSector() {
+        const selectedText =
+            departamentoSelect.options[departamentoSelect.selectedIndex]?.text.toLowerCase();
+
+        if (selectedText && selectedText.includes('piscinas')) {
+            boxSector.classList.remove('hidden');
+        } else {
+            boxSector.classList.add('hidden');
+            document.getElementById('sector').value = '';
+        }
+    }
+
+    departamentoSelect.addEventListener('change', toggleSector);
+    toggleSector(); // correr ao carregar a página
+</script>
 </body>
 </html>

@@ -142,6 +142,15 @@ try {
             <p><strong>Telefone:</strong> <?= htmlspecialchars($colaborador['telefone'] ?: '—') ?></p>
             <p><strong>Email:</strong> <?= htmlspecialchars($colaborador['email'] ?: '—') ?></p>
             <p><strong>Departamento:</strong> <?= htmlspecialchars($colaborador['departamento_nome'] ?? '—') ?></p>
+            <?php if (
+                !empty($colaborador['sector']) &&
+                stripos($colaborador['departamento_nome'], 'piscinas') !== false
+            ): ?>
+                <p>
+                    <strong>Sector:</strong>
+                    <?= htmlspecialchars($colaborador['sector']) ?>
+                </p>
+            <?php endif; ?>
             <p><strong>Status:</strong>
                 <?= $colaborador['ativo']
                     ? '<span class="text-green-600 font-medium">Ativo</span>'
