@@ -22,7 +22,12 @@ if (!$colaborador) {
 // 🔍 Buscar fardas compatíveis (com stock visível)
 $stmtFardas = $pdo->prepare("
     SELECT DISTINCT 
-        f.id, f.nome, c.nome AS cor, t.nome AS tamanho, f.quantidade
+        f.id,
+        f.ean,
+        f.nome,
+        c.nome AS cor,
+        t.nome AS tamanho,
+        f.quantidade
     FROM fardas f
     JOIN cores c ON f.cor_id = c.id
     JOIN tamanhos t ON f.tamanho_id = t.id
@@ -116,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php include_once '../src/templates/header.php'; ?>
 
-<main class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8">
+<main class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg mt-8 mb-4">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">👕 Atribuir Farda</h1>
 
     <p class="text-gray-700 mb-6">
@@ -148,14 +153,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label class="block text-sm font-medium text-gray-700 mb-1">
                 Peça de Farda
             </label>
-            <select name="farda_id" class="w-full px-4 py-2 border rounded-md" required>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    🔍 Procurar por EAN
+                </label>
+                <input type="text"
+                    id="eanSearch"
+                    placeholder="Passe o código de barras..."
+                    class="w-full px-4 py-2 border rounded-md">
+            </div>
+
+            <select name="farda_id" id="fardaSelect" class="w-full px-4 py-2 border rounded-md" required>
                 <option value="">-- Selecione uma farda --</option>
                 <?php foreach ($fardas as $f): ?>
-                    <option value="<?= $f['id'] ?>">
-                        <?= htmlspecialchars(
-                            "{$f['nome']} ({$f['cor']} - {$f['tamanho']}) — Stock: {$f['quantidade']}"
-                        ) ?>
-                    </option>
+                    <option value="<?= $f['id'] ?>"
+                        data-ean="<?= htmlspecialchars($f['ean']) ?>">
+                    <?= htmlspecialchars(
+                        "{$f['nome']} ({$f['cor']} - {$f['tamanho']}) — Stock: {$f['quantidade']}"
+                    ) ?>
+                </option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -177,6 +194,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </form>
 </main>
+<script>
+const eanInput = document.getElementById('eanSearch');
+const select   = document.getElementById('fardaSelect');
+
+eanInput.addEventListener('input', () => {
+
+    const term = eanInput.value.trim();
+
+    let found = false;
+
+    [...select.options].forEach(opt => {
+
+        if (!opt.value) return;
+
+        const ean = opt.dataset.ean;
+
+        if (ean && ean.startsWith(term)) {
+            opt.hidden = false;
+
+            if (ean === term) {
+                select.value = opt.value;
+                found = true;
+            }
+
+        } else {
+            opt.hidden = true;
+        }
+    });
+
+    if (!term) {
+        [...select.options].forEach(opt => opt.hidden = false);
+    }
+});
+</script>
 
 <?php include_once '../src/templates/footer.php'; ?>
 
