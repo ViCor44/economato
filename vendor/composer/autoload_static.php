@@ -40,6 +40,10 @@ class ComposerStaticInitf64c0f42a180f64dd5c4971478d99adf
         array (
             'FontLib\\' => 8,
         ),
+        'E' => 
+        array (
+            'Endroid\\QrCode\\' => 15,
+        ),
         'D' => 
         array (
             'Dompdf\\' => 7,
@@ -117,6 +121,10 @@ class ComposerStaticInitf64c0f42a180f64dd5c4971478d99adf
         'FontLib\\' => 
         array (
             0 => __DIR__ . '/..' . '/dompdf/php-font-lib/src/FontLib',
+        ),
+        'Endroid\\QrCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/endroid/qr-code/src',
         ),
         'Dompdf\\' => 
         array (

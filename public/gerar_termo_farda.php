@@ -8,14 +8,40 @@ use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+/* ======================================================
+   CONFIG QR / BASE URL
+====================================================== */
+
+$baseUrlValidacao = 'http://191.188.126.13/economato/public/validar_documento.php';
+
+/* ======================================================
+   GERAR CÓDIGO ÚNICO
+====================================================== */
+
+$codigoDocumento = bin2hex(random_bytes(16));
+$urlValidacao = $baseUrlValidacao . '?codigo=' . $codigoDocumento;
+
+/* ======================================================
+   FUNÇÃO GERAR QR (API externa)
+====================================================== */
+
+function gerarQrCode($texto, $path) {
+
+    $api = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($texto);
+
+    $img = file_get_contents($api);
+
+    file_put_contents($path, $img);
+}
+
+/* ======================================================
+   COLABORADOR
+====================================================== */
+
 $colaborador_id = $_GET['colaborador_id'] ?? 0;
 if ($colaborador_id <= 0) {
     die("Colaborador inválido.");
 }
-
-/* ======================================================
-   BUSCAR COLABORADOR
-====================================================== */
 
 $stmt = $pdo->prepare("
     SELECT c.id, c.nome, c.email, d.nome AS departamento
@@ -31,7 +57,7 @@ if (!$colaborador) {
 }
 
 /* ======================================================
-   BUSCAR FARDAS
+   FARDAS
 ====================================================== */
 
 $stmt = $pdo->prepare("
@@ -61,11 +87,26 @@ if (!$fardas_atribuidas) {
 $data_atribuicao = $fardas_atribuidas[0]['data_atribuicao'];
 
 /* ======================================================
+   GERAR QR
+====================================================== */
+
+$qrPath = __DIR__ . '/../storage/qrcodes/' . $codigoDocumento . '.png';
+
+if (!is_dir(dirname($qrPath))) {
+    mkdir(dirname($qrPath), 0777, true);
+}
+
+gerarQrCode($urlValidacao, $qrPath);
+
+$qrBase64 = base64_encode(file_get_contents($qrPath));
+
+/* ======================================================
    GERAR PDF
 ====================================================== */
 
 $options = new Options();
 $options->set('defaultFont', 'Arial');
+$options->set('isRemoteEnabled', true);
 
 $dompdf = new Dompdf($options);
 
@@ -168,10 +209,19 @@ Assinatura do Colaborador</p>
 <p><em>Foi enviada uma cópia deste termo para o email 
 '.htmlspecialchars($colaborador['email']).'.</em></p>
 
+<div style="margin-top:25px;">
+    <img src="data:image/png;base64,'.$qrBase64.'" style="width:120px;">
+<br>
+    <span style="font-size:10px;">
+        Validar documento:<br>
+        '.$urlValidacao.'
+    </span>
+</div>
+
 </body>
 </html>
 ';
-
+file_put_contents(__DIR__.'/../storage/debug_html.html', $html);
 $dompdf->loadHtml($html);
 $dompdf->setPaper('A4');
 $dompdf->render();
@@ -186,6 +236,23 @@ $nomePdf = "termo_fardamento_{$colaborador['id']}_" . date('Ymd_His') . ".pdf";
 $caminho = __DIR__ . '/../storage/pdfs/' . $nomePdf;
 
 file_put_contents($caminho, $pdfContent);
+
+/* ======================================================
+   REGISTAR DOCUMENTO NA BD
+====================================================== */
+
+$stmt = $pdo->prepare("
+    INSERT INTO documentos
+    (codigo, tipo, colaborador_id, ficheiro, criado_por)
+    VALUES (?, 'termo_farda', ?, ?, ?)
+");
+
+$stmt->execute([
+    $codigoDocumento,
+    $colaborador['id'],
+    $nomePdf,
+    $_SESSION['user_id']
+]);
 
 /* ======================================================
    ENVIAR EMAIL
@@ -235,7 +302,7 @@ CrewGest
 }
 
 /* ======================================================
-   DOWNLOAD NO BROWSER
+   DOWNLOAD
 ====================================================== */
 
 header('Content-Type: application/pdf');
