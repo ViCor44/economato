@@ -5,27 +5,35 @@ require_once '../vendor/autoload.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 $colaborador_id = $_GET['colaborador_id'] ?? 0;
 if ($colaborador_id <= 0) {
     die("Colaborador inválido.");
 }
 
-// Buscar informações do colaborador
+/* ======================================================
+   BUSCAR COLABORADOR
+====================================================== */
+
 $stmt = $pdo->prepare("
-    SELECT c.id, c.nome, d.nome AS departamento
+    SELECT c.id, c.nome, c.email, d.nome AS departamento
     FROM colaboradores c
     LEFT JOIN departamentos d ON c.departamento_id = d.id
     WHERE c.id = ?
 ");
 $stmt->execute([$colaborador_id]);
-$colaborador = $stmt->fetch();
+$colaborador = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$colaborador) {
     die("Colaborador não encontrado.");
 }
 
-// Buscar fardas atribuídas (AGRUPADAS)
+/* ======================================================
+   BUSCAR FARDAS
+====================================================== */
+
 $stmt = $pdo->prepare("
     SELECT 
         f.nome,
@@ -52,9 +60,16 @@ if (!$fardas_atribuidas) {
 
 $data_atribuicao = $fardas_atribuidas[0]['data_atribuicao'];
 
+/* ======================================================
+   GERAR PDF
+====================================================== */
+
 $options = new Options();
 $options->set('defaultFont', 'Arial');
+
 $dompdf = new Dompdf($options);
+
+/* ---------------- HTML ---------------- */
 
 $html = '
 <!DOCTYPE html>
@@ -137,11 +152,21 @@ $html .= '
 
 <br>
 
+<p><strong>Farda entregue e conferida por:</strong> 
+'.htmlspecialchars($_SESSION['user_name']).'</p>
+
+<br>
+
 <p>Lagoa, '.date('d/m/Y', strtotime($data_atribuicao)).'</p>
 
 <br>
 <p>__________________________________________<br>
-Assinatura do Trabalhador</p>
+Assinatura do Colaborador</p>
+
+<br>
+
+<p><em>Foi enviada uma cópia deste termo para o email 
+'.htmlspecialchars($colaborador['email']).'.</em></p>
 
 </body>
 </html>
@@ -151,4 +176,69 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4');
 $dompdf->render();
 
-$dompdf->stream("termo_fardamento_{$colaborador['id']}.pdf", ["Attachment" => true]);
+$pdfContent = $dompdf->output();
+
+/* ======================================================
+   GUARDAR PDF
+====================================================== */
+
+$nomePdf = "termo_fardamento_{$colaborador['id']}_" . date('Ymd_His') . ".pdf";
+$caminho = __DIR__ . '/../storage/pdfs/' . $nomePdf;
+
+file_put_contents($caminho, $pdfContent);
+
+/* ======================================================
+   ENVIAR EMAIL
+====================================================== */
+
+$mail = new PHPMailer(true);
+
+try {
+
+    $smtp = require __DIR__ . '/../config/mail.php';
+
+    $mail->isSMTP();
+    $mail->Host       = $smtp['host'];
+    $mail->SMTPAuth   = true;
+    $mail->Username   = $smtp['username'];
+    $mail->Password   = $smtp['password'];
+    $mail->Port       = $smtp['port'];
+    $mail->SMTPSecure = $smtp['encryption'];
+
+    $mail->CharSet = 'UTF-8';
+
+    $mail->setFrom($smtp['from_email'], $smtp['from_name']);
+    $mail->addAddress($colaborador['email'], $colaborador['nome']);
+
+    $mail->Subject = 'Termo de Entrega de Fardamento';
+
+    $mail->Body = "
+Olá {$colaborador['nome']},
+
+Segue em anexo o termo de entrega de fardamento.
+
+Cumprimentos,
+CrewGest
+";
+
+    $mail->addStringAttachment(
+        $pdfContent,
+        $nomePdf,
+        'base64',
+        'application/pdf'
+    );
+
+    $mail->send();
+
+} catch (Exception $e) {
+    error_log('Erro envio termo farda: ' . $mail->ErrorInfo);
+}
+
+/* ======================================================
+   DOWNLOAD NO BROWSER
+====================================================== */
+
+header('Content-Type: application/pdf');
+header("Content-Disposition: attachment; filename=\"$nomePdf\"");
+echo $pdfContent;
+exit;
