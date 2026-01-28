@@ -125,11 +125,12 @@ $html = '
         text-align: justify;
     }
     h1 { text-align: center; margin-bottom: 20px; font-size: 18px; }
+    h2 { margin-top: 30px; font-size: 16px; }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     table, th, td { border: 1px solid black; }
-    th, td { padding: 6px; }
-    ul { margin-left: 20px; }
-    p { text-align: justify; }
+    th, td { padding: 6px; font-size: 10px; }
+    ul { margin-left: 20px; font-size: 11px;}
+    p { text-align: justify; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -140,7 +141,7 @@ $html = '
 
 <h2>Termo de Responsabilidade</h2>
 
-<p>Eu, trabalhador acima identificado, recebo a farda entregue pela Firma Correia & Santinha, Lda., contribuinte nº 501 585 583 na data indicada as peças de fardamento de trabalho que abaixo estão assinaladas, comprometendo-me a usá-las exclusivamente na minha atividade profissional, com zelo de forma a garantir o seu bom estado de conservação e asseio, ao serviço da Correia & Santinha, Lda. Declaro ainda estar ciente que:</p>
+<p>Eu, colaborador acima identificado, recebo a farda entregue pela empresa Correia & Santinha, Lda., contribuinte nº 501 585 583 na data indicada as peças de fardamento de trabalho que abaixo estão assinaladas, comprometendo-me a usá-las exclusivamente na minha atividade profissional, com zelo de forma a garantir o seu bom estado de conservação e asseio, ao serviço da Correia & Santinha, Lda. Declaro ainda estar ciente que:</p>
 
 <ul>
     <li>a) As peças de fardamento que recebi são propriedade da Correia & Santinha, Lda e que, quando cessar o meu vínculo contratual com a empresa as devolverei nas melhores condições.</li><br>
@@ -191,8 +192,6 @@ $html .= '
 
 <p>Após o recebimento da farda, verifique todas as peças de vestuário, afim de confirmar se os respetivos tamanhos são adequados, e caso seja necessário a troca de tamanho de alguma peça de vestuário, a mesma tem de ser efetuada antes de ser usada.</p>
 
-<br>
-
 <p><strong>Farda entregue e conferida por:</strong> 
 '.htmlspecialchars($_SESSION['user_name']).'</p>
 
@@ -200,17 +199,14 @@ $html .= '
 
 <p>Lagoa, '.date('d/m/Y', strtotime($data_atribuicao)).'</p>
 
-<br>
 <p>__________________________________________<br>
 Assinatura do Colaborador</p>
-
-<br>
 
 <p><em>Foi enviada uma cópia deste termo para o email 
 '.htmlspecialchars($colaborador['email']).'.</em></p>
 
 <div style="margin-top:25px;">
-    <img src="data:image/png;base64,'.$qrBase64.'" style="width:120px;">
+    <img src="data:image/png;base64,'.$qrBase64.'" style="width:80px;">
 <br>
     <span style="font-size:10px;">
         Validar documento:<br>
