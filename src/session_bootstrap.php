@@ -12,5 +12,5 @@ session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax',
 ]);
-
+session_name('CREWGESTSESSID');
 session_start();
