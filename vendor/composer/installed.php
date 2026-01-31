@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'dd3fbe1294fac5776ea72f561e767aa97c6f71dc',
+        'reference' => 'af07af18f1ce8c797090cc8318cfd627ef9df293',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'dd3fbe1294fac5776ea72f561e767aa97c6f71dc',
+            'reference' => 'af07af18f1ce8c797090cc8318cfd627ef9df293',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -153,6 +153,15 @@
             'install_path' => __DIR__ . '/../phpoffice/phpspreadsheet',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'phpstan/phpstan' => array(
+            'pretty_version' => '2.1.38',
+            'version' => '2.1.38.0',
+            'reference' => 'dfaf1f530e1663aa167bc3e52197adb221582629',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpstan/phpstan',
+            'aliases' => array(),
+            'dev_requirement' => true,
         ),
         'picqer/php-barcode-generator' => array(
             'pretty_version' => 'v3.2.3',
