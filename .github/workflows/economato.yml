@@ -1,0 +1,23 @@
+name: Economato CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  economato-ci:
+    runs-on: [self-hosted, Windows, X64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP version
+        run: php -v
+
+      - name: Composer version
+        run: composer -V
+
+      - name: Test basic script
+        run: php -r "echo 'Economato runner OK';"
