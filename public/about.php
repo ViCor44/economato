@@ -241,7 +241,7 @@ $maintainers = [
         <div class="logo">Cr</div>
         <div>
           <div class="app-name">CrewGest</div>
-          <div class="subtitle">Gestão simples e eficiente de fardas, stock e relatórios.</div>
+          <div class="subtitle">Gestão simples e eficiente de fardas, cacifos, stock e relatórios.</div>
         </div>
       </div>
       <div>
