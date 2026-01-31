@@ -25,7 +25,7 @@ jobs:
           }
 
       - name: PHPStan
-        run: vendor\bin\phpstan analyse
+        run: php vendor/phpstan/phpstan/phpstan analyse
 
       # DEPLOY SÓ SE PASSAR TUDO
       - name: Deploy to production
