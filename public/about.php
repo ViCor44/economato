@@ -249,7 +249,7 @@ $maintainers = [
       </div>
     </header>
 
-    <h1 class="dashboard-title">Sobre o Sistema</h1>
+    <h1 class="dashboard-title">Sobre o CrewGest</h1>
 
     <div class="section">
       <div class="section-header">
