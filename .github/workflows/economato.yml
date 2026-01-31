@@ -19,10 +19,13 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: PHP lint
+        shell: powershell
         run: |
-          Get-ChildItem -Recurse -Filter *.php | ForEach-Object {
-            php -l $_.FullName
-          }
+          Get-ChildItem -Recurse -Filter *.php |
+            Where-Object { $_.FullName -notmatch '\\vendor\\' } |
+            ForEach-Object {
+              php -l $_.FullName
+            }
 
       - name: PHPStan
         run: php vendor/phpstan/phpstan/phpstan analyse . --level=max
