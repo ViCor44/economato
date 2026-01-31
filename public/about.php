@@ -346,7 +346,7 @@ $maintainers = [
         <i class="fas fa-balance-scale icon icon-yellow"></i>
         <h2>Licença e Créditos</h2>
       </div>
-      <p>Projeto interno. Bibliotecas: Dompdf, PHPMailer, PhpSpreadsheet. Obrigado às comunidades open-source.</p>
+      <p>Projeto interno. Bibliotecas: Dompdf, PHPMailer, PhpSpreadsheet.</p>
     </div>
 
     <a href="javascript:history.back()" class="back-btn">Voltar</a>
