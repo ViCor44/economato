@@ -352,7 +352,7 @@ $maintainers = [
     <a href="javascript:history.back()" class="back-btn">Voltar</a>
 
     <footer>
-      © <?= date('Y') ?> CrewGest | <a href="#">Sobre o sistema</a>
+      © <?= date('Y') ?> CrewGest | <a href="#">Sobre o CrewGest</a>
     </footer>
   </div>
 </body>
