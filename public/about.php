@@ -281,7 +281,7 @@ $maintainers = [
     <div class="section">
       <div class="section-header">
         <i class="fas fa-question-circle icon icon-yellow"></i>
-        <h2>Porquê Usar</h2>
+        <h2>Porquê Usar o CrewGest</h2>
       </div>
       <p>Reduza tempo administrativo, minimize perdas e melhore a organização. Ideal para departamentos com necessidades específicas de relatórios e controlo.</p>
     </div>
