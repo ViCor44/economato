@@ -1,23 +1,38 @@
-name: Economato CI
+name: Economato CI + Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
 
 jobs:
   economato-ci:
-    runs-on: [self-hosted, Windows, X64]
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
+      # Mostrar PHP
       - name: PHP version
-        run: C:\xampp\php\php.exe -v
+        run: php -v
 
+      # Mostrar Composer
       - name: Composer version
         run: composer -V
 
-      - name: Test basic script
-        run: C:\xampp\php\php.exe -r "echo 'Economato runner OK';"
+      # DEPLOY REAL
+      - name: Deploy to production folder
+        shell: powershell
+        run: |
+          Write-Host "Deploying to XAMPP folder..."
+
+          cd C:\xampp\htdocs\economato
+
+          git status
+          git pull origin main
+
+          composer install --no-interaction --prefer-dist --no-dev
+
+      - name: Done
+        run: echo "Deploy completed"
