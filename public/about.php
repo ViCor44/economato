@@ -269,6 +269,7 @@ $maintainers = [
         <li>Atribuição e registo de itens</li>
         <li>Atribuição e registo de cacifos</li>
         <li>Relatórios em PDF, Excel e CSV</li>
+        <li>Geração de termos</li>
         <li>Geração de códigos EAN</li>
         <li>Registo de devoluções e avarias</li>
         <li>Logs auditáveis</li>
