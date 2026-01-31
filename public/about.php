@@ -267,6 +267,7 @@ $maintainers = [
       <ul class="features">
         <li>Gestão de stock de fardas</li>
         <li>Atribuição e registo de itens</li>
+        <li>Atribuição e registo de cacifos</li>
         <li>Relatórios em PDF, Excel e CSV</li>
         <li>Geração de códigos EAN</li>
         <li>Registo de devoluções e avarias</li>
