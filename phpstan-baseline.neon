@@ -677,3 +677,5 @@ parameters:
 			identifier: property.notFound
 			count: 2
 			path: vendor/sabberworm/php-css-parser/src/Rule/Rule.php
+
+			
