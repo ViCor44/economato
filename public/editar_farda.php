@@ -1,19 +1,14 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
-/** @var PDO $pdo */
-
 require_once '../src/ean_functions.php'; // validate_ean13, generate_unique_ean, save_ean_png
 
 $errors = [];
 $success = '';
 
 // carregar selects
-/** @var array<int, array{id:int,nome:string}> $cores */
 $cores = $pdo->query("SELECT id, nome FROM cores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
-/** @var array<int, array{id:int,nome:string}> $tamanhos */
 $tamanhos = $pdo->query("SELECT id, nome FROM tamanhos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
-/** @var array<int, array{id:int,nome:string}> $departamentos */
 $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -38,13 +33,13 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = trim((string)($_POST['nome'] ?? ''));
+    $nome = trim($_POST['nome'] ?? '');
     $cor_id = $_POST['cor_id'] ?? null;
     $tamanho_id = $_POST['tamanho_id'] ?? null;
     $departamentos_sel = $_POST['departamentos'] ?? [];
     $preco_unitario = str_replace(',', '.', $_POST['preco_unitario'] ?? '');
     $quantidade = (int)($_POST['quantidade'] ?? 0);
-    $ean_input = trim((string)($_POST['ean'] ?? ''));
+    $ean_input = trim($_POST['ean'] ?? '');
 
     // validações
     if ($nome === '') $errors[] = "O nome da peça é obrigatório.";
