@@ -14,6 +14,9 @@ $old = $_POST ?? [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
+    if ($nome === '' && !empty($_POST['nome_select'])) {
+        $nome = trim($_POST['nome_select']);
+    }
     $cor_id = $_POST['cor_id'] ?? null;
     $tamanho_id = $_POST['tamanho_id'] ?? null;
     $departamentos_sel = $_POST['departamentos'] ?? [];
@@ -101,6 +104,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// 🔔 Última farda adicionada
+$stmtUltima = $pdo->query("
+    SELECT 
+        f.id,
+        f.nome,
+        c.nome AS cor,
+        t.nome AS tamanho,
+        f.ean,
+        f.criado_em
+    FROM fardas f
+    JOIN cores c ON c.id = f.cor_id
+    JOIN tamanhos t ON t.id = f.tamanho_id
+    ORDER BY f.criado_em DESC
+    LIMIT 1
+");
+$ultimaFarda = $stmtUltima->fetch(PDO::FETCH_ASSOC);
+
+$nomesPecas = $pdo->query("
+    SELECT DISTINCT nome
+    FROM fardas
+    ORDER BY nome ASC
+")->fetchAll(PDO::FETCH_COLUMN);
+
 render_form:
 ?>
 <!DOCTYPE html>
@@ -114,7 +140,69 @@ render_form:
 <body class="bg-gray-100">
     <?php include_once '../src/templates/header.php'; ?>
 
-    <main class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
+    <main class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8 mb-8">
+
+        <?php if (!empty($ultimaFarda)): ?>
+        <div class="mb-10 relative overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-white p-8 shadow-xl hover:shadow-2xl transition mb-12">
+
+            <!-- decoração -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-indigo-100 rounded-full opacity-40"></div>
+
+            <div class="relative flex items-center justify-between gap-6">
+
+                <!-- esquerda -->
+                <div class="flex items-center gap-5">
+
+                    <!-- ícone -->
+                    <div class="bg-gradient-to-br from-indigo-600 to-blue-500 text-white rounded-2xl w-14 h-14 flex items-center justify-center text-2xl shadow-md">
+                        👕
+                    </div>
+
+                    <div>
+
+                        <p class="text-xs uppercase tracking-wide text-indigo-600 font-semibold">
+                            Última Farda Criada
+                        </p>
+
+                        <p class="text-sm text-gray-500">
+                            <?= date('d/m/Y H:i', strtotime($ultimaFarda['criado_em'])) ?>
+                        </p>
+
+                        <h2 class="text-2xl font-bold text-gray-900 mt-1">
+                            <?= htmlspecialchars($ultimaFarda['nome']) ?>
+                        </h2>
+
+                        <p class="text-gray-600">
+                            <?= htmlspecialchars($ultimaFarda['cor']) ?> · <?= htmlspecialchars($ultimaFarda['tamanho']) ?>
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- direita -->
+                <div class="text-right space-y-3">
+
+                    <div class="inline-flex items-center gap-2 bg-white px-5 py-2 rounded-full border shadow-sm font-mono text-sm">
+                        EAN <?= htmlspecialchars($ultimaFarda['ean']) ?>
+                    </div>
+
+                    <div class="flex gap-3 justify-end">
+
+                        <a href="editar_farda.php?id=<?= $ultimaFarda['id'] ?>"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition shadow">
+                            ✏️ Editar
+                        </a>
+                        
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <?php endif; ?>
+
         <h1 class="text-2xl font-bold text-gray-800 mb-6">➕ Nova Farda</h1>
 
         <?php if ($success): ?>
@@ -133,10 +221,29 @@ render_form:
 
         <form action="" method="POST" class="space-y-6">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Peça</label>
-                <input type="text" name="nome" required
-                       class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                       value="<?= htmlspecialchars($old['nome'] ?? '') ?>">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Nome do Artigo
+                </label>
+
+                <select id="nome_select"
+                        class="w-full px-4 py-2 border rounded-md"
+                        onchange="toggleNomeInput(this.value)">
+                    <option value="">— Selecionar existente —</option>
+
+                    <?php foreach ($nomesPecas as $n): ?>
+                        <option value="<?= htmlspecialchars($n) ?>">
+                            <?= htmlspecialchars($n) ?>
+                        </option>
+                    <?php endforeach; ?>
+
+                    <option value="__nova__">➕ Novo artigo…</option>
+                </select>
+
+                <input type="text"
+                    name="nome"
+                    id="nome_input"
+                    placeholder="Nome do novo artigo…"
+                    class="w-full px-4 py-2 border rounded-md mt-2 hidden">
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -229,11 +336,20 @@ render_form:
                 } ?>
             </div>
 
-            <div class="flex justify-end">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow">
+            <div class="flex justify-end gap-3">
+
+                <a href="gerir_stock_farda.php"
+                class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-6 py-2 rounded-lg shadow mr-4">
+                    Cancelar
+                </a>
+
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow">
                     Guardar Farda
                 </button>
+
             </div>
+
         </form>
     </main>
 
@@ -320,6 +436,25 @@ render_form:
               console.error(e);
           });
     });
+    function toggleNomeInput(valor) {
+        const input = document.getElementById('nome_input');
+
+        if (valor === '__nova__') {
+            input.classList.remove('hidden');
+            input.focus();
+            input.required = true;
+            input.value = '';
+        } else if (valor) {
+            input.classList.add('hidden');
+            input.required = false;
+            input.value = valor;
+        } else {
+            input.classList.add('hidden');
+            input.required = false;
+            input.value = '';
+        }
+    }
+
 </script>
 <?php
         // Podemos definir o contexto para personalizar a mensagem inicial
