@@ -1,7 +1,9 @@
 <?php
+
+declare(strict_types=1);
+
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
-
 /** @var PDO $pdo */
 
 require_once '../src/ean_functions.php';
@@ -9,47 +11,63 @@ require_once '../src/ean_functions.php';
 $errors = [];
 $success = '';
 
+/* ==========================
+   CARREGAR SELECTS
+========================== */
+
 /** @var array<int,array{id:int,nome:string}> $cores */
-$cores = $pdo->query(
-    "SELECT id, nome FROM cores ORDER BY nome ASC"
-)->fetchAll(PDO::FETCH_ASSOC);
+$cores = [];
+$stmt = $pdo->query("SELECT id, nome FROM cores ORDER BY nome ASC");
+if ($stmt instanceof PDOStatement) {
+    $cores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 /** @var array<int,array{id:int,nome:string}> $tamanhos */
-$tamanhos = $pdo->query(
-    "SELECT id, nome FROM tamanhos ORDER BY nome ASC"
-)->fetchAll(PDO::FETCH_ASSOC);
+$tamanhos = [];
+$stmt = $pdo->query("SELECT id, nome FROM tamanhos ORDER BY nome ASC");
+if ($stmt instanceof PDOStatement) {
+    $tamanhos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 /** @var array<int,array{id:int,nome:string}> $departamentos */
-$departamentos = $pdo->query(
-    "SELECT id, nome FROM departamentos ORDER BY nome ASC"
-)->fetchAll(PDO::FETCH_ASSOC);
+$departamentos = [];
+$stmt = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC");
+if ($stmt instanceof PDOStatement) {
+    $departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
-$old = $_POST ?? [];
+$old = is_array($_POST) ? $_POST : [];
+
+/* ==========================
+   PROCESSAR POST
+========================== */
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $nome = trim((string)($_POST['nome'] ?? ''));
+    $nome = trim((string)($old['nome'] ?? ''));
 
-    if ($nome === '' && !empty($_POST['nome_select'])) {
-        $nome = trim((string)$_POST['nome_select']);
+    if ($nome === '' && isset($old['nome_select'])) {
+        $nome = trim((string)$old['nome_select']);
     }
 
-    $cor_id = isset($_POST['cor_id']) ? (int)$_POST['cor_id'] : 0;
-    $tamanho_id = isset($_POST['tamanho_id']) ? (int)$_POST['tamanho_id'] : 0;
+    $cor_id = isset($old['cor_id']) ? (int)$old['cor_id'] : 0;
+    $tamanho_id = isset($old['tamanho_id']) ? (int)$old['tamanho_id'] : 0;
 
-    $departamentos_sel = $_POST['departamentos'] ?? [];
-    if (!is_array($departamentos_sel)) {
-        $departamentos_sel = [];
-    }
+    $departamentos_sel = isset($old['departamentos']) && is_array($old['departamentos'])
+        ? array_map('intval', $old['departamentos'])
+        : [];
 
-    $preco_unitario = str_replace(',', '.', (string)($_POST['preco_unitario'] ?? '0'));
-    $quantidade = (int)($_POST['quantidade'] ?? 0);
-    $ean_input = trim((string)($_POST['ean'] ?? ''));
+    $preco_unitario_raw = (string)($old['preco_unitario'] ?? '0');
+    $preco_unitario = str_replace(',', '.', $preco_unitario_raw);
 
-    // validações
-    if ($nome === '' || !$cor_id || !$tamanho_id || !$departamentos_sel) {
-        $errors[] =
-            "Todos os campos obrigatórios devem ser preenchidos (nome, cor, tamanho e pelo menos 1 departamento).";
+    $quantidade = isset($old['quantidade']) ? (int)$old['quantidade'] : 0;
+
+    $ean_input = trim((string)($old['ean'] ?? ''));
+
+    /* ---------- validações ---------- */
+
+    if ($nome === '' || $cor_id === 0 || $tamanho_id === 0 || $departamentos_sel === []) {
+        $errors[] = "Todos os campos obrigatórios devem ser preenchidos.";
     }
 
     if (!is_numeric($preco_unitario) || (float)$preco_unitario < 0) {
@@ -57,22 +75,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($quantidade < 0) {
-        $quantidade = 0;
+        $errors[] = "Quantidade inválida.";
     }
 
-    // EAN
+    /* ---------- EAN ---------- */
+
     if ($ean_input !== '') {
 
         if (!validate_ean13($ean_input)) {
 
-            $errors[] =
-                "EAN inválido — tem de ser 13 dígitos com checksum correcto.";
+            $errors[] = "EAN inválido — tem de ser 13 dígitos com checksum correcto.";
 
         } else {
 
-            $stmt = $pdo->prepare(
-                "SELECT id FROM fardas WHERE ean = ?"
-            );
+            $stmt = $pdo->prepare("SELECT id FROM fardas WHERE ean = ?");
             $stmt->execute([$ean_input]);
 
             if ($stmt->fetch()) {
@@ -84,13 +100,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             $ean_input = generate_unique_ean($pdo, '200');
-        } catch (Exception $e) {
-            $errors[] =
-                "Erro ao gerar EAN automático: " . $e->getMessage();
+        } catch (Throwable $e) {
+            $errors[] = "Erro ao gerar EAN automático.";
         }
     }
 
-    if (!$errors) {
+    /* ---------- INSERIR ---------- */
+
+    if ($errors === []) {
 
         try {
 
@@ -98,8 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt = $pdo->prepare("
                 INSERT INTO fardas
-                    (nome, cor_id, tamanho_id,
-                     preco_unitario, quantidade, ean)
+                    (nome, cor_id, tamanho_id, preco_unitario, quantidade, ean)
                 VALUES (?, ?, ?, ?, ?, ?)
             ");
 
@@ -114,80 +130,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $farda_id = (int)$pdo->lastInsertId();
 
-            $stmtDep = $pdo->prepare(
-                "INSERT INTO farda_departamentos
-                    (farda_id, departamento_id)
-                 VALUES (?, ?)"
-            );
+            $stmtDep = $pdo->prepare("
+                INSERT INTO farda_departamentos (farda_id, departamento_id)
+                VALUES (?, ?)
+            ");
 
             foreach ($departamentos_sel as $dep_id) {
-
-                $dep_id = (int)$dep_id;
-
                 if ($dep_id > 0) {
                     $stmtDep->execute([$farda_id, $dep_id]);
                 }
             }
 
-            $outPath = __DIR__ . '/../public/barcodes';
-
-            if (!is_dir($outPath)) {
-                @mkdir($outPath, 0755, true);
+            $barcodeDir = __DIR__ . '/../public/barcodes';
+            if (!is_dir($barcodeDir)) {
+                mkdir($barcodeDir, 0755, true);
             }
 
-            try {
-
-                save_ean_png($ean_input, $outPath);
-
-            } catch (Exception $e) {
-
-                $pdo->commit();
-
-                $errors[] =
-                    "Farda criada, mas falha ao gerar imagem do barcode: " .
-                    $e->getMessage();
-
-                $success =
-                    "✅ Farda adicionada com EAN {$ean_input}, mas houve um problema ao gerar o PNG do barcode.";
-
-                $old = [];
-
-                goto render_form;
-            }
+            save_ean_png($ean_input, $barcodeDir);
 
             $pdo->commit();
 
-            $success =
-                "✅ Farda adicionada com sucesso! EAN: {$ean_input}";
-
+            $success = "✅ Farda adicionada com sucesso! EAN: {$ean_input}";
             $old = [];
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
 
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
 
-            $errors[] =
-                "Erro ao adicionar farda: " . $e->getMessage();
+            $errors[] = "Erro ao adicionar farda.";
         }
-
-    } else {
-
-        $old = $_POST;
-        $old['ean'] = $ean_input;
     }
 }
 
-// última farda
-$stmtUltima = $pdo->query("
-    SELECT
-        f.id,
-        f.nome,
-        c.nome AS cor,
-        t.nome AS tamanho,
-        f.ean,
-        f.criado_em
+/* ==========================
+   ÚLTIMA FARDa
+========================== */
+
+$ultimaFarda = null;
+
+$stmt = $pdo->query("
+    SELECT f.id, f.nome, c.nome AS cor, t.nome AS tamanho, f.ean, f.criado_em
     FROM fardas f
     JOIN cores c ON c.id = f.cor_id
     JOIN tamanhos t ON t.id = f.tamanho_id
@@ -195,29 +179,38 @@ $stmtUltima = $pdo->query("
     LIMIT 1
 ");
 
-$ultimaFarda = $stmtUltima->fetch(PDO::FETCH_ASSOC) ?: null;
+if ($stmt instanceof PDOStatement) {
+    $ultimaFarda = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
 
-/** @var array<int,string> $nomesPecas */
-$nomesPecas = $pdo->query("
-    SELECT DISTINCT nome
-    FROM fardas
-    ORDER BY nome ASC
-")->fetchAll(PDO::FETCH_COLUMN);
+/* ==========================
+   NOMES EXISTENTES
+========================== */
+
+$nomesPecas = [];
+
+$stmt = $pdo->query("SELECT DISTINCT nome FROM fardas ORDER BY nome ASC");
+
+if ($stmt instanceof PDOStatement) {
+    $nomesPecas = $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
 
 render_form:
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-PT" class="bg-gray-100">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova Farda - CrewGest</title>
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
-    <?php include_once '../src/templates/header.php'; ?>
 
-    <main class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8 mb-8">
+<?php include '../src/templates/header.php'; ?>
+
+<main class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8 mb-8">
+
 
         <?php if (!empty($ultimaFarda)): ?>
         <div class="mb-10 relative overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-white p-8 shadow-xl hover:shadow-2xl transition mb-12">
