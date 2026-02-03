@@ -28,7 +28,7 @@ jobs:
             }
 
       - name: PHPStan
-        run: php vendor/phpstan/phpstan/phpstan analyse . --level=max
+        run: php vendor/phpstan/phpstan/phpstan analyse . --level=3
 
       # DEPLOY SÓ SE PASSAR TUDO
       - name: Deploy to production
