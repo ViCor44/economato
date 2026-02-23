@@ -1,28 +1,29 @@
 <?php
 
-// Caminho do ficheiro — ajusta conforme preferires
+date_default_timezone_set('Europe/Lisbon');
+
 define('LOG_FILE', __DIR__ . '/../storage/system.log');
 
-/**
- * Escreve um log num ficheiro em vez da BD.
- * $level    EX: INFO, WARNING, ERROR
- * $action   EX: LOGIN_SUCCESS
- * $message  Texto detalhado
- */
 function log_event_file(string $level, string $action, string $message, $user_id = null): void
 {
     $timestamp = date('Y-m-d H:i:s');
 
-    // construir linha
-    $line = "[$timestamp] [$level] [$action]";
+    // Obter IP real do utilizador
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'CLI';
 
-    if ($user_id) {
+    // Se estiver atrás de proxy (opcional)
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+    }
+
+    $line = "[$timestamp] [$level] [$action] [IP:$ip]";
+
+    if ($user_id !== null) {
         $line .= " [USER:$user_id]";
     }
 
     $line .= " - $message" . PHP_EOL;
 
-    // garantir que a pasta existe
     $dir = dirname(LOG_FILE);
     if (!is_dir($dir)) {
         mkdir($dir, 0775, true);
