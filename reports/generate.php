@@ -802,10 +802,21 @@ try {
                     c.ativo
                 FROM colaboradores c
                 LEFT JOIN departamentos d ON c.departamento_id = d.id
-                ORDER BY d.nome, c.nome
+                WHERE 1=1
             ";
 
-            $stmt = $pdo->query($sql);
+            $params = [];
+
+            if ($departamento) {
+                $sql .= " AND c.departamento_id = ? ";
+                $params[] = $departamento;
+            }
+
+            $sql .= " ORDER BY d.nome ASC, c.nome ASC";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $columns = [
@@ -829,7 +840,7 @@ try {
             }, $data);
 
         break;
-
+        
         case 'colaboradores_com_dividas':
 
             $title = "Colaboradores com Dívidas de Fardamento";
