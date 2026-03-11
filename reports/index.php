@@ -203,7 +203,14 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
 
         if (needsDate.includes(val)) boxDates.classList.remove('hidden');
         if (['fardas_mais_atribuidas','fardas_menos_atribuidas','custo_por_colaborador','custo_por_departamento'].includes(val)) boxTop.classList.remove('hidden');
-        if (['fardas_mais_atribuidas','colaboradores_sem_farda','custo_por_departamento'].includes(val)) boxDept.classList.remove('hidden');
+        if ([
+            'fardas_mais_atribuidas',
+            'colaboradores_sem_farda',
+            'custo_por_departamento',
+            'colaboradores_por_departamento'
+        ].includes(val)) {
+            boxDept.classList.remove('hidden');
+        }
         if (val === 'stock_baixo') boxThreshold.classList.remove('hidden');
         if (['logs_filtrados','export_ean','itens_sem_ean','historico_atribuicoes'].includes(val)) boxFreeText.classList.remove('hidden');
     }
