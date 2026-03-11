@@ -62,6 +62,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                                 <option value="colaboradores_sem_farda">4. Colaboradores sem farda atribuída</option>
                                 <option value="colaboradores_com_emprestimos">5. Colaboradores com empréstimos activos</option>
                                 <option value="colaboradores_com_dividas">6. Colaboradores com dívidas de fardamento</option>
+                                <option value="colaboradores_por_departamento">27. Colaboradores por departamento</option>
                             </optgroup>
 
                             <!-- Fardas -->

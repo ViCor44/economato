@@ -788,6 +788,48 @@ try {
             $rows = array_map(function($r){ return ['ID'=>$r['id'],'Data'=>$r['data_atribuicao'],'Colaborador'=>$r['colaborador'],'Peça'=>$r['farda'],'Qtd'=>$r['quantidade']]; }, $data);
             break;
 
+        case 'colaboradores_por_departamento':
+
+            $title = "Colaboradores por Departamento";
+
+            $sql = "
+                SELECT 
+                    d.nome AS departamento,
+                    c.nome,
+                    c.cartao,
+                    c.telefone,
+                    c.email,
+                    c.ativo
+                FROM colaboradores c
+                LEFT JOIN departamentos d ON c.departamento_id = d.id
+                ORDER BY d.nome, c.nome
+            ";
+
+            $stmt = $pdo->query($sql);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $columns = [
+                'Departamento',
+                'Nome',
+                'Cartão',
+                'Telefone',
+                'Email',
+                'Ativo'
+            ];
+
+            $rows = array_map(function($r){
+                return [
+                    'Departamento' => $r['departamento'] ?? '—',
+                    'Nome' => $r['nome'],
+                    'Cartão' => $r['cartao'] ?? '',
+                    'Telefone' => $r['telefone'] ?? '',
+                    'Email' => $r['email'] ?? '',
+                    'Ativo' => ($r['ativo'] ? 'Sim' : 'Não')
+                ];
+            }, $data);
+
+        break;
+
         case 'colaboradores_com_dividas':
 
             $title = "Colaboradores com Dívidas de Fardamento";
