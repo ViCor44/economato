@@ -154,8 +154,10 @@ try {
                     <td class="px-6 py-3 border-b">
                         <div class="flex items-center gap-4">
                             <?php if (!empty($c['foto'])): ?>
+                            <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:1px solid #e5e7eb;flex-shrink:0;">
                                 <img src="<?= BASE_URL ?>/public/uploads/colaboradores/<?= htmlspecialchars($c['foto']) ?>"
-                                     style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;">
+                                    style="width:100%;height:100%;object-fit:cover;">
+                            </div>                            
                             <?php else: ?>
                                 <div style="width:64px;height:64px;border-radius:50%;background:#e5e7eb;
                                             display:flex;align-items:center;justify-content:center;
