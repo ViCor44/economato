@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-bold text-gray-800">👕 Atribuir Farda</h1>
 
-        <a href="<?= BASE_URL ?>/public/colaboradores/detalhes.php?id=<?= $colaborador_id ?>"
+        <a href="<?= BASE_URL ?>/public/detalhes_colaborador.php?id=<?= $colaborador_id ?>"
         class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium">
             ← Voltar ao colaborador
         </a>
