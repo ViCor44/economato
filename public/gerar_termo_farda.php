@@ -141,7 +141,8 @@ $html = '
 
 <h2>Termo de Responsabilidade</h2>
 
-<p>Eu, colaborador acima identificado, recebo a farda entregue pela empresa Correia & Santinha, Lda., contribuinte nº 501 585 583 na data indicada as peças de fardamento de trabalho que abaixo estão assinaladas, comprometendo-me a usá-las exclusivamente na minha atividade profissional, com zelo de forma a garantir o seu bom estado de conservação e asseio, ao serviço da Correia & Santinha, Lda. Declaro ainda estar ciente que:</p>
+<p>Eu, colaborador acima identificado, recebo a farda entregue pela empresa Correia & Santinha, Lda., contribuinte nº 501 585 583 na data indicada as peças de fardamento de trabalho que abaixo estão assinaladas, comprometendo-me a usá-las exclusivamente na minha atividade profissional, com zelo de forma a garantir o seu bom estado de conservação e asseio, ao serviço da Correia & Santinha, Lda. </p>
+<p>Declaro ainda estar ciente que:</p>
 
 <ul>
     <li>a) As peças de fardamento que recebi são propriedade da Correia & Santinha, Lda e que, quando cessar o meu vínculo contratual com a empresa as devolverei nas melhores condições.</li><br>
