@@ -362,20 +362,20 @@ try {
         <?php
         $stmt = $pdo->prepare("
             SELECT
+                fa.id,
                 f.nome,
                 c.nome AS cor,
                 t.nome AS tamanho,
-                SUM(fa.quantidade) AS quantidade_total,
+                fa.quantidade,
                 f.preco_unitario,
-                MAX(fa.data_atribuicao) AS ultima_data
+                fa.data_atribuicao
             FROM farda_atribuicoes fa
             JOIN fardas f ON fa.farda_id = f.id
             JOIN cores c ON f.cor_id = c.id
             JOIN tamanhos t ON f.tamanho_id = t.id
             WHERE fa.colaborador_id = ?
-              AND fa.estado IN ('atribuida', 'marcada_devolucao')
-            GROUP BY f.nome, c.nome, t.nome, f.preco_unitario
-            ORDER BY ultima_data DESC
+            AND fa.estado IN ('atribuida','marcada_devolucao')
+            ORDER BY fa.data_atribuicao DESC
         ");
         $stmt->execute([$colaborador_id]);
         $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -393,6 +393,7 @@ try {
                         <th class="px-4 py-2 border-b text-right">Preço (€)</th>
                         <th class="px-4 py-2 border-b text-right">Total (€)</th>
                         <th class="px-4 py-2 border-b text-center">Data</th>
+                        <th class="px-4 py-2 border-b text-center">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -411,6 +412,19 @@ try {
                         </td>
                         <td class="px-4 py-2 border-b text-center">
                             <?= date('d/m/Y H:i', strtotime($f['ultima_data'])) ?>
+                        </td>
+                        <td class="px-4 py-2 border-b text-center">
+                            <a href="editar_atribuicao.php?id=<?= $f['id'] ?>"
+                            class="text-blue-600 hover:text-blue-800 font-semibold mr-2">
+                            ✏️
+                            </a>
+                            <form action="anular_atribuicao.php" method="POST" class="inline"
+                                onsubmit="return confirm('Anular esta atribuição?');">
+                                <input type="hidden" name="id" value="<?= $f['id'] ?>">
+                                <button class="text-red-600 hover:text-red-800 font-semibold">
+                                    ❌
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
