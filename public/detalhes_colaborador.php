@@ -81,6 +81,7 @@ try {
     <meta charset="UTF-8">
     <title>Detalhes do Colaborador - CrewGest</title>
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="p-4 md:p-8">
 
@@ -346,13 +347,13 @@ try {
 
             <!-- 📄 Termo de entrega -->
             <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
-            target="_blank"
-            style="background-color:#2563eb;color:#fff;font-weight:600;
-                    display:flex;align-items:center;gap:8px;
-                    padding:8px 16px;border-radius:8px;text-decoration:none;
-                    box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
-            onmouseover="this.style.backgroundColor='#1d4ed8';"
-            onmouseout="this.style.backgroundColor='#2563eb';">
+                id="btnGerarTermo"
+                style="background-color:#2563eb;color:#fff;font-weight:600;
+                display:flex;align-items:center;gap:8px;
+                padding:8px 16px;border-radius:8px;text-decoration:none;
+                box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
+                onmouseover="this.style.backgroundColor='#1d4ed8';"
+                onmouseout="this.style.backgroundColor='#2563eb';">
                 📄 <span>Gerar Termo</span>
             </a>
 
@@ -442,7 +443,37 @@ try {
     </section>
 
 </main>
+<script>
 
+    document.getElementById('btnGerarTermo').addEventListener('click', function(e){
+
+        e.preventDefault();
+
+        const url = this.href;
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Gerar Termo de Fardamento',
+            html: `
+            <p>Verifique os artigos atribuídos.</p>
+            <p><strong>Após a emissão do termo não será possível editar ou anular estas atribuições.</strong></p>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Gerar Termo',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#6b7280'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+                window.open(url, '_blank');
+            }
+
+        });
+
+    });
+
+</script>
 <?php include_once '../src/templates/footer.php'; ?>
 </body>
 </html>
