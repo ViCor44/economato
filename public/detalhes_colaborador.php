@@ -418,13 +418,10 @@ try {
                             class="text-blue-600 hover:text-blue-800 font-semibold mr-2">
                             ✏️
                             </a>
-                            <form action="anular_atribuicao.php" method="POST" class="inline"
-                                onsubmit="return confirm('Anular esta atribuição?');">
-                                <input type="hidden" name="id" value="<?= $f['id'] ?>">
-                                <button class="text-red-600 hover:text-red-800 font-semibold">
-                                    ❌
-                                </button>
-                            </form>
+                            <a href="anular_atribuicao.php?id=<?= $f['id'] ?>"
+                            class="text-red-600 hover:text-red-800 font-semibold">
+                            ❌ Anular
+                            </a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
