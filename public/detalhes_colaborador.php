@@ -398,20 +398,20 @@ try {
                 </thead>
                 <tbody>
                 <?php foreach ($fardas_atribuidas as $f):
-                    $total_item = $f['quantidade_total'] * $f['preco_unitario'];
+                    $total_item = $f['quantidade'] * $f['preco_unitario'];
                     $total_geral += $total_item;
                 ?>
                     <tr>
                         <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['nome']) ?></td>
                         <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['cor']) ?></td>
                         <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['tamanho']) ?></td>
-                        <td class="px-4 py-2 border-b text-center"><?= $f['quantidade_total'] ?></td>
+                        <td class="px-4 py-2 border-b text-center"><?= $f['quantidade'] ?></td>
                         <td class="px-4 py-2 border-b text-right"><?= number_format($f['preco_unitario'], 2, ',', '.') ?></td>
                         <td class="px-4 py-2 border-b text-right font-semibold">
                             <?= number_format($total_item, 2, ',', '.') ?>
                         </td>
                         <td class="px-4 py-2 border-b text-center">
-                            <?= date('d/m/Y H:i', strtotime($f['ultima_data'])) ?>
+                            <?= date('d/m/Y H:i', strtotime($f['data_atribuicao'])) ?>
                         </td>
                         <td class="px-4 py-2 border-b text-center">
                             <a href="editar_atribuicao.php?id=<?= $f['id'] ?>"
