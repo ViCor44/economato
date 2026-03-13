@@ -441,37 +441,89 @@ try {
             <p class="text-gray-500 italic">Nenhuma farda atribuída.</p>
         <?php endif; ?>
     </section>
-
+<script>
+    const colaboradorNome = "<?= addslashes($colaborador['nome']) ?>";
+    const fardas = <?= json_encode($fardas_atribuidas) ?>;
+</script>
 </main>
 <script>
 
-    document.getElementById('btnGerarTermo').addEventListener('click', function(e){
+document.getElementById('btnGerarTermo').addEventListener('click', function(e){
 
-        e.preventDefault();
+    e.preventDefault();
 
-        const url = this.href;
+    const url = this.href;
 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Gerar Termo de Fardamento',
-            html: `
-            <p>Verifique os artigos atribuídos.</p>
-            <p><strong>Após a emissão do termo não será possível editar ou anular estas atribuições.</strong></p>
-            `,
-            showCancelButton: true,
-            confirmButtonText: 'Gerar Termo',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#2563eb',
-            cancelButtonColor: '#6b7280'
-        }).then((result) => {
+    let lista = '';
+    let total = 0;
 
-            if (result.isConfirmed) {
-                window.open(url, '_blank');
-            }
+    fardas.forEach(f => {
 
-        });
+        const subtotal = f.quantidade * f.preco_unitario;
+        total += subtotal;
+
+        lista += `
+        <tr>
+            <td style="text-align:left">${f.nome}</td>
+            <td>${f.cor}</td>
+            <td>${f.tamanho}</td>
+            <td>${f.quantidade}</td>
+        </tr>`;
+    });
+
+    const tabela = `
+    <table style="width:100%;font-size:14px;border-collapse:collapse">
+        <thead>
+            <tr>
+                <th style="text-align:left">Peça</th>
+                <th>Cor</th>
+                <th>Tam</th>
+                <th>Qtd</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${lista}
+        </tbody>
+    </table>
+    `;
+
+    Swal.fire({
+
+        icon: 'warning',
+        title: 'Confirmar Termo de Fardamento',
+
+        html: `
+        <p><strong>Colaborador:</strong> ${colaboradorNome}</p>
+
+        ${tabela}
+
+        <br>
+
+        <p style="font-weight:bold">
+        Total estimado: € ${total.toFixed(2)}
+        </p>
+
+        <p style="color:#dc2626;font-size:13px">
+        Após gerar o termo não será possível editar ou anular estas atribuições.
+        </p>
+        `,
+
+        width: 600,
+        showCancelButton: true,
+        confirmButtonText: 'Gerar Termo',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280'
+
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+            window.open(url, '_blank');
+        }
 
     });
+
+});
 
 </script>
 <?php include_once '../src/templates/footer.php'; ?>
