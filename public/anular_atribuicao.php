@@ -112,8 +112,13 @@ Cancelar
 </a>
 
 <button type="submit"
-class="px-6 py-2 rounded-lg bg-red-200 hover:bg-red-300 text-white font-semibold shadow">
-❌ Confirmar Anulação
+    style="background-color:#dc2626;color:#fff;font-weight:600;
+    display:flex;align-items:center;gap:8px;
+    padding:8px 16px;border-radius:8px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.1);border:none;cursor:pointer;"
+    onmouseover="this.style.backgroundColor='#b91c1c';"
+    onmouseout="this.style.backgroundColor='#dc2626';">
+    ❌ <span>Confirmar Anulação</span>
 </button>
 
 </form>
