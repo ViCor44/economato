@@ -840,6 +840,29 @@ try {
             }, $data);
 
         break;
+
+        case 'colaboradores_com_farda':
+
+            $sql = "
+            SELECT DISTINCT
+                c.id,
+                c.nome,
+                c.numero_funcionario,
+                c.cartao,
+                d.nome AS departamento
+            FROM colaboradores c
+            JOIN farda_atribuicoes fa ON fa.colaborador_id = c.id
+            LEFT JOIN departamentos d ON c.departamento_id = d.id
+            WHERE fa.estado = 'atribuida'
+            ORDER BY c.nome ASC
+            ";
+
+            $stmt = $pdo->query($sql);
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $titulo = "Colaboradores com farda atribuída";
+
+        break;
         
         case 'colaboradores_com_dividas':
 

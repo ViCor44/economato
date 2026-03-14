@@ -60,45 +60,46 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                                 <option value="colaboradores_ativos">2. Colaboradores ativos</option>
                                 <option value="colaboradores_inativos">3. Colaboradores inativos</option>
                                 <option value="colaboradores_sem_farda">4. Colaboradores sem farda atribuída</option>
-                                <option value="colaboradores_com_emprestimos">5. Colaboradores com empréstimos activos</option>
-                                <option value="colaboradores_com_dividas">6. Colaboradores com dívidas de fardamento</option>
-                                <option value="colaboradores_por_departamento">27. Colaboradores por departamento</option>
+                                <option value="colaboradores_com_farda">5. Colaboradores com farda atribuída</option>
+                                <option value="colaboradores_com_emprestimos">6. Colaboradores com empréstimos activos</option>
+                                <option value="colaboradores_com_dividas">7. Colaboradores com dívidas de fardamento</option>
+                                <option value="colaboradores_por_departamento">8. Colaboradores por departamento</option>
                             </optgroup>
 
                             <!-- Fardas -->
                             <optgroup label="Fardas">
-                                <option value="fardas_mais_atribuidas">7. Fardas mais atribuídas</option>
-                                <option value="fardas_menos_atribuidas">8. Fardas menos atribuídas</option>
-                                <option value="stock_atual">9. Stock atual completo</option>
-                                <option value="stock_baixo">10. Stock baixo (abaixo do mínimo)</option>
-                                <option value="compras_periodo">11. Compras de fardas por período</option>
-                                <option value="devolucoes_motivo">12. Devoluções por motivo / estado</option>
-                                <option value="inativos_com_farda">13. Colaboradores inativos com farda</option>
+                                <option value="fardas_mais_atribuidas">9. Fardas mais atribuídas</option>
+                                <option value="fardas_menos_atribuidas">10. Fardas menos atribuídas</option>
+                                <option value="stock_atual">11. Stock atual completo</option>
+                                <option value="stock_baixo">12. Stock baixo (abaixo do mínimo)</option>
+                                <option value="compras_periodo">13. Compras de fardas por período</option>
+                                <option value="devolucoes_motivo">14. Devoluções por motivo / estado</option>
+                                <option value="inativos_com_farda">15. Colaboradores inativos com farda</option>
                             </optgroup>
 
                             <!-- Cacifos -->
                             <optgroup label="Cacifos">
-                                <option value="cacifos_lista">14. Lista completa de cacifos</option>
-                                <option value="cacifos_ocupados">15. Cacifos ocupados</option>
-                                <option value="cacifos_livres">16. Cacifos livres</option>
-                                <option value="cacifos_avariados">17. Cacifos avariados</option>
-                                <option value="cacifos_colabs_inativos">18. Cacifos de colaboradores inativos</option>
+                                <option value="cacifos_lista">16. Lista completa de cacifos</option>
+                                <option value="cacifos_ocupados">17. Cacifos ocupados</option>
+                                <option value="cacifos_livres">18. Cacifos livres</option>
+                                <option value="cacifos_avariados">19. Cacifos avariados</option>
+                                <option value="cacifos_colabs_inativos">20. Cacifos de colaboradores inativos</option>
                             </optgroup>
 
                             <!-- Financeiros -->
                             <optgroup label="Financeiros">
-                                <option value="valor_total_stock">19. Valor total em stock</option>
-                                <option value="custo_por_colaborador">20. Custo de fardamento entregue por colaborador</option>
-                                <option value="custo_por_departamento">21. Custo total por departamento</option>
+                                <option value="valor_total_stock">21. Valor total em stock</option>
+                                <option value="custo_por_colaborador">22. Custo de fardamento entregue por colaborador</option>
+                                <option value="custo_por_departamento">23. Custo total por departamento</option>
                             </optgroup>
 
                             <!-- Diversos -->
                             <optgroup label="Diversos">
-                                <option value="logs_filtrados">22. Logs de sistema filtráveis</option>
-                                <option value="export_ean">23. Export EAN / códigos de barras (CSV)</option>
-                                <option value="print_ean">24. Imprimir EAN (etiquetas a partir dos PNGs)</option>
-                                <option value="itens_sem_ean">25. Itens de farda sem EAN</option>
-                                <option value="historico_atribuicoes">26. Histórico de atribuições</option>
+                                <option value="logs_filtrados">24. Logs de sistema filtráveis</option>
+                                <option value="export_ean">25. Export EAN / códigos de barras (CSV)</option>
+                                <option value="print_ean">26. Imprimir EAN (etiquetas a partir dos PNGs)</option>
+                                <option value="itens_sem_ean">27. Itens de farda sem EAN</option>
+                                <option value="historico_atribuicoes">28. Histórico de atribuições</option>
                             </optgroup>
                         </select>
                     </div>
