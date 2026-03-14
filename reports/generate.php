@@ -508,7 +508,6 @@ try {
             break;
 
         // ------------------- Colaboradores inativos com farda -------------------
-        // ------------------- Colaboradores inativos com farda -------------------
         case 'inativos_com_farda':
             $title = "Colaboradores Inativos com Fardas Atribuídas";
 
@@ -843,24 +842,33 @@ try {
 
         case 'colaboradores_com_farda':
 
-            $sql = "
-            SELECT DISTINCT
-                c.id,
-                c.nome,
-                c.numero_funcionario,
-                c.cartao,
-                d.nome AS departamento
-            FROM colaboradores c
-            JOIN farda_atribuicoes fa ON fa.colaborador_id = c.id
-            LEFT JOIN departamentos d ON c.departamento_id = d.id
-            WHERE fa.estado = 'atribuida'
-            ORDER BY c.nome ASC
-            ";
+            $title = "Colaboradores com Farda Atribuída";
 
-            $stmt = $pdo->query($sql);
-            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt = $pdo->prepare("
+                SELECT DISTINCT
+                    c.id,
+                    c.nome,
+                    c.cartao,
+                    c.email
+                FROM colaboradores c
+                JOIN farda_atribuicoes fa ON fa.colaborador_id = c.id
+                WHERE fa.estado = 'atribuida'
+                ORDER BY c.nome ASC
+            ");
 
-            $titulo = "Colaboradores com farda atribuída";
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $columns = ['ID','Nome','Cartão','Email'];
+
+            $rows = array_map(function($r){
+                return [
+                    'ID' => $r['id'],
+                    'Nome' => $r['nome'],
+                    'Cartão' => $r['cartao'],
+                    'Email' => $r['email']
+                ];
+            }, $data);
 
         break;
         
