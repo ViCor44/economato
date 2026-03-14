@@ -346,17 +346,29 @@ try {
             </a>
 
             <!-- 📄 Termo de entrega -->
+            <?php if ($temFardas): ?>
+
             <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
-                id="btnGerarTermo"
-                style="background-color:#2563eb;color:#fff;font-weight:600;
-                display:flex;align-items:center;gap:8px;
-                padding:8px 16px;border-radius:8px;text-decoration:none;
-                box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
-                onmouseover="this.style.backgroundColor='#1d4ed8';"
-                onmouseout="this.style.backgroundColor='#2563eb';">
-                📄 <span>Gerar Termo</span>
+            id="btnGerarTermo"
+            style="background-color:#2563eb;color:#fff;font-weight:600;
+            display:flex;align-items:center;gap:8px;
+            padding:8px 16px;border-radius:8px;text-decoration:none;
+            box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
+            onmouseover="this.style.backgroundColor='#1d4ed8';"
+            onmouseout="this.style.backgroundColor='#2563eb';">
+            📄 <span>Gerar Termo</span>
             </a>
 
+            <?php else: ?>
+
+            <span style="background:#e5e7eb;color:#9ca3af;font-weight:600;
+            display:flex;align-items:center;gap:8px;
+            padding:8px 16px;border-radius:8px;
+            cursor:not-allowed;" class="mr-4">
+            📄 <span>Gerar Termo</span>
+            </span>
+
+            <?php endif; ?>
         <?php endif; ?>
         </div>
 
