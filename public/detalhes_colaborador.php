@@ -277,6 +277,32 @@ try {
 
 
     <!-- 🧥 FARDAS -->
+
+    <?php
+        $stmt = $pdo->prepare("
+            SELECT
+                fa.id,
+                f.nome,
+                c.nome AS cor,
+                t.nome AS tamanho,
+                fa.quantidade,
+                f.preco_unitario,
+                fa.data_atribuicao
+            FROM farda_atribuicoes fa
+            JOIN fardas f ON fa.farda_id = f.id
+            JOIN cores c ON f.cor_id = c.id
+            JOIN tamanhos t ON f.tamanho_id = t.id
+            WHERE fa.colaborador_id = ?
+            AND fa.estado IN ('atribuida','marcada_devolucao')
+            ORDER BY fa.data_atribuicao DESC
+        ");
+        $stmt->execute([$colaborador_id]);
+        $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $total_geral = 0;
+        $temFardas = !empty($fardas_atribuidas);
+    ?>
+
+
     <section class="mt-8">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">🧥 Fardas Atribuídas</h2>
         
@@ -372,28 +398,6 @@ try {
         <?php endif; ?>
         </div>
 
-        <?php
-        $stmt = $pdo->prepare("
-            SELECT
-                fa.id,
-                f.nome,
-                c.nome AS cor,
-                t.nome AS tamanho,
-                fa.quantidade,
-                f.preco_unitario,
-                fa.data_atribuicao
-            FROM farda_atribuicoes fa
-            JOIN fardas f ON fa.farda_id = f.id
-            JOIN cores c ON f.cor_id = c.id
-            JOIN tamanhos t ON f.tamanho_id = t.id
-            WHERE fa.colaborador_id = ?
-            AND fa.estado IN ('atribuida','marcada_devolucao')
-            ORDER BY fa.data_atribuicao DESC
-        ");
-        $stmt->execute([$colaborador_id]);
-        $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $total_geral = 0;
-        ?>
 
         <?php if ($fardas_atribuidas): ?>
             <table class="min-w-full border border-gray-200 text-sm">
