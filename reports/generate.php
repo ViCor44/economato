@@ -343,17 +343,17 @@ try {
         case 'fardas_mais_atribuidas':
             $title = "Fardas Mais Atribuídas";
             $sql = "
-                SELECT f.id, f.nome AS farda, c.nome AS cor, t.nome AS tamanho,
-                       SUM(fa.quantidade) AS total_atribuido,
-                       COUNT(DISTINCT fa.colaborador_id) AS colaboradores,
-                       MIN(fa.data_atribuicao) AS primeiro_registo,
-                       MAX(fa.data_atribuicao) AS ultimo_registo
-                FROM farda_atribuicoes fa
-                JOIN fardas f ON f.id = fa.farda_id
-                JOIN cores c ON c.id = f.cor_id
-                JOIN tamanhos t ON t.id = f.tamanho_id
-                WHERE fa.data_atribuicao BETWEEN ? AND ?
-            ";
+                            SELECT f.id, f.nome AS farda, c.nome AS cor, t.nome AS tamanho,
+                                SUM(fa.quantidade) AS total_atribuido,
+                                COUNT(DISTINCT fa.colaborador_id) AS colaboradores,
+                                MIN(fa.data_atribuicao) AS primeiro_registo,
+                                MAX(fa.data_atribuicao) AS ultimo_registo
+                            FROM farda_atribuicoes fa
+                            JOIN fardas f ON f.id = fa.farda_id
+                            JOIN cores c ON c.id = f.cor_id
+                            JOIN tamanhos t ON t.id = f.tamanho_id
+                            WHERE fa.data_atribuicao BETWEEN ? AND ?
+                        ";
             if ($departamento) {
                 $sql .= " AND EXISTS(SELECT 1 FROM farda_departamentos fd WHERE fd.farda_id = f.id AND fd.departamento_id = ?) ";
             }
