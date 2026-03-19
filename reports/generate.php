@@ -340,45 +340,69 @@ try {
             break;
 
         // ------------------- Fardas -------------------
-        case 'fardas_mais_atribuidas':
-            $title = "Fardas Mais Atribuídas";
-            $sql = "
-                SELECT f.id, f.nome AS farda, c.nome AS cor, t.nome AS tamanho,
-                       SUM(fa.quantidade) AS total_atribuido,
-                       COUNT(DISTINCT fa.colaborador_id) AS colaboradores,
-                       MIN(fa.data_atribuicao) AS primeiro_registo,
-                       MAX(fa.data_atribuicao) AS ultimo_registo
-                FROM farda_atribuicoes fa
-                JOIN fardas f ON f.id = fa.farda_id
-                JOIN cores c ON c.id = f.cor_id
-                JOIN tamanhos t ON t.id = f.tamanho_id
-                WHERE fa.data_atribuicao BETWEEN ? AND ?
-            ";
-            if ($departamento) {
-                $sql .= " AND EXISTS(SELECT 1 FROM farda_departamentos fd WHERE fd.farda_id = f.id AND fd.departamento_id = ?) ";
-            }
-            $sql .= " GROUP BY f.id ORDER BY total_atribuido DESC LIMIT ?";
-            $stmt = $pdo->prepare($sql);
-            if ($departamento) {
-                $stmt->execute([$inicioFull, $fimFull, $departamento, $top]);
-            } else {
-                $stmt->execute([$inicioFull, $fimFull, $top]);
-            }
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $columns = ['Farda','Cor','Tamanho','Total Atribuído','Colaboradores','Primeiro','Último'];
-            $rows = array_map(function($r){
-                return [
-                    'Farda'=>$r['farda'],
-                    'Cor'=>$r['cor'],
-                    'Tamanho'=>$r['tamanho'],
-                    'Total Atribuído'=>$r['total_atribuido'],
-                    'Colaboradores'=>$r['colaboradores'],
-                    'Primeiro'=>$r['primeiro_registo'],
-                    'Último'=>$r['ultimo_registo']
-                ];
-            }, $data);
-            break;
+case 'fardas_mais_atribuidas':
 
+$title = "Fardas Mais Atribuídas";
+
+$sql = "
+SELECT 
+    f.id,
+    f.nome AS farda,
+    c.nome AS cor,
+    t.nome AS tamanho,
+    SUM(fa.quantidade) AS total_atribuido,
+    COUNT(DISTINCT fa.colaborador_id) AS colaboradores,
+    MIN(fa.data_atribuicao) AS primeiro_registo,
+    MAX(fa.data_atribuicao) AS ultimo_registo
+FROM farda_atribuicoes fa
+JOIN fardas f ON f.id = fa.farda_id
+JOIN cores c ON c.id = f.cor_id
+JOIN tamanhos t ON t.id = f.tamanho_id
+WHERE fa.estado = 'atribuida'
+AND fa.data_atribuicao BETWEEN ? AND ?
+";
+
+$params = [$inicioFull, $fimFull];
+
+if ($departamento) {
+    $sql .= "
+    AND EXISTS (
+        SELECT 1
+        FROM farda_departamentos fd
+        WHERE fd.farda_id = f.id
+        AND fd.departamento_id = ?
+    )";
+    $params[] = $departamento;
+}
+
+$sql .= "
+GROUP BY f.id, c.nome, t.nome
+ORDER BY total_atribuido DESC
+LIMIT ?
+";
+
+$params[] = $top;
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
+
+$data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$columns = ['Farda','Cor','Tamanho','Total Atribuído','Colaboradores','Primeiro','Último'];
+
+$rows = array_map(function($r){
+    return [
+        'Farda'=>$r['farda'],
+        'Cor'=>$r['cor'],
+        'Tamanho'=>$r['tamanho'],
+        'Total Atribuído'=>$r['total_atribuido'],
+        'Colaboradores'=>$r['colaboradores'],
+        'Primeiro'=>$r['primeiro_registo'],
+        'Último'=>$r['ultimo_registo']
+    ];
+}, $data);
+
+break;
         case 'fardas_menos_atribuidas':
             $title = "Fardas Menos Atribuídas ({$inicio} → {$fim})";
             $sql = "
