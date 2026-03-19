@@ -123,7 +123,13 @@ try {
             </div>
         </div>
 
-        <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
+        <div class="flex items-center gap-3">
+            <a href="editar_colaborador.php?id=<?= $colaborador_id ?>"
+               class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 font-semibold">
+               ✏️ Editar Colaborador
+            </a>
+            <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
+        </div>
     </div>
 
     <!-- ⚠ ALERTA DE DÍVIDA -->
