@@ -156,7 +156,7 @@ try {
                                 <td class="px-4 py-2 text-right"><?= number_format($f['preco_unitario'], 2, ',', '.') ?></td>
                                 <td class="px-4 py-2 text-right"><?= (int)$f['quantidade'] ?></td>
                                 <td class="px-4 py-2 text-center">
-                                    <a href="editar_farda.php?id=<?= $f['id'] ?>" class="text-blue-600 hover:underline">Editar</a>
+                                    <a href="editar_farda.php?id=<?= $f['id'] ?>&pesquisa=<?= urlencode($pesquisa) ?>&departamento_id=<?= $departamento_id ?>" class="text-blue-600 hover:underline">Editar</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

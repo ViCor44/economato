@@ -12,6 +12,9 @@ $tamanhos = $pdo->query("SELECT id, nome FROM tamanhos ORDER BY nome ASC")->fetc
 $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$pesquisa = trim($_GET['pesquisa'] ?? '');
+$departamento_id = isset($_GET['departamento_id']) ? (int)$_GET['departamento_id'] : 0;
+
 if ($id <= 0) {
     header('Location: gerir_stock_farda.php');
     exit;
@@ -151,7 +154,7 @@ function is_dep_checked($id, $deps_assoc) {
 <main class="max-w-3xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold">✏️ Editar Farda</h1>
-        <a href="gerir_stock_farda.php" class="text-blue-600 hover:underline">← Voltar ao stock</a>
+        <a href="gerir_stock_farda.php?pesquisa=<?= urlencode($pesquisa) ?>&departamento_id=<?= $departamento_id ?>" class="text-blue-600 hover:underline">← Voltar ao stock</a>
     </div>
 
     <?php if ($success): ?>
@@ -247,7 +250,7 @@ function is_dep_checked($id, $deps_assoc) {
         </div>
 
         <div class="flex justify-end gap-3">
-            <a href="gerir_stock_farda.php" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md">Cancelar</a>
+            <a href="gerir_stock_farda.php?pesquisa=<?= urlencode($pesquisa) ?>&departamento_id=<?= $departamento_id ?>" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md">Cancelar</a>
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Guardar Alterações</button>
         </div>
     </form>
