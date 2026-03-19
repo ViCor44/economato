@@ -4,6 +4,10 @@ require_once '../config/db.php';
 
 // Pesquisa opcional
 $pesquisa = trim($_GET['pesquisa'] ?? '');
+$departamento_id = isset($_GET['departamento_id']) ? (int)$_GET['departamento_id'] : 0;
+
+// Buscar departamentos
+$departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 try {
     $query = "
@@ -17,27 +21,32 @@ try {
         LEFT JOIN departamentos d ON fd.departamento_id = d.id
     ";
 
+    $conditions = [];
+    $params = [];
+
     // Se houver termo de pesquisa, filtra por nome ou cor
     if ($pesquisa) {
-        $query .= " WHERE f.nome LIKE :pesq1 OR c.nome LIKE :pesq2 OR f.ean LIKE :pesq3 ";
+        $conditions[] = "(f.nome LIKE :pesq1 OR c.nome LIKE :pesq2 OR f.ean LIKE :pesq3)";
+        $val = "%{$pesquisa}%";
+        $params['pesq1'] = $val;
+        $params['pesq2'] = $val;
+        $params['pesq3'] = $val;
+    }
+
+    // Se houver departamento selecionado, filtra por departamento
+    if ($departamento_id > 0) {
+        $conditions[] = "fd.departamento_id = :dept_id";
+        $params['dept_id'] = $departamento_id;
+    }
+
+    if (!empty($conditions)) {
+        $query .= " WHERE " . implode(" AND ", $conditions);
     }
 
     $query .= " GROUP BY f.id ORDER BY f.nome ASC";
 
     $stmt = $pdo->prepare($query);
-
-    if ($pesquisa) {
-        $val = "%{$pesquisa}%";
-        $params = ['pesq1' => $val, 'pesq2' => $val, 'pesq3' => $val];
-
-        // opcional: log para debug (remove em produção)
-        // file_put_contents(__DIR__.'/../storage/sql_debug.log', $query . "\nPARAMS: ".var_export($params, true)."\n\n", FILE_APPEND);
-
-        $stmt->execute($params);
-    } else {
-        $stmt->execute();
-    }
-
+    $stmt->execute($params);
     $fardas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
@@ -67,7 +76,7 @@ try {
 
             <div class="flex flex-col md:flex-row gap-3 md:items-center">
                 <!-- 🔍 Pesquisa -->
-                <form method="GET" class="flex gap-2">
+                <form method="GET" class="flex gap-2 flex-wrap md:flex-nowrap">
                     <input 
                         type="text" 
                         name="pesquisa" 
@@ -75,6 +84,17 @@ try {
                         placeholder="Pesquisar por nome ou cor..." 
                         style="padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px;"
                     >
+                    <select 
+                        name="departamento_id" 
+                        style="padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px;"
+                    >
+                        <option value="">Todos os departamentos</option>
+                        <?php foreach ($departamentos as $d): ?>
+                            <option value="<?= $d['id'] ?>" <?= ($departamento_id == $d['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($d['nome']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                     <button type="submit"
                         style="background-color:#2563eb; color:#fff; font-weight:600; padding:8px 18px; border:none; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
                         onmouseover="this.style.backgroundColor='#1d4ed8'"
