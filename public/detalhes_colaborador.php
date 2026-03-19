@@ -124,11 +124,11 @@ try {
         </div>
 
         <div class="flex items-center gap-3">
+            <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
             <a href="editar_colaborador.php?id=<?= $colaborador_id ?>"
-               class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold shadow-md transition-colors duration-150">
+               class="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold shadow-md transition-colors duration-150">
                ✏️ Editar Colaborador
             </a>
-            <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
         </div>
     </div>
 
