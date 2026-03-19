@@ -200,7 +200,9 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                     <?php endforeach; ?>
                 </select>
                 <div id="boxSector" class="<?= (
-                    stripos($colaborador['departamento_nome'] ?? '', 'piscinas') === false
+                    stripos($colaborador['departamento_nome'] ?? '', 'piscinas') === false &&
+                    stripos($colaborador['departamento_nome'] ?? '', 'vigilantes') === false &&
+                    stripos($colaborador['departamento_nome'] ?? '', 'supervisores') === false
                 ) ? 'hidden' : '' ?>">
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         Sector (Piscinas)
@@ -236,7 +238,7 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
         const text =
             departamentoSelect.options[departamentoSelect.selectedIndex]?.text.toLowerCase();
 
-        if (text && text.includes('piscinas')) {
+        if (text && (text.includes('piscinas') || text.includes('vigilantes') || text.includes('supervisores'))) {
             boxSector.classList.remove('hidden');
         } else {
             boxSector.classList.add('hidden');
