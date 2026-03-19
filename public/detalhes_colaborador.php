@@ -125,7 +125,7 @@ try {
 
         <div class="flex items-center gap-3">
             <a href="editar_colaborador.php?id=<?= $colaborador_id ?>"
-               class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 font-semibold">
+               class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold shadow-md transition-colors duration-150">
                ✏️ Editar Colaborador
             </a>
             <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
