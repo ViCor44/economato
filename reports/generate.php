@@ -679,6 +679,7 @@ break;
                 JOIN fardas f ON f.id = fa.farda_id
                 JOIN colaboradores col ON col.id = fa.colaborador_id
                 WHERE fa.data_atribuicao BETWEEN ? AND ?
+                  AND fa.estado <> 'devolvida_confirmada'
                 GROUP BY col.id
                 ORDER BY total DESC
                 LIMIT ?
@@ -700,6 +701,7 @@ break;
                 JOIN colaboradores col ON col.id = fa.colaborador_id
                 JOIN departamentos d ON d.id = col.departamento_id
                 WHERE fa.data_atribuicao BETWEEN ? AND ?
+                  AND fa.estado <> 'devolvida_confirmada'
                 GROUP BY d.id
                 ORDER BY total DESC
                 LIMIT ?
