@@ -203,7 +203,7 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
         const selectedText =
             departamentoSelect.options[departamentoSelect.selectedIndex]?.text.toLowerCase();
 
-        if (selectedText && selectedText.includes('piscinas')) {
+        if (selectedText && (selectedText.includes('vigilantes') || selectedText.includes('supervisores'))) {
             boxSector.classList.remove('hidden');
         } else {
             boxSector.classList.add('hidden');

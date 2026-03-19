@@ -145,7 +145,8 @@ try {
             <p><strong>Departamento:</strong> <?= htmlspecialchars($colaborador['departamento_nome'] ?? '—') ?></p>
             <?php if (
                 !empty($colaborador['sector']) &&
-                stripos($colaborador['departamento_nome'], 'piscinas') !== false
+                (stripos($colaborador['departamento_nome'], 'vigilantes') !== false || 
+                 stripos($colaborador['departamento_nome'], 'supervisores') !== false)
             ): ?>
                 <p>
                     <strong>Sector:</strong>
