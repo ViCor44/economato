@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $departamento_id = $_POST['departamento_id'] ?? null;
     $ativo = isset($_POST['ativo']) ? 1 : 0;
+    $cartao_entregue = isset($_POST['cartao_entregue']) ? 1 : 0;
 
     $foto_nome = $colaborador['foto']; // manter foto atual
 
@@ -86,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     departamento_id = ?,
                     sector = ?,
                     ativo = ?,
+                    cartao_entregue = ?,
                     foto = ?
                 WHERE id = ?
             ");
@@ -99,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $departamento_id,
                 $sector,
                 $ativo,
+                $cartao_entregue,
                 $foto_nome,
                 $id
             ]);
@@ -215,10 +218,16 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                 </div>
             </div>
 
-            <div class="flex items-center">
-                <input type="checkbox" name="ativo" id="ativo"
-                        style="margin-right:10px;" <?= $colaborador['ativo'] ? 'checked' : '' ?>>
-                <label for="ativo" class="text-gray-700">Colaborador Ativo</label>
+            <div class="flex items-center gap-6">
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="ativo" id="ativo" class="mr-2" <?= $colaborador['ativo'] ? 'checked' : '' ?>>
+                    <span class="text-gray-700">Colaborador Ativo</span>
+                </label>
+
+                <label class="inline-flex items-center">
+                    <input type="checkbox" name="cartao_entregue" id="cartao_entregue" class="mr-2" <?= !empty($colaborador['cartao_entregue']) ? 'checked' : '' ?>>
+                    <span class="text-gray-700">Cartão Entregue</span>
+                </label>
             </div>
 
             <div class="text-right pt-4">

@@ -9,6 +9,8 @@ if ($colaborador_id <= 0) {
     exit;
 }
 
+$success = '';
+
 try {
     // 🔹 Buscar dados do colaborador
     $stmt = $pdo->prepare("
@@ -23,7 +25,14 @@ try {
     if (!$colaborador) {
         die("Colaborador não encontrado.");
     }
-
+    // ✅ Atualizar estado de entrega do cartão (botão no topo)
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cartao_entregue_status'])) {
+        $entregue = ($_POST['cartao_entregue_status'] === '1') ? 1 : 0;
+        $stmtUpdate = $pdo->prepare("UPDATE colaboradores SET cartao_entregue = ? WHERE id = ?");
+        $stmtUpdate->execute([$entregue, $colaborador_id]);
+        $colaborador['cartao_entregue'] = $entregue;
+        $success = $entregue ? 'Cartão marcado como entregue.' : 'Cartão marcado como não entregue.';
+    }
     // 🔹 Buscar cacifos atribuídos
     $stmtCacifos = $pdo->prepare("
         SELECT numero, avariado
@@ -89,6 +98,12 @@ try {
 
 <main class="max-w-5xl mx-auto bg-white rounded-2xl shadow-md p-4 md:p-8 mt-8 mb-8">
 
+    <?php if (!empty($success)): ?>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-6">
+            <?= htmlspecialchars($success) ?>
+        </div>
+    <?php endif; ?>
+
     <!-- 👤 CABEÇALHO -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div class="flex items-center gap-4">
@@ -125,6 +140,16 @@ try {
 
         <div class="flex items-center gap-3">
             <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
+
+            <form method="POST" style="margin:0;">
+                <input type="hidden" name="cartao_entregue_status" value="<?= $colaborador['cartao_entregue'] ? '0' : '1' ?>">
+                <button type="submit"
+                    class="ml-4 px-4 py-2 text-white rounded-md font-semibold shadow-md transition-colors duration-150"
+                    style="background-color: <?= $colaborador['cartao_entregue'] ? '#10b981' : '#ef4444' ?>;">
+                    <?= $colaborador['cartao_entregue'] ? '✔ Cartão Entregue' : '✘ Marcar Cartão Entregue' ?>
+                </button>
+            </form>
+
             <a href="editar_colaborador.php?id=<?= $colaborador_id ?>"
                class="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold shadow-md transition-colors duration-150">
                ✏️ Editar Colaborador
@@ -163,6 +188,11 @@ try {
                 <?= $colaborador['ativo']
                     ? '<span class="text-green-600 font-medium">Ativo</span>'
                     : '<span class="text-red-600 font-medium">Inativo</span>' ?>
+            </p>
+            <p><strong>Cartão Entregue:</strong>
+                <?= $colaborador['cartao_entregue']
+                    ? '<span class="text-green-600 font-medium">Sim</span>'
+                    : '<span class="text-red-600 font-medium">Não</span>' ?>
             </p>
             <p><strong>Data de criação:</strong>
                 <?= date('d/m/Y H:i', strtotime($colaborador['criado_em'])) ?>
