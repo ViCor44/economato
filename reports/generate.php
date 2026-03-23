@@ -310,16 +310,25 @@ try {
 
         case 'colaboradores_sem_farda':
             $title = "Colaboradores sem Farda Atribuída";
-            $stmt = $pdo->prepare("
+            $sql = "
                 SELECT c.id, c.nome, c.cartao, c.email
                 FROM colaboradores c
                 LEFT JOIN farda_atribuicoes fa
                     ON fa.colaborador_id = c.id
                     AND fa.estado IN ('atribuida', 'marcada_devolucao')
                 WHERE fa.id IS NULL
-                ORDER BY c.nome ASC
-            ");
-            $stmt->execute();
+            ";
+
+            $params = [];
+            if ($departamento) {
+                $sql .= " AND c.departamento_id = ?";
+                $params[] = $departamento;
+            }
+
+            $sql .= "\n                ORDER BY c.nome ASC\n            ";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $columns = ['ID','Nome','Cartão','Email'];
             $rows = array_map(function($r){ return ['ID'=>$r['id'],'Nome'=>$r['nome'],'Cartão'=>$r['cartao'],'Email'=>$r['email']]; }, $data);
