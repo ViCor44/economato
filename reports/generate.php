@@ -313,7 +313,9 @@ try {
             $stmt = $pdo->prepare("
                 SELECT c.id, c.nome, c.cartao, c.email
                 FROM colaboradores c
-                LEFT JOIN farda_atribuicoes fa ON fa.colaborador_id = c.id
+                LEFT JOIN farda_atribuicoes fa
+                    ON fa.colaborador_id = c.id
+                    AND fa.estado IN ('atribuida', 'marcada_devolucao')
                 WHERE fa.id IS NULL
                 ORDER BY c.nome ASC
             ");
