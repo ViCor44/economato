@@ -18,7 +18,7 @@ try {
     // 🔍 Query principal (JOIN com colaboradores)
     if (!empty($pesquisa)) {
         $stmt = $pdo->prepare("
-            SELECT c.numero, c.avariado, col.nome AS colaborador, col.cartao
+            SELECT c.numero, c.avariado, col.nome AS colaborador, col.cartao, col.numero_funcionario
             FROM cacifos c
             LEFT JOIN colaboradores col ON c.colaborador_id = col.id
             WHERE col.nome LIKE :pesq_nome
@@ -31,7 +31,7 @@ try {
         ]);
     } else {
         $stmt = $pdo->query("
-            SELECT c.numero, c.avariado, col.nome AS colaborador, col.cartao
+            SELECT c.numero, c.avariado, col.nome AS colaborador, col.cartao, col.numero_funcionario
             FROM cacifos c
             LEFT JOIN colaboradores col ON c.colaborador_id = col.id
             ORDER BY c.numero ASC
@@ -42,6 +42,7 @@ try {
         $num = (int)$row['numero'];
         $cacifos[$num] = [
             'colaborador' => $row['colaborador'],
+            'numero_funcionario' => $row['numero_funcionario'] ?? null,
             'avariado' => (bool)$row['avariado']
         ];
 
@@ -196,7 +197,12 @@ try {
         for ($i = 1; $i <= $total_cacifos; $i++) {
             if (isset($cacifos[$i])) {
                 $colab = $cacifos[$i]['colaborador'] ?? '';
-                $tooltip = $cacifos[$i]['avariado'] ? "Avariado" : htmlspecialchars($colab ?: "Ocupado");
+                $numeroColaborador = $cacifos[$i]['numero_funcionario'] ?? null;
+                $textoOcupado = $colab ?: "Ocupado";
+                if ($numeroColaborador !== null && $numeroColaborador !== '') {
+                    $textoOcupado .= " (Nº " . $numeroColaborador . ")";
+                }
+                $tooltip = $cacifos[$i]['avariado'] ? "Avariado" : htmlspecialchars($textoOcupado);
                 $url = "edit_locker.php?numero=$i";
 
                 if ($cacifos[$i]['avariado']) {
