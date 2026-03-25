@@ -225,7 +225,7 @@ try {
 
         <?php else: ?>
 
-            <a href="list_lockers.php?colaborador_id=<?= (int)$colaborador['id'] ?>&pesquisa=<?= urlencode($colaborador['nome']) ?>"
+            <a href="list_lockers.php?colaborador_id=<?= (int)$colaborador['id'] ?>"
             class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
                     bg-green-100 text-green-700 hover:bg-green-200 transition mr-4">
                 ➕ <span>Atribuir</span>
