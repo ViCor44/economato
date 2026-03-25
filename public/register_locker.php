@@ -18,10 +18,11 @@ $colaborador_preselecionado = isset($_GET['colaborador_id']) ? (int)$_GET['colab
 
 $mensagem = '';
 $erro = '';
+$colaborador_contexto = null;
 
 // 🔍 Buscar colaboradores ativos
 try {
-    $stmt = $pdo->query("SELECT id, nome FROM colaboradores WHERE ativo = 1 ORDER BY nome ASC");
+    $stmt = $pdo->query("SELECT id, nome, numero_funcionario FROM colaboradores WHERE ativo = 1 ORDER BY nome ASC");
     $colaboradores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $idsColaboradores = array_map(static function ($c) {
@@ -29,6 +30,15 @@ try {
     }, $colaboradores);
     if (!in_array($colaborador_preselecionado, $idsColaboradores, true)) {
         $colaborador_preselecionado = 0;
+    }
+
+    if ($colaborador_preselecionado > 0) {
+        foreach ($colaboradores as $colaboradorItem) {
+            if ((int)$colaboradorItem['id'] === $colaborador_preselecionado) {
+                $colaborador_contexto = $colaboradorItem;
+                break;
+            }
+        }
     }
 } catch (PDOException $e) {
     die("Erro ao carregar colaboradores: " . $e->getMessage());
@@ -121,6 +131,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .back { display: inline-block; margin-top: 15px; text-decoration: none; color: #007bff; }
         .back:hover { text-decoration: underline; }
         .disabled { color: #aaa; }
+        .selected-colaborador {
+            margin-bottom: 15px;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #f9fafb;
+            color: #111827;
+        }
         label {
             display: block;
             margin-bottom: 8px;
@@ -153,16 +171,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($erro): ?><p class="erro"><?= htmlspecialchars($erro) ?></p><?php endif; ?>
 
     <form method="POST">
-        <label for="colaborador_id">Atribuir a colaborador:</label>
-        <select name="colaborador_id" id="colaborador_id" <?= $cacifo['avariado'] ? 'disabled class="disabled"' : '' ?>>
-            <option value="">-- Nenhum (livre) --</option>
-            <?php foreach ($colaboradores as $col): ?>
-                <option value="<?= $col['id'] ?>"
-                    <?= (!empty($cacifo['colaborador_id']) && $cacifo['colaborador_id'] == $col['id']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($col['nome']) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+        <?php if ($colaborador_contexto): ?>
+            <label>Colaborador selecionado:</label>
+            <div class="selected-colaborador">
+                <?= htmlspecialchars($colaborador_contexto['nome']) ?>
+                <?php if (!empty($colaborador_contexto['numero_funcionario'])): ?>
+                    <span> (Nº <?= htmlspecialchars((string)$colaborador_contexto['numero_funcionario']) ?>)</span>
+                <?php endif; ?>
+            </div>
+            <input type="hidden" name="colaborador_id" value="<?= (int)$colaborador_contexto['id'] ?>">
+        <?php else: ?>
+            <label for="colaborador_id">Atribuir a colaborador:</label>
+            <select name="colaborador_id" id="colaborador_id" <?= $cacifo['avariado'] ? 'disabled class="disabled"' : '' ?>>
+                <option value="">-- Nenhum (livre) --</option>
+                <?php foreach ($colaboradores as $col): ?>
+                    <option value="<?= $col['id'] ?>"
+                        <?= (!empty($cacifo['colaborador_id']) && $cacifo['colaborador_id'] == $col['id']) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($col['nome']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        <?php endif; ?>
 
         
             <div class="checkbox-row">
@@ -181,6 +210,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script>
 function toggleColaborador(checkbox) {
     const select = document.getElementById('colaborador_id');
+    if (!select) {
+        return;
+    }
     if (checkbox.checked) {
         select.disabled = true;
         select.classList.add('disabled');
