@@ -14,6 +14,8 @@ if ($numero <= 0) {
     die("Número de cacifo inválido.");
 }
 
+$colaborador_preselecionado = isset($_GET['colaborador_id']) ? (int)$_GET['colaborador_id'] : 0;
+
 $mensagem = '';
 $erro = '';
 
@@ -21,6 +23,13 @@ $erro = '';
 try {
     $stmt = $pdo->query("SELECT id, nome FROM colaboradores WHERE ativo = 1 ORDER BY nome ASC");
     $colaboradores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $idsColaboradores = array_map(static function ($c) {
+        return (int)$c['id'];
+    }, $colaboradores);
+    if (!in_array($colaborador_preselecionado, $idsColaboradores, true)) {
+        $colaborador_preselecionado = 0;
+    }
 } catch (PDOException $e) {
     die("Erro ao carregar colaboradores: " . $e->getMessage());
 }
@@ -35,6 +44,10 @@ try {
     ");
     $stmt->execute(['numero' => $numero]);
     $cacifo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($cacifo && empty($cacifo['colaborador_id']) && !$cacifo['avariado'] && $colaborador_preselecionado > 0) {
+        $cacifo['colaborador_id'] = $colaborador_preselecionado;
+    }
 } catch (PDOException $e) {
     die("Erro ao carregar dados do cacifo.");
 }
@@ -69,10 +82,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'avariado' => $avariado
         ]);
 
-        $mensagem = "Cacifo atualizado com sucesso!";
-        // Atualiza os dados locais
-        $cacifo['colaborador_id'] = $colaborador_id;
-        $cacifo['avariado'] = $avariado;
+        $redirecionarColaboradorId = null;
+        if (!$avariado && !empty($colaborador_id)) {
+            $redirecionarColaboradorId = (int)$colaborador_id;
+        } elseif ($colaborador_preselecionado > 0) {
+            $redirecionarColaboradorId = $colaborador_preselecionado;
+        }
+
+        if ($redirecionarColaboradorId) {
+            header("Location: detalhes_colaborador.php?id=" . $redirecionarColaboradorId);
+            exit;
+        }
+
+        header("Location: list_lockers.php");
+        exit;
     } catch (PDOException $e) {
         $erro = "Erro ao atualizar o cacifo: " . $e->getMessage();
     }
@@ -151,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        
 
         <button type="submit" class="btn">Guardar</button>
-        <a href="list_lockers.php" class="back">← Voltar à lista</a>
+        <a href="list_lockers.php<?= $colaborador_preselecionado > 0 ? '?colaborador_id=' . $colaborador_preselecionado : '' ?>" class="back">← Voltar à lista</a>
     </form>
 </main>
 

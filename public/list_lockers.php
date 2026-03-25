@@ -9,10 +9,16 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $pesquisa = trim($_GET['pesquisa'] ?? '');
+$colaborador_param_id = isset($_GET['colaborador_id']) ? (int)$_GET['colaborador_id'] : 0;
 $cacifos = [];
 $ocupados = 0;
 $avariados = 0;
 $total_cacifos = 540;
+
+$atribuirQuery = '';
+if ($colaborador_param_id > 0) {
+    $atribuirQuery = '&colaborador_id=' . $colaborador_param_id;
+}
 
 try {
     // 🔍 Query principal (JOIN com colaboradores)
@@ -220,7 +226,7 @@ try {
                       </div>";
             } else {
                 $class = ($i <= 268) ? 'blue textwhite' : 'yellow textblack';
-                $url = "register_locker.php?numero=$i";
+                $url = "register_locker.php?numero=$i{$atribuirQuery}";
                 echo "<a href='$url' class='cacifo $class' title='Livre'>$i</a>";
             }
         }
