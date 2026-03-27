@@ -7,6 +7,16 @@ $mostrar_inativos = isset($_GET['mostrar_inativos']) && $_GET['mostrar_inativos'
 
 $colaboradores = [];
 
+// Carregar departamentos para o filtro
+$departamento_id = isset($_GET['departamento_id']) ? (int)$_GET['departamento_id'] : 0;
+$departamentos = [];
+try {
+    $stmt = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC");
+    $departamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $departamentos = [];
+}
+
 try {
 
     $sql = "
@@ -55,6 +65,12 @@ try {
             $params[] = $like;
         }
     }
+
+        // Filtro por departamento
+        if ($departamento_id > 0) {
+            $sql .= " AND c.departamento_id = ? ";
+            $params[] = $departamento_id;
+        }
 
     // ✅ Por defeito: apenas ativos
     if (!$mostrar_inativos) {
@@ -106,6 +122,15 @@ try {
                 value="<?= htmlspecialchars($pesquisa) ?>"
                 placeholder="🔍 Nome, cartão ou nº funcionário"
                 class="flex-1 px-4 py-2 border rounded-md">
+
+                <select name="departamento_id" class="px-4 py-2 border rounded-md">
+                    <option value="0">Todos os departamentos</option>
+                    <?php foreach ($departamentos as $dep): ?>
+                        <option value="<?= $dep['id'] ?>" <?= $departamento_id == $dep['id'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($dep['nome']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
 
             <button type="submit"
                     class="bg-blue-600 text-white px-4 py-2 rounded-md">
