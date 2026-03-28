@@ -279,12 +279,12 @@ try {
     ?>
 
     <?php if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR): ?>
-        <div id="modalAlertasColaboradores" class="hidden fixed inset-0 z-50" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="tituloModalAlertas">
+        <div id="modalAlertasColaboradores" class="hidden fixed inset-0 z-[1000]" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="tituloModalAlertas">
             <div id="overlayModalAlertas" class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 transition-opacity duration-200"></div>
 
-            <div class="relative flex min-h-full items-center justify-center p-4 sm:p-6">
-                <div id="conteudoModalAlertas" class="relative w-full max-w-4xl max-h-[88vh] flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl opacity-0 scale-95 transition-all duration-200">
-                    <div class="flex items-center justify-between gap-3 bg-gradient-to-r from-amber-50 via-orange-50 to-white px-6 py-4 border-b border-amber-100">
+            <div class="relative flex min-h-screen items-center justify-center p-4 sm:p-6">
+                <div id="conteudoModalAlertas" class="relative w-full max-w-4xl h-[85vh] max-h-[85vh] min-h-0 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl opacity-0 scale-95 transition-all duration-200">
+                    <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-200 bg-white">
                         <div>
                             <h3 id="tituloModalAlertas" class="text-lg font-semibold text-slate-800">Situacoes de Alerta</h3>
                             <p class="text-sm text-slate-600">Acompanhe e corrija dados em falta dos colaboradores.</p>
@@ -297,7 +297,7 @@ try {
                         </div>
                     </div>
 
-                    <div id="listaAlertasColaboradores" class="flex-1 overflow-y-auto px-5 py-4">
+                    <div id="listaAlertasColaboradores" class="h-full min-h-0 overflow-y-scroll px-5 py-4 pr-3 bg-slate-50/50">
                         <?php if ($error_message): ?>
                             <p class="text-sm text-red-600"><?= htmlspecialchars($error_message) ?></p>
                         <?php elseif ($total_alertas_colaboradores === 0): ?>
@@ -307,8 +307,8 @@ try {
                         <?php else: ?>
                             <div class="space-y-3">
                                 <?php foreach ($alertas_colaboradores as $alerta): ?>
-                                    <div class="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm">
-                                        <div class="min-w-0">
+                                    <div class="flex items-start justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                                        <div class="min-w-0 flex-1">
                                             <a href="detalhes_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="font-semibold text-slate-800 hover:text-blue-700">
                                                 <?= htmlspecialchars($alerta['nome']) ?>
                                             </a>
@@ -320,9 +320,11 @@ try {
                                                 <?php endforeach; ?>
                                             </div>
                                         </div>
-                                        <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="shrink-0 inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">
-                                            Corrigir
-                                        </a>
+                                        <div class="shrink-0 self-start">
+                                            <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+                                                Corrigir
+                                            </a>
+                                        </div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
