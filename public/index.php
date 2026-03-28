@@ -58,6 +58,9 @@ try {
 
     $total_alertas_colaboradores = count($alertas_colaboradores);
 
+    $total_utilizadores_pendentes = 0;
+    $stmt_pendentes_u = $pdo->query("SELECT COUNT(*) FROM utilizadores WHERE is_active = 0");
+    $total_utilizadores_pendentes = (int)$stmt_pendentes_u->fetchColumn();
 
 } catch (PDOException $e) {
     error_log("Erro ao buscar dados para o dashboard: " . $e->getMessage());
@@ -177,7 +180,12 @@ try {
                         aria-expanded="false"
                         aria-controls="modalAlertasColaboradores"
                     >
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-4 relative">
+                            <?php if ($total_alertas_colaboradores > 0): ?>
+                                <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:0.7rem;font-weight:700;line-height:1;padding:3px 7px;border-radius:9999px;min-width:20px;text-align:center;">
+                                    <?= $total_alertas_colaboradores ?>
+                                </span>
+                            <?php endif; ?>
                             <div style="background-color:#fef3c7;color:#d97706;padding:0.75rem;border-radius:9999px;flex-shrink:0;">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -214,7 +222,12 @@ try {
 
                 <?php if ((int)($utilizador_logado['role_id'] ?? 0) === ROLE_ADMIN): ?>
                 <a href="gerir_utilizadores.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-4 relative">
+                        <?php if ($total_utilizadores_pendentes > 0): ?>
+                            <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:0.7rem;font-weight:700;line-height:1;padding:3px 7px;border-radius:9999px;min-width:20px;text-align:center;">
+                                <?= $total_utilizadores_pendentes ?>
+                            </span>
+                        <?php endif; ?>
                         <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /> </svg>                        </div>
                         <div>
