@@ -280,24 +280,16 @@ try {
 
     <?php if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR): ?>
         <div id="modalAlertasColaboradores" class="hidden fixed inset-0 z-[1000]" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="tituloModalAlertas">
-            <div id="overlayModalAlertas" class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] opacity-0 transition-opacity duration-200"></div>
+            <div id="overlayModalAlertas" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
 
-            <div class="relative flex min-h-screen items-center justify-center p-4 sm:p-6">
-                <div id="conteudoModalAlertas" class="relative w-full max-w-4xl h-[85vh] max-h-[85vh] min-h-0 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl opacity-0 scale-95 transition-all duration-200">
-                    <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-200 bg-white">
-                        <div>
-                            <h3 id="tituloModalAlertas" class="text-lg font-semibold text-slate-800">Situacoes de Alerta</h3>
-                            <p class="text-sm text-slate-600">Acompanhe e corrija dados em falta dos colaboradores.</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 border border-amber-200">
-                                <?= (int)$total_alertas_colaboradores ?> alerta(s)
-                            </span>
-                            <button type="button" id="fecharModalAlertas" class="h-9 w-9 rounded-full border border-slate-300 text-slate-500 hover:bg-slate-100 hover:text-slate-700 text-xl leading-none" aria-label="Fechar modal de alertas">&times;</button>
-                        </div>
+            <div class="relative flex min-h-screen items-center justify-center p-4">
+                <div id="conteudoModalAlertas" class="relative w-[95%] max-w-3xl bg-white rounded-xl shadow-2xl border border-gray-200 opacity-0 scale-95 transition-all duration-200 max-h-[85vh] overflow-hidden flex flex-col">
+                    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+                        <h3 id="tituloModalAlertas" class="text-lg font-semibold text-gray-800">Situações de Alerta</h3>
+                        <button type="button" id="fecharModalAlertas" class="text-gray-500 hover:text-gray-800 text-2xl leading-none" aria-label="Fechar modal de alertas">&times;</button>
                     </div>
 
-                    <div id="listaAlertasColaboradores" class="h-full min-h-0 overflow-y-scroll px-5 py-4 pr-3 bg-slate-50/50">
+                    <div id="listaAlertasColaboradores" class="overflow-y-scroll px-5 py-4" style="max-height: calc(85vh - 122px);">
                         <?php if ($error_message): ?>
                             <p class="text-sm text-red-600"><?= htmlspecialchars($error_message) ?></p>
                         <?php elseif ($total_alertas_colaboradores === 0): ?>
@@ -305,35 +297,27 @@ try {
                                 Não existem alertas de colaboradores neste momento.
                             </p>
                         <?php else: ?>
-                            <div class="space-y-3">
+                            <div class="space-y-2">
                                 <?php foreach ($alertas_colaboradores as $alerta): ?>
-                                    <div class="flex items-start justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                                        <div class="min-w-0 flex-1">
-                                            <a href="detalhes_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="font-semibold text-slate-800 hover:text-blue-700">
+                                    <div class="flex items-start justify-between gap-3 p-3 border border-gray-200 rounded-md bg-gray-50">
+                                        <div>
+                                            <a href="detalhes_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="font-medium text-gray-800 hover:text-blue-700">
                                                 <?= htmlspecialchars($alerta['nome']) ?>
                                             </a>
-                                            <div class="mt-2 flex flex-wrap gap-2">
-                                                <?php foreach ($alerta['motivos'] as $motivo): ?>
-                                                    <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800">
-                                                        <?= htmlspecialchars($motivo) ?>
-                                                    </span>
-                                                <?php endforeach; ?>
-                                            </div>
+                                            <p class="text-sm text-gray-600"><?= htmlspecialchars(implode(' | ', $alerta['motivos'])) ?></p>
                                         </div>
-                                        <div class="shrink-0 self-start">
-                                            <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="text-sm font-semibold text-blue-700 hover:text-blue-900">
-                                                Corrigir
-                                            </a>
-                                        </div>
+                                        <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="text-xs font-semibold text-blue-700 hover:text-blue-900 whitespace-nowrap">
+                                            Corrigir
+                                        </a>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
                     </div>
 
-                    <div class="border-t border-slate-200 bg-slate-50 px-5 py-3 flex items-center justify-between">
-                        <p class="text-xs text-slate-500">Use o scroll para visualizar todas as situacoes.</p>
-                        <button type="button" id="fecharModalAlertasRodape" class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+                    <div class="border-t border-gray-200 bg-gray-50 px-5 py-3 flex items-center justify-between">
+                        <p class="text-xs text-gray-500">Use o scroll para visualizar todas as situações.</p>
+                        <button type="button" id="fecharModalAlertasRodape" class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100">
                             Fechar
                         </button>
                     </div>
