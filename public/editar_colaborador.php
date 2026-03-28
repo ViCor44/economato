@@ -38,20 +38,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sector = null;
     }
 
+    // Se nao existir cartao no momento da edicao, guardar nota padrao.
+    if ($cartao === '') {
+        $cartao = 'SEM CARTAO (Aguardando atribuicao)';
+    }
+
     // Validações
     if (empty($nome)) $errors[] = "O nome é obrigatório.";
     if (empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório.";
-    if (empty($cartao)) $errors[] = "O número do cartão é obrigatório.";
     if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "O email inserido não é válido.";
     }
 
     // Duplicados (cartão ou nº funcionário)
-    $stmt = $pdo->prepare("
-        SELECT id FROM colaboradores
-        WHERE (cartao = ? OR numero_funcionario = ?) AND id <> ?
-    ");
-    $stmt->execute([$cartao, $numero_funcionario, $id]);
+    $cartao_tem_numero_real = ($cartao !== 'SEM CARTAO (Aguardando atribuicao)');
+
+    if ($cartao_tem_numero_real) {
+        $stmt = $pdo->prepare("
+            SELECT id FROM colaboradores
+            WHERE (cartao = ? OR numero_funcionario = ?) AND id <> ?
+        ");
+        $stmt->execute([$cartao, $numero_funcionario, $id]);
+    } else {
+        $stmt = $pdo->prepare("
+            SELECT id FROM colaboradores
+            WHERE numero_funcionario = ? AND id <> ?
+        ");
+        $stmt->execute([$numero_funcionario, $id]);
+    }
 
     if ($stmt->fetch()) {
         $errors[] = "O cartão ou número de funcionário já pertence a outro colaborador.";
@@ -159,7 +173,8 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
 
             <div>
                 <label class="block text-gray-700 font-medium mb-1">Número do Cartão</label>
-                <input type="text" name="cartao" value="<?= htmlspecialchars($colaborador['cartao']) ?>" class="w-full px-4 py-2 border rounded-md" required>
+                <input type="text" name="cartao" value="<?= htmlspecialchars($colaborador['cartao']) ?>" class="w-full px-4 py-2 border rounded-md" placeholder="Opcional: aproxime ou digite o número do cartão">
+                <p class="text-sm text-gray-500 mt-1">Se ficar vazio, será guardado como "SEM CARTÃO (Aguardando atribuição)".</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
