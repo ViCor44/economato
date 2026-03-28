@@ -96,7 +96,7 @@ try {
                         id="cardAlertasColaboradores"
                         class="block w-full text-left bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                         aria-expanded="false"
-                        aria-controls="painelAlertasColaboradores"
+                        aria-controls="modalAlertasColaboradores"
                     >
                         <div class="flex items-center gap-4">
                             <div class="bg-amber-100 text-amber-600 p-3 rounded-full">
@@ -128,34 +128,6 @@ try {
                             </div>
                         </div>
                     </a>
-
-                    <div id="painelAlertasColaboradores" class="hidden sm:col-span-2 lg:col-span-3 xl:col-span-4 bg-white p-6 rounded-lg shadow-md border border-amber-200">
-                        <h3 class="text-base font-semibold text-gray-800 mb-3">Situações de Alerta</h3>
-
-                        <?php if ($error_message): ?>
-                            <p class="text-sm text-red-600"><?= htmlspecialchars($error_message) ?></p>
-                        <?php elseif ($total_alertas_colaboradores === 0): ?>
-                            <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
-                                Não existem alertas de colaboradores neste momento.
-                            </p>
-                        <?php else: ?>
-                            <div class="space-y-2">
-                                <?php foreach ($alertas_colaboradores as $alerta): ?>
-                                    <div class="flex items-start justify-between gap-3 p-3 border border-gray-200 rounded-md bg-gray-50">
-                                        <div>
-                                            <a href="detalhes_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="font-medium text-gray-800 hover:text-blue-700">
-                                                <?= htmlspecialchars($alerta['nome']) ?>
-                                            </a>
-                                            <p class="text-sm text-gray-600"><?= htmlspecialchars(implode(' | ', $alerta['motivos'])) ?></p>
-                                        </div>
-                                        <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="text-xs font-semibold text-blue-700 hover:text-blue-900 whitespace-nowrap">
-                                            Corrigir
-                                        </a>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
 
                 <?php
                 endif;
@@ -280,24 +252,109 @@ try {
         $aiContext = 'dashboard'; // ou 'etiquetas', 'dashboard', etc.
         include __DIR__ . '/../src/templates/assistant_widget.php';
     ?>
+
+    <?php if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR): ?>
+        <div id="modalAlertasColaboradores" class="hidden fixed inset-0 z-50" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="tituloModalAlertas">
+            <div id="overlayModalAlertas" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
+
+            <div id="conteudoModalAlertas" class="relative mx-auto my-8 w-[95%] max-w-3xl bg-white rounded-xl shadow-2xl border border-gray-200 max-h-[85vh] overflow-hidden opacity-0 scale-95 transition-all duration-200">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+                    <h3 id="tituloModalAlertas" class="text-lg font-semibold text-gray-800">Situações de Alerta</h3>
+                    <button type="button" id="fecharModalAlertas" class="text-gray-500 hover:text-gray-800 text-2xl leading-none" aria-label="Fechar modal de alertas">&times;</button>
+                </div>
+
+                <div class="p-5 overflow-y-auto max-h-[70vh]">
+                    <?php if ($error_message): ?>
+                        <p class="text-sm text-red-600"><?= htmlspecialchars($error_message) ?></p>
+                    <?php elseif ($total_alertas_colaboradores === 0): ?>
+                        <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+                            Não existem alertas de colaboradores neste momento.
+                        </p>
+                    <?php else: ?>
+                        <div class="space-y-2">
+                            <?php foreach ($alertas_colaboradores as $alerta): ?>
+                                <div class="flex items-start justify-between gap-3 p-3 border border-gray-200 rounded-md bg-gray-50">
+                                    <div>
+                                        <a href="detalhes_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="font-medium text-gray-800 hover:text-blue-700">
+                                            <?= htmlspecialchars($alerta['nome']) ?>
+                                        </a>
+                                        <p class="text-sm text-gray-600"><?= htmlspecialchars(implode(' | ', $alerta['motivos'])) ?></p>
+                                    </div>
+                                    <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="text-xs font-semibold text-blue-700 hover:text-blue-900 whitespace-nowrap">
+                                        Corrigir
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
     
     <?php include_once '../src/templates/footer.php'; ?>
     <script>
         const cardAlertas = document.getElementById('cardAlertasColaboradores');
-        const painelAlertas = document.getElementById('painelAlertasColaboradores');
+        const modalAlertas = document.getElementById('modalAlertasColaboradores');
+        const overlayModalAlertas = document.getElementById('overlayModalAlertas');
+        const conteudoModalAlertas = document.getElementById('conteudoModalAlertas');
+        const fecharModalAlertas = document.getElementById('fecharModalAlertas');
 
-        if (cardAlertas && painelAlertas) {
-            cardAlertas.addEventListener('click', function () {
-                const aberto = !painelAlertas.classList.contains('hidden');
+        function abrirModalAlertas() {
+            if (!modalAlertas || !cardAlertas || !overlayModalAlertas || !conteudoModalAlertas) return;
+            modalAlertas.classList.remove('hidden');
+            cardAlertas.setAttribute('aria-expanded', 'true');
+            modalAlertas.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('overflow-hidden');
 
-                if (aberto) {
-                    painelAlertas.classList.add('hidden');
-                    cardAlertas.setAttribute('aria-expanded', 'false');
-                } else {
-                    painelAlertas.classList.remove('hidden');
-                    cardAlertas.setAttribute('aria-expanded', 'true');
-                }
+            requestAnimationFrame(function () {
+                overlayModalAlertas.classList.remove('opacity-0');
+                overlayModalAlertas.classList.add('opacity-100');
+                conteudoModalAlertas.classList.remove('opacity-0', 'scale-95');
+                conteudoModalAlertas.classList.add('opacity-100', 'scale-100');
             });
+        }
+
+        function fecharModalAlertasFn() {
+            if (!modalAlertas || !cardAlertas || !overlayModalAlertas || !conteudoModalAlertas) return;
+            overlayModalAlertas.classList.remove('opacity-100');
+            overlayModalAlertas.classList.add('opacity-0');
+            conteudoModalAlertas.classList.remove('opacity-100', 'scale-100');
+            conteudoModalAlertas.classList.add('opacity-0', 'scale-95');
+
+            setTimeout(function () {
+                modalAlertas.classList.add('hidden');
+            }, 200);
+
+            cardAlertas.setAttribute('aria-expanded', 'false');
+            modalAlertas.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        if (cardAlertas && modalAlertas) {
+            cardAlertas.addEventListener('click', abrirModalAlertas);
+        }
+
+        if (overlayModalAlertas) {
+            overlayModalAlertas.addEventListener('click', fecharModalAlertasFn);
+        }
+
+        if (fecharModalAlertas) {
+            fecharModalAlertas.addEventListener('click', fecharModalAlertasFn);
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && modalAlertas && !modalAlertas.classList.contains('hidden')) {
+                fecharModalAlertasFn();
+            }
+        });
+
+        window.addEventListener('beforeunload', function () {
+            document.body.classList.remove('overflow-hidden');
+        });
+        
+        if (modalAlertas && modalAlertas.classList.contains('hidden')) {
+            modalAlertas.setAttribute('aria-hidden', 'true');
         }
     </script>
 </body>
