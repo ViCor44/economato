@@ -12,7 +12,7 @@ $total_alertas_colaboradores = 0;
 try {
 
     $stmt_alertas = $pdo->query(" 
-        SELECT id, nome, cartao, telefone, email, departamento_id, ativo
+        SELECT id, nome, cartao, telefone, email, foto, departamento_id, ativo
         FROM colaboradores
         WHERE ativo = 1
         ORDER BY nome ASC
@@ -25,6 +25,7 @@ try {
         $cartao = trim((string)($colaborador['cartao'] ?? ''));
         $telefone = trim((string)($colaborador['telefone'] ?? ''));
         $email = trim((string)($colaborador['email'] ?? ''));
+        $foto = trim((string)($colaborador['foto'] ?? ''));
         $departamento_id = $colaborador['departamento_id'] ?? null;
 
         if ($cartao === '' || stripos($cartao, 'SEM CARTAO') !== false) {
@@ -37,6 +38,10 @@ try {
 
         if ($email === '') {
             $motivos[] = 'Email por preencher';
+        }
+
+        if ($foto === '') {
+            $motivos[] = 'Fotografia por carregar';
         }
 
         if (empty($departamento_id)) {
