@@ -5,9 +5,58 @@ require_once '../config/db.php';
 // Inicializar variáveis para evitar erros
 
 $error_message = null;
+$alertas_colaboradores = [];
+$total_alertas_colaboradores = 0;
 
 // --- BUSCAR DADOS (DENTRO DE UM TRY...CATCH) ---
 try {
+
+    $stmt_alertas = $pdo->query(" 
+        SELECT id, nome, cartao, telefone, email, departamento_id, ativo
+        FROM colaboradores
+        WHERE ativo = 1
+        ORDER BY nome ASC
+    ");
+
+    $colaboradores_dashboard = $stmt_alertas->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($colaboradores_dashboard as $colaborador) {
+        $motivos = [];
+        $cartao = trim((string)($colaborador['cartao'] ?? ''));
+        $telefone = trim((string)($colaborador['telefone'] ?? ''));
+        $email = trim((string)($colaborador['email'] ?? ''));
+        $departamento_id = $colaborador['departamento_id'] ?? null;
+
+        if ($cartao === '' || stripos($cartao, 'SEM CARTAO') !== false) {
+            $motivos[] = 'Sem cartao atribuido';
+        }
+
+        if ($telefone === '') {
+            $motivos[] = 'Telefone por preencher';
+        }
+
+        if ($email === '') {
+            $motivos[] = 'Email por preencher';
+        }
+
+        if (empty($departamento_id)) {
+            $motivos[] = 'Departamento por preencher';
+        }
+
+        if (!empty($motivos)) {
+            $alertas_colaboradores[] = [
+                'id' => (int)$colaborador['id'],
+                'nome' => (string)$colaborador['nome'],
+                'motivos' => $motivos,
+            ];
+        }
+    }
+
+    usort($alertas_colaboradores, static function ($a, $b) {
+        return count($b['motivos']) <=> count($a['motivos']);
+    });
+
+    $total_alertas_colaboradores = count($alertas_colaboradores);
 
 
 } catch (PDOException $e) {
@@ -42,6 +91,54 @@ try {
                 // Se o utilizador tiver uma função de gestão (qualquer uma exceto Funcionário)
                 if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR ):
                 ?>
+                    <div class="block bg-white p-6 rounded-lg shadow-md border-l-4 border-amber-500 lg:col-span-2">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="bg-amber-100 text-amber-600 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-semibold text-lg text-gray-800">Alertas de Colaboradores</h2>
+                                <p class="text-sm text-gray-600">Colaboradores sem cartão atribuído ou com dados em falta.</p>
+                            </div>
+                        </div>
+
+                        <?php if ($error_message): ?>
+                            <p class="text-sm text-red-600"><?= htmlspecialchars($error_message) ?></p>
+                        <?php elseif ($total_alertas_colaboradores === 0): ?>
+                            <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+                                Não existem alertas de colaboradores neste momento.
+                            </p>
+                        <?php else: ?>
+                            <p class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">
+                                <?= $total_alertas_colaboradores ?> colaborador(es) com alertas.
+                            </p>
+
+                            <div class="space-y-2">
+                                <?php foreach (array_slice($alertas_colaboradores, 0, 5) as $alerta): ?>
+                                    <div class="flex items-start justify-between gap-3 p-3 border border-gray-200 rounded-md bg-gray-50">
+                                        <div>
+                                            <a href="detalhes_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="font-medium text-gray-800 hover:text-blue-700">
+                                                <?= htmlspecialchars($alerta['nome']) ?>
+                                            </a>
+                                            <p class="text-sm text-gray-600"><?= htmlspecialchars(implode(' | ', $alerta['motivos'])) ?></p>
+                                        </div>
+                                        <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="text-xs font-semibold text-blue-700 hover:text-blue-900 whitespace-nowrap">
+                                            Corrigir
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <?php if ($total_alertas_colaboradores > 5): ?>
+                                <p class="text-xs text-gray-500 mt-3">
+                                    A mostrar os 5 mais prioritários. Restantes: <?= $total_alertas_colaboradores - 5 ?>.
+                                </p>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+
                     <a href="colaboradores.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                         <div class="flex items-center gap-4">
                             <div class="bg-blue-100 text-blue-600 p-3 rounded-full">
