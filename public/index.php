@@ -91,8 +91,14 @@ try {
                 // Se o utilizador tiver uma função de gestão (qualquer uma exceto Funcionário)
                 if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR ):
                 ?>
-                    <div class="block bg-white p-6 rounded-lg shadow-md border-l-4 border-amber-500 lg:col-span-2">
-                        <div class="flex items-center gap-4 mb-4">
+                    <button
+                        type="button"
+                        id="cardAlertasColaboradores"
+                        class="block w-full text-left bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        aria-expanded="false"
+                        aria-controls="painelAlertasColaboradores"
+                    >
+                        <div class="flex items-center gap-4">
                             <div class="bg-amber-100 text-amber-600 p-3 rounded-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
@@ -100,9 +106,31 @@ try {
                             </div>
                             <div>
                                 <h2 class="font-semibold text-lg text-gray-800">Alertas de Colaboradores</h2>
-                                <p class="text-sm text-gray-600">Colaboradores sem cartão atribuído ou com dados em falta.</p>
+                                <?php if ($error_message): ?>
+                                    <p class="text-sm text-red-600">Erro ao carregar alertas.</p>
+                                <?php elseif ($total_alertas_colaboradores === 0): ?>
+                                    <p class="text-sm text-emerald-700">Sem alertas no momento.</p>
+                                <?php else: ?>
+                                    <p class="text-sm text-gray-600"><?= $total_alertas_colaboradores ?> colaborador(es) com alerta. Clique para ver.</p>
+                                <?php endif; ?>
                             </div>
                         </div>
+                    </button>
+
+                    <a href="colaboradores.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-blue-100 text-blue-600 p-3 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /> </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-semibold text-lg text-gray-800">Gerir Colaboradores</h2>
+                                <p class="text-sm text-gray-600">Ver, adicionar ou editar colaboradores.</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <div id="painelAlertasColaboradores" class="hidden sm:col-span-2 lg:col-span-3 xl:col-span-4 bg-white p-6 rounded-lg shadow-md border border-amber-200">
+                        <h3 class="text-base font-semibold text-gray-800 mb-3">Situações de Alerta</h3>
 
                         <?php if ($error_message): ?>
                             <p class="text-sm text-red-600"><?= htmlspecialchars($error_message) ?></p>
@@ -111,12 +139,8 @@ try {
                                 Não existem alertas de colaboradores neste momento.
                             </p>
                         <?php else: ?>
-                            <p class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">
-                                <?= $total_alertas_colaboradores ?> colaborador(es) com alertas.
-                            </p>
-
                             <div class="space-y-2">
-                                <?php foreach (array_slice($alertas_colaboradores, 0, 5) as $alerta): ?>
+                                <?php foreach ($alertas_colaboradores as $alerta): ?>
                                     <div class="flex items-start justify-between gap-3 p-3 border border-gray-200 rounded-md bg-gray-50">
                                         <div>
                                             <a href="detalhes_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="font-medium text-gray-800 hover:text-blue-700">
@@ -130,26 +154,8 @@ try {
                                     </div>
                                 <?php endforeach; ?>
                             </div>
-
-                            <?php if ($total_alertas_colaboradores > 5): ?>
-                                <p class="text-xs text-gray-500 mt-3">
-                                    A mostrar os 5 mais prioritários. Restantes: <?= $total_alertas_colaboradores - 5 ?>.
-                                </p>
-                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
-
-                    <a href="colaboradores.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                        <div class="flex items-center gap-4">
-                            <div class="bg-blue-100 text-blue-600 p-3 rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /> </svg>
-                            </div>
-                            <div>
-                                <h2 class="font-semibold text-lg text-gray-800">Gerir Colaboradores</h2>
-                                <p class="text-sm text-gray-600">Ver, adicionar ou editar colaboradores.</p>
-                            </div>
-                        </div>
-                    </a>
 
                 <?php
                 endif;
@@ -276,5 +282,23 @@ try {
     ?>
     
     <?php include_once '../src/templates/footer.php'; ?>
+    <script>
+        const cardAlertas = document.getElementById('cardAlertasColaboradores');
+        const painelAlertas = document.getElementById('painelAlertasColaboradores');
+
+        if (cardAlertas && painelAlertas) {
+            cardAlertas.addEventListener('click', function () {
+                const aberto = !painelAlertas.classList.contains('hidden');
+
+                if (aberto) {
+                    painelAlertas.classList.add('hidden');
+                    cardAlertas.setAttribute('aria-expanded', 'false');
+                } else {
+                    painelAlertas.classList.remove('hidden');
+                    cardAlertas.setAttribute('aria-expanded', 'true');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
