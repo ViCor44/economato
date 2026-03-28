@@ -74,6 +74,60 @@ try {
     <title>Dashboard - CrewSync</title>
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
     <style>
+        #modalAlertasColaboradores,
+        #modalAlertasColaboradores * {
+            box-sizing: border-box;
+        }
+
+        #modalAlertasColaboradores {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+        }
+
+        #modalAlertasColaboradores .modal-wrap {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        #modalAlertasColaboradores .modal-panel {
+            position: relative;
+            width: min(1100px, 96vw);
+            height: min(85vh, 760px);
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
+            overflow: hidden;
+        }
+
+        #modalAlertasColaboradores .modal-header,
+        #modalAlertasColaboradores .modal-footer {
+            padding: 14px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #ffffff;
+        }
+
+        #modalAlertasColaboradores .modal-footer {
+            border-bottom: 0;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        #modalAlertasColaboradores .modal-body {
+            min-height: 0;
+            overflow-y: auto;
+            padding: 16px 20px;
+            background: #f8fafc;
+            scrollbar-gutter: stable;
+        }
+
         #listaAlertasColaboradores {
             scrollbar-width: thin;
             scrollbar-color: #94a3b8 #e2e8f0;
@@ -282,14 +336,14 @@ try {
         <div id="modalAlertasColaboradores" class="hidden fixed inset-0 z-[1000]" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="tituloModalAlertas">
             <div id="overlayModalAlertas" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
 
-            <div class="relative flex min-h-screen items-center justify-center p-4">
-                <div id="conteudoModalAlertas" class="relative w-[95%] max-w-3xl h-[85vh] bg-white rounded-xl shadow-2xl border border-gray-200 opacity-0 scale-95 transition-all duration-200 grid grid-rows-[auto,minmax(0,1fr),auto]">
-                    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+            <div class="modal-wrap">
+                <div id="conteudoModalAlertas" class="modal-panel opacity-0 scale-95 transition-all duration-200">
+                    <div class="modal-header flex items-center justify-between">
                         <h3 id="tituloModalAlertas" class="text-lg font-semibold text-gray-800">Situações de Alerta</h3>
                         <button type="button" id="fecharModalAlertas" class="text-gray-500 hover:text-gray-800 text-2xl leading-none" aria-label="Fechar modal de alertas">&times;</button>
                     </div>
 
-                    <div id="listaAlertasColaboradores" class="overflow-y-auto px-5 py-4 min-h-0">
+                    <div id="listaAlertasColaboradores" class="modal-body">
                         <?php if ($error_message): ?>
                             <p class="text-sm text-red-600"><?= htmlspecialchars($error_message) ?></p>
                         <?php elseif ($total_alertas_colaboradores === 0): ?>
@@ -315,7 +369,7 @@ try {
                         <?php endif; ?>
                     </div>
 
-                    <div class="border-t border-gray-200 bg-gray-50 px-5 py-3 flex items-center justify-between">
+                    <div class="modal-footer flex items-center justify-between">
                         <p class="text-xs text-gray-500">Use o scroll para visualizar todas as situações.</p>
                         <button type="button" id="fecharModalAlertasRodape" class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100">
                             Fechar
