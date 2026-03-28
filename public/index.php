@@ -283,13 +283,13 @@ try {
             <div id="overlayModalAlertas" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
 
             <div class="relative flex min-h-screen items-center justify-center p-4">
-                <div id="conteudoModalAlertas" class="relative w-[95%] max-w-3xl bg-white rounded-xl shadow-2xl border border-gray-200 opacity-0 scale-95 transition-all duration-200 max-h-[85vh] overflow-hidden flex flex-col">
+                <div id="conteudoModalAlertas" class="relative w-[95%] max-w-3xl h-[85vh] bg-white rounded-xl shadow-2xl border border-gray-200 opacity-0 scale-95 transition-all duration-200 grid grid-rows-[auto,minmax(0,1fr),auto]">
                     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
                         <h3 id="tituloModalAlertas" class="text-lg font-semibold text-gray-800">Situações de Alerta</h3>
                         <button type="button" id="fecharModalAlertas" class="text-gray-500 hover:text-gray-800 text-2xl leading-none" aria-label="Fechar modal de alertas">&times;</button>
                     </div>
 
-                    <div id="listaAlertasColaboradores" class="overflow-y-scroll px-5 py-4" style="max-height: calc(85vh - 122px);">
+                    <div id="listaAlertasColaboradores" class="overflow-y-auto px-5 py-4 min-h-0">
                         <?php if ($error_message): ?>
                             <p class="text-sm text-red-600"><?= htmlspecialchars($error_message) ?></p>
                         <?php elseif ($total_alertas_colaboradores === 0): ?>
@@ -300,13 +300,13 @@ try {
                             <div class="space-y-2">
                                 <?php foreach ($alertas_colaboradores as $alerta): ?>
                                     <div class="flex items-start justify-between gap-3 p-3 border border-gray-200 rounded-md bg-gray-50">
-                                        <div>
+                                        <div class="min-w-0">
                                             <a href="detalhes_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="font-medium text-gray-800 hover:text-blue-700">
                                                 <?= htmlspecialchars($alerta['nome']) ?>
                                             </a>
                                             <p class="text-sm text-gray-600"><?= htmlspecialchars(implode(' | ', $alerta['motivos'])) ?></p>
                                         </div>
-                                        <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="text-xs font-semibold text-blue-700 hover:text-blue-900 whitespace-nowrap">
+                                        <a href="editar_colaborador.php?id=<?= (int)$alerta['id'] ?>" class="text-xs font-semibold text-blue-700 hover:text-blue-900 whitespace-nowrap shrink-0">
                                             Corrigir
                                         </a>
                                     </div>
