@@ -178,37 +178,6 @@ try {
                 // Se o utilizador tiver uma função de gestão (qualquer uma exceto Funcionário)
                 if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR ):
                 ?>
-                    <button
-                        type="button"
-                        id="cardAlertasColaboradores"
-                        class="block w-full text-left bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                        aria-expanded="false"
-                        aria-controls="modalAlertasColaboradores"
-                    >
-                        <div class="flex items-center gap-4 relative">
-                            <?php if ($total_alertas_colaboradores > 0): ?>
-                                <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:0.7rem;font-weight:700;line-height:1;padding:3px 7px;border-radius:9999px;min-width:20px;text-align:center;">
-                                    <?= $total_alertas_colaboradores ?>
-                                </span>
-                            <?php endif; ?>
-                            <div style="background-color:#fef3c7;color:#d97706;padding:0.75rem;border-radius:9999px;flex-shrink:0;">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h2 class="font-semibold text-lg text-gray-800">Alertas de Colaboradores</h2>
-                                <?php if ($error_message): ?>
-                                    <p class="text-sm text-red-600">Erro ao carregar alertas.</p>
-                                <?php elseif ($total_alertas_colaboradores === 0): ?>
-                                    <p class="text-sm text-emerald-700">Sem alertas no momento.</p>
-                                <?php else: ?>
-                                    <p class="text-sm text-gray-600"><?= $total_alertas_colaboradores ?> colaborador(es) com alerta. Clique para ver.</p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </button>
-
                     <a href="colaboradores.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                         <div class="flex items-center gap-4">
                             <div class="bg-blue-100 text-blue-600 p-3 rounded-full">
@@ -340,6 +309,39 @@ try {
 
                     </div>
                 </a>
+
+                <?php if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR): ?>
+                    <button
+                        type="button"
+                        id="cardAlertasColaboradores"
+                        class="block w-full text-left bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        aria-expanded="false"
+                        aria-controls="modalAlertasColaboradores"
+                    >
+                        <div class="flex items-center gap-4 relative">
+                            <?php if ($total_alertas_colaboradores > 0): ?>
+                                <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:0.7rem;font-weight:700;line-height:1;padding:3px 7px;border-radius:9999px;min-width:20px;text-align:center;">
+                                    <?= $total_alertas_colaboradores ?>
+                                </span>
+                            <?php endif; ?>
+                            <div style="background-color:#fef3c7;color:#d97706;padding:0.75rem;border-radius:9999px;flex-shrink:0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-semibold text-lg text-gray-800">Alertas de Colaboradores</h2>
+                                <?php if ($error_message): ?>
+                                    <p class="text-sm text-red-600">Erro ao carregar alertas.</p>
+                                <?php elseif ($total_alertas_colaboradores === 0): ?>
+                                    <p class="text-sm text-emerald-700">Sem alertas no momento.</p>
+                                <?php else: ?>
+                                    <p class="text-sm text-gray-600"><?= $total_alertas_colaboradores ?> colaborador(es) com alerta. Clique para ver.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </button>
+                <?php endif; ?>
              
             </div>
         </div>
