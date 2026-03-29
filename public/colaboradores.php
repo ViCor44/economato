@@ -6,6 +6,8 @@ $pesquisa = trim($_GET['pesquisa'] ?? '');
 $mostrar_inativos = isset($_GET['mostrar_inativos']) && $_GET['mostrar_inativos'] == '1';
 
 $colaboradores = [];
+$total_ativos = 0;
+$total_inativos = 0;
 
 // Carregar departamentos para o filtro
 $departamento_id = isset($_GET['departamento_id']) ? (int)$_GET['departamento_id'] : 0;
@@ -18,6 +20,14 @@ try {
 }
 
 try {
+
+    $stmtTotais = $pdo->query("SELECT
+        SUM(CASE WHEN ativo = 1 THEN 1 ELSE 0 END) AS total_ativos,
+        SUM(CASE WHEN ativo = 0 THEN 1 ELSE 0 END) AS total_inativos
+        FROM colaboradores");
+    $totais = $stmtTotais->fetch(PDO::FETCH_ASSOC);
+    $total_ativos = (int)($totais['total_ativos'] ?? 0);
+    $total_inativos = (int)($totais['total_inativos'] ?? 0);
 
     $sql = "
         SELECT
@@ -110,6 +120,17 @@ try {
            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95">
             ➕ Adicionar Colaborador
         </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <div class="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <p class="text-xs font-semibold text-green-700 uppercase tracking-wide">Ativos</p>
+            <p class="text-2xl font-bold text-green-800"><?= $total_ativos ?></p>
+        </div>
+        <div class="bg-gray-100 border border-gray-300 rounded-xl px-4 py-3">
+            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Inativos</p>
+            <p class="text-2xl font-bold text-gray-800"><?= $total_inativos ?></p>
+        </div>
     </div>
 
     <!-- 🔍 Pesquisa + filtro -->
