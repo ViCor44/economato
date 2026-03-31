@@ -256,12 +256,12 @@ try {
         // ------------------- Colaboradores -------------------
         case 'lista_colaboradores':
             $title = "Lista de Todos os Colaboradores";
-            $stmt = $pdo->query("SELECT id, nome, cartao, telefone, email, ativo, criado_em FROM colaboradores ORDER BY nome ASC");
+            $stmt = $pdo->query("SELECT numero_funcionario, nome, cartao, telefone, email, ativo, criado_em FROM colaboradores ORDER BY nome ASC");
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $columns = ['ID','Nome','Cartão','Telefone','Email','Ativo','Criado Em'];
+            $columns = ['Nº Colaborador','Nome','Cartão','Telefone','Email','Ativo','Criado Em'];
             $rows = array_map(function($r){
                 return [
-                    'ID'=>$r['id'],
+                    'Nº Colaborador'=>$r['numero_funcionario'] ?? '',
                     'Nome'=>$r['nome'],
                     'Cartão'=>$r['cartao'],
                     'Telefone'=>$r['telefone'] ?? '',
