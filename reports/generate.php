@@ -274,13 +274,13 @@ try {
 
         case 'colaboradores_ativos':
             $title = "Colaboradores Ativos";
-            $stmt = $pdo->prepare("SELECT id, nome, cartao, telefone, email, criado_em FROM colaboradores WHERE ativo = 1 ORDER BY nome ASC");
+            $stmt = $pdo->prepare("SELECT numero_funcionario, nome, cartao, telefone, email, criado_em FROM colaboradores WHERE ativo = 1 ORDER BY nome ASC");
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $columns = ['ID','Nome','Cartão','Telefone','Email','Criado Em'];
+            $columns = ['Nº Colaborador','Nome','Cartão','Telefone','Email','Criado Em'];
             $rows = array_map(function($r){
                 return [
-                    'ID'=>$r['id'],
+                    'Nº Colaborador'=>$r['numero_funcionario'] ?? '',
                     'Nome'=>$r['nome'],
                     'Cartão'=>$r['cartao'],
                     'Telefone'=>$r['telefone'] ?? '',
@@ -292,13 +292,13 @@ try {
 
         case 'colaboradores_inativos':
             $title = "Colaboradores Inativos";
-            $stmt = $pdo->prepare("SELECT id, nome, cartao, telefone, email, criado_em FROM colaboradores WHERE ativo = 0 ORDER BY nome ASC");
+            $stmt = $pdo->prepare("SELECT numero_funcionario, nome, cartao, telefone, email, criado_em FROM colaboradores WHERE ativo = 0 ORDER BY nome ASC");
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $columns = ['ID','Nome','Cartão','Telefone','Email','Criado Em'];
+            $columns = ['Nº Colaborador','Nome','Cartão','Telefone','Email','Criado Em'];
             $rows = array_map(function($r){
                 return [
-                    'ID'=>$r['id'],
+                    'Nº Colaborador'=>$r['numero_funcionario'] ?? '',
                     'Nome'=>$r['nome'],
                     'Cartão'=>$r['cartao'],
                     'Telefone'=>$r['telefone'] ?? '',
@@ -311,7 +311,7 @@ try {
         case 'colaboradores_sem_farda':
             $title = "Colaboradores sem Farda Atribuída";
             $sql = "
-                SELECT c.id, c.nome, c.cartao, c.email
+                SELECT c.numero_funcionario, c.nome, c.cartao, c.email
                 FROM colaboradores c
                 LEFT JOIN farda_atribuicoes fa
                     ON fa.colaborador_id = c.id
@@ -330,15 +330,15 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $columns = ['ID','Nome','Cartão','Email'];
-            $rows = array_map(function($r){ return ['ID'=>$r['id'],'Nome'=>$r['nome'],'Cartão'=>$r['cartao'],'Email'=>$r['email']]; }, $data);
+            $columns = ['Nº Colaborador','Nome','Cartão','Email'];
+            $rows = array_map(function($r){ return ['Nº Colaborador'=>$r['numero_funcionario'] ?? '','Nome'=>$r['nome'],'Cartão'=>$r['cartao'],'Email'=>$r['email']]; }, $data);
             break;
 
         case 'colaboradores_com_emprestimos':
             $title = "Colaboradores com Empréstimos Activos";
             // assumindo tabela farda_emprestimos com campo devolvido (0/1)
             $stmt = $pdo->prepare("
-                SELECT DISTINCT c.id, c.nome, c.cartao, c.email
+                SELECT DISTINCT c.numero_funcionario, c.nome, c.cartao, c.email
                 FROM colaboradores c
                 JOIN farda_emprestimos fe ON fe.colaborador_id = c.id
                 WHERE fe.devolvido = 0
@@ -346,8 +346,8 @@ try {
             ");
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $columns = ['ID','Nome','Cartão','Email'];
-            $rows = array_map(function($r){ return ['ID'=>$r['id'],'Nome'=>$r['nome'],'Cartão'=>$r['cartao'],'Email'=>$r['email']]; }, $data);
+            $columns = ['Nº Colaborador','Nome','Cartão','Email'];
+            $rows = array_map(function($r){ return ['Nº Colaborador'=>$r['numero_funcionario'] ?? '','Nome'=>$r['nome'],'Cartão'=>$r['cartao'],'Email'=>$r['email']]; }, $data);
             break;
 
         // ------------------- Fardas -------------------
@@ -548,7 +548,7 @@ break;
 
             // 1) buscar colaboradores inativos que têm atribuições
             $stmt = $pdo->prepare("
-                SELECT DISTINCT col.id, col.nome, col.cartao, col.telefone
+                SELECT DISTINCT col.id, col.numero_funcionario, col.nome, col.cartao, col.telefone
                 FROM colaboradores col
                 JOIN farda_atribuicoes fa ON fa.colaborador_id = col.id
                 WHERE col.ativo = 0
@@ -557,7 +557,7 @@ break;
             $stmt->execute();
             $colabs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $columns = ['ID','Nome','Cartão','Telefone','Total Peças','Peças Atribuídas'];
+            $columns = ['Nº Colaborador','Nome','Cartão','Telefone','Total Peças','Peças Atribuídas'];
             $rows = [];
 
             // 2) para cada colaborador, agregamos por peça (nome+cor+tamanho) e somamos a quantidade
@@ -590,7 +590,7 @@ break;
                 $pecasText = $lista ? implode('; ', $lista) : '';
 
                 $rows[] = [
-                    'ID' => $col['id'],
+                    'Nº Colaborador' => $col['numero_funcionario'] ?? '',
                     'Nome' => $col['nome'],
                     'Cartão' => $col['cartao'] ?? '',
                     'Telefone' => $col['telefone'] ?? '',
@@ -883,7 +883,7 @@ break;
 
             $stmt = $pdo->prepare("
                 SELECT DISTINCT
-                    c.id,
+                    c.numero_funcionario,
                     c.nome,
                     c.cartao,
                     c.email
@@ -896,11 +896,11 @@ break;
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $columns = ['ID','Nome','Cartão','Email'];
+            $columns = ['Nº Colaborador','Nome','Cartão','Email'];
 
             $rows = array_map(function($r){
                 return [
-                    'ID' => $r['id'],
+                    'Nº Colaborador' => $r['numero_funcionario'] ?? '',
                     'Nome' => $r['nome'],
                     'Cartão' => $r['cartao'],
                     'Email' => $r['email']
@@ -934,7 +934,6 @@ break;
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $columns = [
-                'ID',
                 'Colaborador',
                 'Nº Funcionário',
                 'Departamento',
@@ -944,7 +943,6 @@ break;
 
             $rows = array_map(function ($r) {
                 return [
-                    'ID' => $r['colaborador_id'],
                     'Colaborador' => $r['colaborador'],
                     'Nº Funcionário' => $r['numero_funcionario'] ?? '',
                     'Departamento' => $r['departamento'] ?? '—',
