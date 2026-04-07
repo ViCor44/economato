@@ -632,7 +632,10 @@ try {
                                                 <option value="danificado">Danificado</option>
                                                 <option value="perdido">Perdido</option>
                                             </select>
-                                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded-md text-xs font-semibold">
+                                            <button type="submit"
+                                                style="background-color:#16a34a;color:#fff;font-weight:600;padding:4px 10px;border-radius:6px;font-size:12px;"
+                                                onmouseover="this.style.backgroundColor='#15803d';"
+                                                onmouseout="this.style.backgroundColor='#16a34a';">
                                                 Devolver
                                             </button>
                                         </form>
@@ -643,7 +646,9 @@ try {
                                             <input type="hidden" name="observacoes" value="Convertido em atribuição definitiva a partir dos detalhes do colaborador.">
                                             <button
                                                 type="submit"
-                                                class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-md text-xs font-semibold"
+                                                style="background-color:#2563eb;color:#fff;font-weight:600;padding:4px 10px;border-radius:6px;font-size:12px;"
+                                                onmouseover="this.style.backgroundColor='#1d4ed8';"
+                                                onmouseout="this.style.backgroundColor='#2563eb';"
                                                 onclick="return confirm('Este empréstimo será convertido em atribuição definitiva. Continuar?');"
                                             >
                                                 Atribuir definitivo
