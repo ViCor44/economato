@@ -358,23 +358,43 @@ try {
         $_stmtTermo->execute([$colaborador_id]);
         $ultimoTermo = $_stmtTermo->fetch(PDO::FETCH_ASSOC) ?: null;
 
-        // Última atividade: atribuição nova ou edição
-        $_stmtAtiv = $pdo->prepare("
-            SELECT MAX(GREATEST(data_atribuicao, COALESCE(updated_at, data_atribuicao))) AS ultima_atividade
-            FROM farda_atribuicoes
-            WHERE colaborador_id = ?
-              AND estado IN ('atribuida','marcada_devolucao')
-        ");
-        $_stmtAtiv->execute([$colaborador_id]);
-        $_rowAtiv = $_stmtAtiv->fetch(PDO::FETCH_ASSOC);
-        $ultimaAtividadeFarda = $_rowAtiv['ultima_atividade'] ?? null;
+        $houveAtividadeDepoisTermo = false;
+
+        if ($ultimoTermo !== null) {
+            // Nova atribuição após o último termo
+            $_stmtNovaAtrib = $pdo->prepare(" 
+                SELECT COUNT(*)
+                FROM farda_atribuicoes
+                WHERE colaborador_id = ?
+                  AND estado IN ('atribuida','marcada_devolucao')
+                  AND data_atribuicao > ?
+            ");
+            $_stmtNovaAtrib->execute([$colaborador_id, $ultimoTermo['criado_em']]);
+            $temNovaAtribuicao = ((int)$_stmtNovaAtrib->fetchColumn() > 0);
+
+            // Edições/anulações/atribuições registadas em log após o último termo
+            $_likeColab = '%Colaborador ID ' . $colaborador_id . '%';
+            $_stmtLogs = $pdo->prepare(" 
+                SELECT COUNT(*)
+                FROM logs
+                WHERE criado_em > ?
+                  AND (
+                    (acao = 'Atribuição de farda' AND detalhes LIKE ?)
+                    OR (acao IN ('Editar atribuição','Anular atribuição') AND detalhes LIKE ?)
+                  )
+            ");
+            $_stmtLogs->execute([$ultimoTermo['criado_em'], $_likeColab, $_likeColab]);
+            $temAlteracaoRegistada = ((int)$_stmtLogs->fetchColumn() > 0);
+
+            $houveAtividadeDepoisTermo = $temNovaAtribuicao || $temAlteracaoRegistada;
+        }
 
         // gerar | novo_termo | em_vigor | sem_fardas
         if (!$temFardas) {
             $termoEstado = 'sem_fardas';
         } elseif ($ultimoTermo === null) {
             $termoEstado = 'gerar';
-        } elseif ($ultimaAtividadeFarda && strtotime($ultimaAtividadeFarda) > strtotime($ultimoTermo['criado_em'])) {
+        } elseif ($houveAtividadeDepoisTermo) {
             $termoEstado = 'novo_termo';
         } else {
             $termoEstado = 'em_vigor';

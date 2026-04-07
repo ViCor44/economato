@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         adicionarLog(
             $pdo,
             "Anular atribuição",
-            "Atribuição ID {$id} anulada"
+            "Colaborador ID {$atribuicao['colaborador_id']} | Atribuição ID {$id} anulada"
         );
 
         header("Location: detalhes_colaborador.php?id=".$atribuicao['colaborador_id']);

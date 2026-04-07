@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             adicionarLog(
                 $pdo,
                 "Editar atribuição",
-                "Atribuição ID {$id} alterada | Farda: {$farda_antiga_id} -> {$nova_farda_id} | Quantidade: {$qtd_antiga} -> {$nova_qtd}"
+                "Colaborador ID {$atribuicao['colaborador_id']} | Atribuição ID {$id} alterada | Farda: {$farda_antiga_id} -> {$nova_farda_id} | Quantidade: {$qtd_antiga} -> {$nova_qtd}"
             );
 
             header("Location: detalhes_colaborador.php?id=".$atribuicao['colaborador_id']);
