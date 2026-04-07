@@ -563,7 +563,7 @@ try {
 
         <div class="flex flex-wrap gap-3 mb-4">
             <?php if ($colaboradorInativo): ?>
-                <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed">
+                <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed mr-4">
                     🧥 Emprestar
                 </span>
                 <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed ml-4">
