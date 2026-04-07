@@ -563,10 +563,10 @@ try {
 
         <div class="flex flex-wrap gap-3 mb-4">
             <?php if ($colaboradorInativo): ?>
-                <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed mr-4">
+                <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed" style="margin-right:12px;">
                     🧥 Emprestar
                 </span>
-                <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed ml-4">
+                <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed">
                     ↩️ Devolver Empréstimo
                 </span>
             <?php else: ?>
@@ -574,7 +574,8 @@ try {
                 style="background-color:#7c3aed;color:#fff;font-weight:600;
                         display:flex;align-items:center;gap:8px;
                         padding:8px 16px;border-radius:8px;text-decoration:none;
-                        box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                        box-shadow:0 2px 4px rgba(0,0,0,0.1);
+                        margin-right:12px;"
                 onmouseover="this.style.backgroundColor='#6d28d9';"
                 onmouseout="this.style.backgroundColor='#7c3aed';">
                     🧥 <span>Emprestar</span>
