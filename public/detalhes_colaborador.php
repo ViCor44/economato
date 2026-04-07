@@ -411,8 +411,6 @@ try {
 
             <span class="<?= $btnDisabled ?>">➕ Atribuir</span>
             <span class="<?= $btnDisabled ?>">🔁 Devolver</span>
-            <span class="<?= $btnDisabled ?>">🧥 Emprestar</span>
-            <span class="<?= $btnDisabled ?>">↩️ Devolver Empréstimo</span>
             <span class="<?= $btnDisabled ?>">📄 Gerar Termo</span>
 
             <span class="text-sm text-red-600 ml-2">
@@ -441,28 +439,6 @@ try {
             onmouseover="this.style.backgroundColor='#b91c1c';"
             onmouseout="this.style.backgroundColor='#dc2626';">
                 🔁 <span>Devolver</span>
-            </a>
-
-            <!-- 🟣 Emprestar -->
-            <a href="emprestar_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
-            style="background-color:#7c3aed;color:#fff;font-weight:600;
-                    display:flex;align-items:center;gap:8px;
-                    padding:8px 16px;border-radius:8px;text-decoration:none;
-                    box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
-            onmouseover="this.style.backgroundColor='#6d28d9';"
-            onmouseout="this.style.backgroundColor='#7c3aed';">
-                🧥 <span>Emprestar</span>
-            </a>
-
-            <!-- ↩️ Devolver empréstimo -->
-            <a href="devolver_emprestimo.php?colaborador_id=<?= $colaborador['id'] ?>"
-            style="background-color:#ea580c;color:#fff;font-weight:600;
-                    display:flex;align-items:center;gap:8px;
-                    padding:8px 16px;border-radius:8px;text-decoration:none;
-                    box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
-            onmouseover="this.style.backgroundColor='#c2410c';"
-            onmouseout="this.style.backgroundColor='#ea580c';">
-                ↩️ <span>Devolver Empréstimo</span>
             </a>
 
             <!-- 📄 Termo de entrega -->
@@ -583,6 +559,37 @@ try {
             <a href="devolver_emprestimo.php?colaborador_id=<?= (int)$colaborador_id ?>" class="text-sm text-blue-600 hover:underline">
                 Abrir gestão completa
             </a>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mb-4">
+            <?php if ($colaboradorInativo): ?>
+                <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed">
+                    🧥 Emprestar
+                </span>
+                <span class="px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed">
+                    ↩️ Devolver Empréstimo
+                </span>
+            <?php else: ?>
+                <a href="emprestar_farda.php?colaborador_id=<?= (int)$colaborador['id'] ?>"
+                style="background-color:#7c3aed;color:#fff;font-weight:600;
+                        display:flex;align-items:center;gap:8px;
+                        padding:8px 16px;border-radius:8px;text-decoration:none;
+                        box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                onmouseover="this.style.backgroundColor='#6d28d9';"
+                onmouseout="this.style.backgroundColor='#7c3aed';">
+                    🧥 <span>Emprestar</span>
+                </a>
+
+                <a href="devolver_emprestimo.php?colaborador_id=<?= (int)$colaborador['id'] ?>"
+                style="background-color:#ea580c;color:#fff;font-weight:600;
+                        display:flex;align-items:center;gap:8px;
+                        padding:8px 16px;border-radius:8px;text-decoration:none;
+                        box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                onmouseover="this.style.backgroundColor='#c2410c';"
+                onmouseout="this.style.backgroundColor='#ea580c';">
+                    ↩️ <span>Devolver Empréstimo</span>
+                </a>
+            <?php endif; ?>
         </div>
 
         <?php if (empty($emprestimosPendentes)): ?>
