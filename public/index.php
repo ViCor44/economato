@@ -8,6 +8,7 @@ $error_message = null;
 $alertas_colaboradores = [];
 $total_alertas_colaboradores = 0;
 $emprestimos_em_alerta = [];
+$emprestimos_dashboard = [];
 $total_emprestimos_alerta = 0;
 $total_emprestimos_pendentes = 0;
 
@@ -455,19 +456,15 @@ try {
                             <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
                                 Não existem empréstimos pendentes neste momento.
                             </p>
-                        <?php elseif ($total_emprestimos_alerta === 0): ?>
-                            <div class="space-y-3">
-                                <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
-                                    Existem <?= $total_emprestimos_pendentes ?> empréstimo(s) pendente(s), mas nenhum ultrapassou 15 dias.
-                                </p>
-                                <a href="devolver_emprestimo.php" class="inline-flex items-center rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
-                                    Abrir gestão de empréstimos
-                                </a>
-                            </div>
                         <?php else: ?>
-                            <div class="space-y-2">
-                                <?php foreach ($emprestimos_em_alerta as $emprestimo): ?>
-                                    <div class="flex items-start justify-between gap-3 p-3 border border-red-200 rounded-md bg-red-50">
+                            <div class="space-y-3">
+                                <p class="text-sm <?= $total_emprestimos_alerta > 0 ? 'text-red-700 bg-red-50 border border-red-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200' ?> rounded-md px-3 py-2">
+                                    <?= $total_emprestimos_pendentes ?> empréstimo(s) pendente(s). <?= $total_emprestimos_alerta > 0 ? $total_emprestimos_alerta . ' em atraso (15+ dias).' : 'Sem atrasos acima de 15 dias.' ?>
+                                </p>
+
+                                <?php foreach ($emprestimos_dashboard as $emprestimo): ?>
+                                    <?php $emAtraso = ((int)$emprestimo['dias_em_aberto'] >= 15); ?>
+                                    <div class="flex items-start justify-between gap-3 p-3 border rounded-md <?= $emAtraso ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-gray-50' ?>">
                                         <div class="min-w-0">
                                             <a href="detalhes_colaborador.php?id=<?= (int)$emprestimo['colaborador_id'] ?>" class="font-medium text-gray-800 hover:text-blue-700">
                                                 <?= htmlspecialchars($emprestimo['colaborador_nome']) ?>
@@ -475,12 +472,15 @@ try {
                                             <p class="text-sm text-gray-700">
                                                 <?= htmlspecialchars($emprestimo['farda_nome']) ?> - <?= htmlspecialchars($emprestimo['cor_nome']) ?> (<?= htmlspecialchars($emprestimo['tamanho_nome']) ?>)
                                             </p>
-                                            <p class="text-sm text-red-700 font-medium">
+                                            <p class="text-sm font-medium <?= $emAtraso ? 'text-red-700' : 'text-gray-700' ?>">
                                                 <?= (int)$emprestimo['quantidade'] ?> unidade(s) emprestada(s) há <?= (int)$emprestimo['dias_em_aberto'] ?> dia(s), desde <?= date('d/m/Y', strtotime($emprestimo['data_emprestimo'])) ?>.
+                                                <?php if ($emAtraso): ?>
+                                                    <span class="ml-1 inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">Atrasado</span>
+                                                <?php endif; ?>
                                             </p>
                                         </div>
-                                        <a href="devolver_emprestimo.php?colaborador_id=<?= (int)$emprestimo['colaborador_id'] ?>" class="text-xs font-semibold text-red-700 hover:text-red-900 whitespace-nowrap shrink-0">
-                                            Gerir devolução
+                                        <a href="devolver_emprestimo.php?colaborador_id=<?= (int)$emprestimo['colaborador_id'] ?>" class="text-xs font-semibold <?= $emAtraso ? 'text-red-700 hover:text-red-900' : 'text-blue-700 hover:text-blue-900' ?> whitespace-nowrap shrink-0">
+                                            Resolver
                                         </a>
                                     </div>
                                 <?php endforeach; ?>
