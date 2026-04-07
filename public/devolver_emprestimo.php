@@ -243,7 +243,10 @@ $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <option value="perdido">Perdido</option>
                                     </select>
                                     <input type="text" name="observacoes" placeholder="Observações" class="border px-2 py-1 rounded-md text-sm w-40">
-                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm">Devolver</button>
+                                    <button type="submit"
+                                        style="background-color:#16a34a;color:#fff;font-weight:600;padding:6px 12px;border-radius:6px;font-size:13px;"
+                                        onmouseover="this.style.backgroundColor='#15803d';"
+                                        onmouseout="this.style.backgroundColor='#16a34a';">Devolver</button>
                                 </form>
                                 <form method="POST" class="inline-flex items-center gap-2 ml-2 mt-2 sm:mt-0">
                                     <input type="hidden" name="emprestimo_id" value="<?= $e['id'] ?>">
@@ -251,7 +254,9 @@ $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <input type="hidden" name="observacoes" value="Convertido em atribuição definitiva a partir da gestão de empréstimos.">
                                     <button
                                         type="submit"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm"
+                                        style="background-color:#2563eb;color:#fff;font-weight:600;padding:6px 12px;border-radius:6px;font-size:13px;"
+                                        onmouseover="this.style.backgroundColor='#1d4ed8';"
+                                        onmouseout="this.style.backgroundColor='#2563eb';"
                                         onclick="return confirm('Este empréstimo será convertido em atribuição definitiva ao colaborador. Continuar?');"
                                     >
                                         Atribuir ao colaborador
