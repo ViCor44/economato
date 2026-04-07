@@ -19,8 +19,7 @@ function garantirVersionamentoDocumentos(PDO $pdo): void
     ];
 
     foreach ($colunasNecessarias as $nomeColuna => $ddl) {
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM documentos LIKE ?");
-        $stmt->execute([$nomeColuna]);
+        $stmt = $pdo->query("SHOW COLUMNS FROM documentos LIKE '" . $nomeColuna . "'");
         if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
             $pdo->exec($ddl);
         }
@@ -33,8 +32,7 @@ function garantirVersionamentoDocumentos(PDO $pdo): void
     ];
 
     foreach ($indicesNecessarios as $nomeIndice => $ddl) {
-        $stmt = $pdo->prepare("SHOW INDEX FROM documentos WHERE Key_name = ?");
-        $stmt->execute([$nomeIndice]);
+        $stmt = $pdo->query("SHOW INDEX FROM documentos WHERE Key_name = '" . $nomeIndice . "'");
         if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
             $pdo->exec($ddl);
         }
@@ -91,7 +89,15 @@ if (!$colaborador) {
 
 garantirVersionamentoDocumentos($pdo);
 
-$stmt = $pdo->prepare("\n+    SELECT id, codigo, criado_em\n+    FROM documentos\n+    WHERE colaborador_id = ?\n+      AND tipo = 'termo_farda'\n+      AND estado = 'valido'\n+    ORDER BY criado_em DESC, id DESC\n+    LIMIT 1\n+");
+$stmt = $pdo->prepare("
+    SELECT id, codigo, criado_em
+    FROM documentos
+    WHERE colaborador_id = ?
+      AND tipo = 'termo_farda'
+      AND estado = 'valido'
+    ORDER BY criado_em DESC, id DESC
+    LIMIT 1
+");
 $stmt->execute([$colaborador_id]);
 $termoAnterior = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
