@@ -7,6 +7,9 @@ require_once '../config/db.php';
 $error_message = null;
 $alertas_colaboradores = [];
 $total_alertas_colaboradores = 0;
+$emprestimos_em_alerta = [];
+$total_emprestimos_alerta = 0;
+$total_emprestimos_pendentes = 0;
 
 // --- BUSCAR DADOS (DENTRO DE UM TRY...CATCH) ---
 try {
@@ -63,6 +66,45 @@ try {
 
     $total_alertas_colaboradores = count($alertas_colaboradores);
 
+    $stmt_emprestimos = $pdo->query(" 
+        SELECT e.id, e.colaborador_id, c.nome AS colaborador_nome, f.nome AS farda_nome,
+               co.nome AS cor_nome, t.nome AS tamanho_nome, e.quantidade, e.data_emprestimo,
+               DATEDIFF(CURDATE(), DATE(e.data_emprestimo)) AS dias_em_aberto
+        FROM farda_emprestimos e
+        JOIN colaboradores c ON e.colaborador_id = c.id
+        JOIN fardas f ON e.farda_id = f.id
+        JOIN cores co ON f.cor_id = co.id
+        JOIN tamanhos t ON f.tamanho_id = t.id
+        WHERE e.devolvido = 0
+        ORDER BY e.data_emprestimo ASC
+    ");
+
+    $emprestimos_dashboard = $stmt_emprestimos->fetchAll(PDO::FETCH_ASSOC);
+    $total_emprestimos_pendentes = count($emprestimos_dashboard);
+
+    foreach ($emprestimos_dashboard as $emprestimo) {
+        $diasEmAberto = (int)($emprestimo['dias_em_aberto'] ?? 0);
+        if ($diasEmAberto >= 15) {
+            $emprestimos_em_alerta[] = [
+                'id' => (int)$emprestimo['id'],
+                'colaborador_id' => (int)$emprestimo['colaborador_id'],
+                'colaborador_nome' => (string)$emprestimo['colaborador_nome'],
+                'farda_nome' => (string)$emprestimo['farda_nome'],
+                'cor_nome' => (string)$emprestimo['cor_nome'],
+                'tamanho_nome' => (string)$emprestimo['tamanho_nome'],
+                'quantidade' => (int)$emprestimo['quantidade'],
+                'data_emprestimo' => (string)$emprestimo['data_emprestimo'],
+                'dias_em_aberto' => $diasEmAberto,
+            ];
+        }
+    }
+
+    usort($emprestimos_em_alerta, static function ($a, $b) {
+        return $b['dias_em_aberto'] <=> $a['dias_em_aberto'];
+    });
+
+    $total_emprestimos_alerta = count($emprestimos_em_alerta);
+
     $total_utilizadores_pendentes = 0;
     $stmt_pendentes_u = $pdo->query("SELECT COUNT(*) FROM utilizadores WHERE is_active = 0");
     $total_utilizadores_pendentes = (int)$stmt_pendentes_u->fetchColumn();
@@ -83,17 +125,21 @@ try {
     <link href="<?= BASE_URL ?>/public/css/style.css" rel="stylesheet">
     <style>
         #modalAlertasColaboradores,
-        #modalAlertasColaboradores * {
+        #modalAlertasColaboradores *,
+        #modalAlertasEmprestimos,
+        #modalAlertasEmprestimos * {
             box-sizing: border-box;
         }
 
-        #modalAlertasColaboradores {
+        #modalAlertasColaboradores,
+        #modalAlertasEmprestimos {
             position: fixed;
             inset: 0;
             z-index: 1000;
         }
 
-        #modalAlertasColaboradores .modal-wrap {
+        #modalAlertasColaboradores .modal-wrap,
+        #modalAlertasEmprestimos .modal-wrap {
             position: relative;
             min-height: 100vh;
             display: flex;
@@ -102,7 +148,8 @@ try {
             padding: 16px;
         }
 
-        #modalAlertasColaboradores .modal-panel {
+        #modalAlertasColaboradores .modal-panel,
+        #modalAlertasEmprestimos .modal-panel {
             position: relative;
             width: min(1100px, 96vw);
             height: min(85vh, 760px);
@@ -116,19 +163,23 @@ try {
         }
 
         #modalAlertasColaboradores .modal-header,
-        #modalAlertasColaboradores .modal-footer {
+        #modalAlertasColaboradores .modal-footer,
+        #modalAlertasEmprestimos .modal-header,
+        #modalAlertasEmprestimos .modal-footer {
             padding: 14px 20px;
             border-bottom: 1px solid #e5e7eb;
             background: #ffffff;
         }
 
-        #modalAlertasColaboradores .modal-footer {
+        #modalAlertasColaboradores .modal-footer,
+        #modalAlertasEmprestimos .modal-footer {
             border-bottom: 0;
             border-top: 1px solid #e5e7eb;
             background: #f9fafb;
         }
 
-        #modalAlertasColaboradores .modal-body {
+        #modalAlertasColaboradores .modal-body,
+        #modalAlertasEmprestimos .modal-body {
             min-height: 0;
             overflow-y: auto;
             padding: 16px 20px;
@@ -136,27 +187,32 @@ try {
             scrollbar-gutter: stable;
         }
 
-        #listaAlertasColaboradores {
+        #listaAlertasColaboradores,
+        #listaAlertasEmprestimos {
             scrollbar-width: thin;
             scrollbar-color: #94a3b8 #e2e8f0;
         }
 
-        #listaAlertasColaboradores::-webkit-scrollbar {
+        #listaAlertasColaboradores::-webkit-scrollbar,
+        #listaAlertasEmprestimos::-webkit-scrollbar {
             width: 10px;
         }
 
-        #listaAlertasColaboradores::-webkit-scrollbar-track {
+        #listaAlertasColaboradores::-webkit-scrollbar-track,
+        #listaAlertasEmprestimos::-webkit-scrollbar-track {
             background: #e2e8f0;
             border-radius: 9999px;
         }
 
-        #listaAlertasColaboradores::-webkit-scrollbar-thumb {
+        #listaAlertasColaboradores::-webkit-scrollbar-thumb,
+        #listaAlertasEmprestimos::-webkit-scrollbar-thumb {
             background: #94a3b8;
             border-radius: 9999px;
             border: 2px solid #e2e8f0;
         }
 
-        #listaAlertasColaboradores::-webkit-scrollbar-thumb:hover {
+        #listaAlertasColaboradores::-webkit-scrollbar-thumb:hover,
+        #listaAlertasEmprestimos::-webkit-scrollbar-thumb:hover {
             background: #64748b;
         }
     </style>
@@ -313,6 +369,37 @@ try {
                 <?php if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR): ?>
                     <button
                         type="button"
+                        id="cardAlertasEmprestimos"
+                        class="block w-full text-left bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                        aria-expanded="false"
+                        aria-controls="modalAlertasEmprestimos"
+                    >
+                        <div class="flex items-center gap-4 relative">
+                            <?php if ($total_emprestimos_alerta > 0): ?>
+                                <span style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:0.7rem;font-weight:700;line-height:1;padding:3px 7px;border-radius:9999px;min-width:20px;text-align:center;">
+                                    <?= $total_emprestimos_alerta ?>
+                                </span>
+                            <?php endif; ?>
+                            <div style="background-color:#fee2e2;color:#dc2626;padding:0.75rem;border-radius:9999px;flex-shrink:0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-semibold text-lg text-gray-800">Gerir Empréstimos</h2>
+                                <?php if ($total_emprestimos_alerta > 0): ?>
+                                    <p class="text-sm text-red-600"><?= $total_emprestimos_alerta ?> empréstimo(s) com 15+ dias por devolver.</p>
+                                <?php elseif ($total_emprestimos_pendentes > 0): ?>
+                                    <p class="text-sm text-gray-600"><?= $total_emprestimos_pendentes ?> empréstimo(s) pendente(s), sem atrasos acima de 15 dias.</p>
+                                <?php else: ?>
+                                    <p class="text-sm text-emerald-700">Sem empréstimos pendentes no momento.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button
+                        type="button"
                         id="cardAlertasColaboradores"
                         class="block w-full text-left bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                         aria-expanded="false"
@@ -353,6 +440,69 @@ try {
     ?>
 
     <?php if ($role_id === ROLE_ADMIN || $role_id === ROLE_GESTOR): ?>
+        <div id="modalAlertasEmprestimos" class="hidden fixed inset-0 z-[1000]" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="tituloModalAlertasEmprestimos">
+            <div id="overlayModalAlertasEmprestimos" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
+
+            <div class="modal-wrap">
+                <div id="conteudoModalAlertasEmprestimos" class="modal-panel opacity-0 scale-95 transition-all duration-200">
+                    <div class="modal-header flex items-center justify-between">
+                        <h3 id="tituloModalAlertasEmprestimos" class="text-lg font-semibold text-gray-800">Alertas de Empréstimos</h3>
+                        <button type="button" id="fecharModalAlertasEmprestimos" class="text-gray-500 hover:text-gray-800 text-2xl leading-none" aria-label="Fechar modal de alertas de empréstimos">&times;</button>
+                    </div>
+
+                    <div id="listaAlertasEmprestimos" class="modal-body">
+                        <?php if ($total_emprestimos_pendentes === 0): ?>
+                            <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+                                Não existem empréstimos pendentes neste momento.
+                            </p>
+                        <?php elseif ($total_emprestimos_alerta === 0): ?>
+                            <div class="space-y-3">
+                                <p class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+                                    Existem <?= $total_emprestimos_pendentes ?> empréstimo(s) pendente(s), mas nenhum ultrapassou 15 dias.
+                                </p>
+                                <a href="devolver_emprestimo.php" class="inline-flex items-center rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
+                                    Abrir gestão de empréstimos
+                                </a>
+                            </div>
+                        <?php else: ?>
+                            <div class="space-y-2">
+                                <?php foreach ($emprestimos_em_alerta as $emprestimo): ?>
+                                    <div class="flex items-start justify-between gap-3 p-3 border border-red-200 rounded-md bg-red-50">
+                                        <div class="min-w-0">
+                                            <a href="detalhes_colaborador.php?id=<?= (int)$emprestimo['colaborador_id'] ?>" class="font-medium text-gray-800 hover:text-blue-700">
+                                                <?= htmlspecialchars($emprestimo['colaborador_nome']) ?>
+                                            </a>
+                                            <p class="text-sm text-gray-700">
+                                                <?= htmlspecialchars($emprestimo['farda_nome']) ?> - <?= htmlspecialchars($emprestimo['cor_nome']) ?> (<?= htmlspecialchars($emprestimo['tamanho_nome']) ?>)
+                                            </p>
+                                            <p class="text-sm text-red-700 font-medium">
+                                                <?= (int)$emprestimo['quantidade'] ?> unidade(s) emprestada(s) há <?= (int)$emprestimo['dias_em_aberto'] ?> dia(s), desde <?= date('d/m/Y', strtotime($emprestimo['data_emprestimo'])) ?>.
+                                            </p>
+                                        </div>
+                                        <a href="devolver_emprestimo.php?colaborador_id=<?= (int)$emprestimo['colaborador_id'] ?>" class="text-xs font-semibold text-red-700 hover:text-red-900 whitespace-nowrap shrink-0">
+                                            Gerir devolução
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="modal-footer flex items-center justify-between">
+                        <p class="text-xs text-gray-500">Alertas automáticos após 15 dias sem devolução.</p>
+                        <div class="flex items-center gap-2">
+                            <a href="devolver_emprestimo.php" class="rounded-md bg-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-700">
+                                Gerir empréstimos
+                            </a>
+                            <button type="button" id="fecharModalAlertasEmprestimosRodape" class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100">
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="modalAlertasColaboradores" class="hidden fixed inset-0 z-[1000]" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="tituloModalAlertas">
             <div id="overlayModalAlertas" class="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200"></div>
 
@@ -402,73 +552,99 @@ try {
     
     <?php include_once '../src/templates/footer.php'; ?>
     <script>
-        const cardAlertas = document.getElementById('cardAlertasColaboradores');
-        const modalAlertas = document.getElementById('modalAlertasColaboradores');
-        const overlayModalAlertas = document.getElementById('overlayModalAlertas');
-        const conteudoModalAlertas = document.getElementById('conteudoModalAlertas');
-        const fecharModalAlertas = document.getElementById('fecharModalAlertas');
-        const fecharModalAlertasRodape = document.getElementById('fecharModalAlertasRodape');
+        function configurarModal(config) {
+            const trigger = document.getElementById(config.triggerId);
+            const modal = document.getElementById(config.modalId);
+            const overlay = document.getElementById(config.overlayId);
+            const content = document.getElementById(config.contentId);
+            const closeButtons = config.closeIds.map(function (id) {
+                return document.getElementById(id);
+            }).filter(Boolean);
 
-        function abrirModalAlertas() {
-            if (!modalAlertas || !cardAlertas || !overlayModalAlertas || !conteudoModalAlertas) return;
-            modalAlertas.classList.remove('hidden');
-            cardAlertas.setAttribute('aria-expanded', 'true');
-            modalAlertas.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('overflow-hidden');
+            if (!trigger || !modal || !overlay || !content) {
+                return null;
+            }
 
-            requestAnimationFrame(function () {
-                overlayModalAlertas.classList.remove('opacity-0');
-                overlayModalAlertas.classList.add('opacity-100');
-                conteudoModalAlertas.classList.remove('opacity-0', 'scale-95');
-                conteudoModalAlertas.classList.add('opacity-100', 'scale-100');
+            function abrir() {
+                modal.classList.remove('hidden');
+                trigger.setAttribute('aria-expanded', 'true');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('overflow-hidden');
+
+                requestAnimationFrame(function () {
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('opacity-100');
+                    content.classList.remove('opacity-0', 'scale-95');
+                    content.classList.add('opacity-100', 'scale-100');
+                });
+            }
+
+            function fechar() {
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('opacity-0');
+                content.classList.remove('opacity-100', 'scale-100');
+                content.classList.add('opacity-0', 'scale-95');
+
+                setTimeout(function () {
+                    modal.classList.add('hidden');
+                }, 200);
+
+                trigger.setAttribute('aria-expanded', 'false');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            trigger.addEventListener('click', abrir);
+            overlay.addEventListener('click', fechar);
+
+            closeButtons.forEach(function (button) {
+                button.addEventListener('click', fechar);
             });
+
+            if (modal.classList.contains('hidden')) {
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            return {
+                modal: modal,
+                fechar: fechar,
+            };
         }
 
-        function fecharModalAlertasFn() {
-            if (!modalAlertas || !cardAlertas || !overlayModalAlertas || !conteudoModalAlertas) return;
-            overlayModalAlertas.classList.remove('opacity-100');
-            overlayModalAlertas.classList.add('opacity-0');
-            conteudoModalAlertas.classList.remove('opacity-100', 'scale-100');
-            conteudoModalAlertas.classList.add('opacity-0', 'scale-95');
+        const modalAlertasEmprestimos = configurarModal({
+            triggerId: 'cardAlertasEmprestimos',
+            modalId: 'modalAlertasEmprestimos',
+            overlayId: 'overlayModalAlertasEmprestimos',
+            contentId: 'conteudoModalAlertasEmprestimos',
+            closeIds: ['fecharModalAlertasEmprestimos', 'fecharModalAlertasEmprestimosRodape']
+        });
 
-            setTimeout(function () {
-                modalAlertas.classList.add('hidden');
-            }, 200);
-
-            cardAlertas.setAttribute('aria-expanded', 'false');
-            modalAlertas.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('overflow-hidden');
-        }
-
-        if (cardAlertas && modalAlertas) {
-            cardAlertas.addEventListener('click', abrirModalAlertas);
-        }
-
-        if (overlayModalAlertas) {
-            overlayModalAlertas.addEventListener('click', fecharModalAlertasFn);
-        }
-
-        if (fecharModalAlertas) {
-            fecharModalAlertas.addEventListener('click', fecharModalAlertasFn);
-        }
-
-        if (fecharModalAlertasRodape) {
-            fecharModalAlertasRodape.addEventListener('click', fecharModalAlertasFn);
-        }
+        const modalAlertasColaboradores = configurarModal({
+            triggerId: 'cardAlertasColaboradores',
+            modalId: 'modalAlertasColaboradores',
+            overlayId: 'overlayModalAlertas',
+            contentId: 'conteudoModalAlertas',
+            closeIds: ['fecharModalAlertas', 'fecharModalAlertasRodape']
+        });
 
         document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && modalAlertas && !modalAlertas.classList.contains('hidden')) {
-                fecharModalAlertasFn();
+            if (event.key !== 'Escape') {
+                return;
+            }
+
+            if (modalAlertasEmprestimos && modalAlertasEmprestimos.modal && !modalAlertasEmprestimos.modal.classList.contains('hidden')) {
+                modalAlertasEmprestimos.fechar();
+                return;
+            }
+
+            if (modalAlertasColaboradores && modalAlertasColaboradores.modal && !modalAlertasColaboradores.modal.classList.contains('hidden')) {
+                modalAlertasColaboradores.fechar();
             }
         });
 
         window.addEventListener('beforeunload', function () {
             document.body.classList.remove('overflow-hidden');
         });
-        
-        if (modalAlertas && modalAlertas.classList.contains('hidden')) {
-            modalAlertas.setAttribute('aria-hidden', 'true');
-        }
     </script>
 </body>
 </html>
