@@ -479,6 +479,7 @@ try {
 
             <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
             id="btnGerarTermo"
+            data-substitui="1"
             title="Existem alterações de fardamento desde o último termo de <?= date('d/m/Y H:i', strtotime($ultimoTermo['criado_em'])) ?>"
             style="background-color:#d97706;color:#fff;font-weight:600;
             display:flex;align-items:center;gap:8px;
@@ -491,14 +492,18 @@ try {
 
             <?php elseif ($termoEstado === 'em_vigor'): ?>
 
-            <span
-            title="Termo em vigor desde <?= date('d/m/Y H:i', strtotime($ultimoTermo['criado_em'])) ?>. Edite ou adicione fardas para poder gerar um novo."
-            style="background:#e5e7eb;color:#9ca3af;font-weight:600;
+            <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+            id="btnGerarTermo"
+            data-substitui="1"
+            title="Termo em vigor desde <?= date('d/m/Y H:i', strtotime($ultimoTermo['criado_em'])) ?>. Clique para emitir novamente (substitui o termo atual)."
+            style="background:#9ca3af;color:#fff;font-weight:600;
             display:flex;align-items:center;gap:8px;
-            padding:8px 16px;border-radius:8px;
-            cursor:not-allowed;" class="mr-4">
+            padding:8px 16px;border-radius:8px;text-decoration:none;
+            box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
+            onmouseover="this.style.backgroundColor='#6b7280';"
+            onmouseout="this.style.backgroundColor='#9ca3af';">
             📄 <span>Termo em vigor</span>
-            </span>
+            </a>
 
             <?php else: ?>
 
@@ -699,6 +704,7 @@ if (btnGerarTermo) {
 
         const url = this.href;
         const isNovoTermo = this.innerText.trim().includes('Novo');
+        const substituiTermoAnterior = this.dataset.substitui === '1' || isNovoTermo;
 
         let lista = '';
         let total = 0;
@@ -749,7 +755,7 @@ if (btnGerarTermo) {
             Total estimado: € ${total.toFixed(2)}
             </p>
 
-            ${isNovoTermo ? '<p style="color:#d97706;font-size:13px">Este termo substituirá e invalidará o anterior.</p>' : ''}
+            ${substituiTermoAnterior ? '<p style="color:#d97706;font-size:13px">Este termo substituirá e invalidará o anterior.</p>' : ''}
 
             <p style="color:#dc2626;font-size:13px">
             Após gerar o termo não será possível editar ou anular estas atribuições.
@@ -758,9 +764,9 @@ if (btnGerarTermo) {
 
             width: 600,
             showCancelButton: true,
-            confirmButtonText: isNovoTermo ? 'Gerar Novo Termo' : 'Gerar Termo',
+            confirmButtonText: substituiTermoAnterior ? 'Emitir Termo' : 'Gerar Termo',
             cancelButtonText: 'Cancelar',
-            confirmButtonColor: isNovoTermo ? '#d97706' : '#2563eb',
+            confirmButtonColor: substituiTermoAnterior ? '#d97706' : '#2563eb',
             cancelButtonColor: '#6b7280'
 
         }).then((result) => {
