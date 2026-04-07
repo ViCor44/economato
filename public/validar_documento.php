@@ -18,10 +18,15 @@ if (!$codigo) {
 
 $stmt = $pdo->prepare("
     SELECT 
+        d.id,
         d.codigo,
         d.tipo,
         d.ficheiro,
         d.criado_em,
+        d.estado,
+        d.invalidado_em,
+        d.motivo_invalidacao,
+        d.invalidado_por_documento_id,
         c.nome AS colaborador_nome,
         u.nome AS criado_por_nome
     FROM documentos d
@@ -33,6 +38,18 @@ $stmt = $pdo->prepare("
 $stmt->execute([$codigo]);
 
 $documento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$documentoSubstituto = null;
+if ($documento && !empty($documento['invalidado_por_documento_id'])) {
+    $stmt = $pdo->prepare("
+        SELECT id, codigo, criado_em, ficheiro
+        FROM documentos
+        WHERE id = ?
+        LIMIT 1
+    ");
+    $stmt->execute([(int)$documento['invalidado_por_documento_id']]);
+    $documentoSubstituto = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
 
 $valido = $documento ? true : false;
 ?>
@@ -90,7 +107,7 @@ $valido = $documento ? true : false;
 
 <div class="card">
 
-<?php if ($valido): ?>
+<?php if ($valido && ($documento['estado'] ?? 'valido') === 'valido'): ?>
 
     <h1>✅ Documento válido</h1>
 
@@ -103,6 +120,38 @@ $valido = $documento ? true : false;
     <a class="btn" href="../storage/pdfs/<?= urlencode($documento['ficheiro']) ?>" target="_blank">
         📄 Abrir PDF
     </a>
+
+<?php elseif ($valido): ?>
+
+    <h1>⚠ Documento invalidado</h1>
+
+    <div class="linha"><strong>Tipo:</strong> <?= htmlspecialchars($documento['tipo']) ?></div>
+    <div class="linha"><strong>Colaborador:</strong> <?= htmlspecialchars($documento['colaborador_nome']) ?></div>
+    <div class="linha"><strong>Gerado por:</strong> <?= htmlspecialchars($documento['criado_por_nome']) ?></div>
+    <div class="linha"><strong>Data:</strong> <?= date('d/m/Y H:i', strtotime($documento['criado_em'])) ?></div>
+    <div class="linha"><strong>Código:</strong> <?= htmlspecialchars($documento['codigo']) ?></div>
+    <?php if (!empty($documento['invalidado_em'])): ?>
+        <div class="linha"><strong>Invalidado em:</strong> <?= date('d/m/Y H:i', strtotime($documento['invalidado_em'])) ?></div>
+    <?php endif; ?>
+    <?php if (!empty($documento['motivo_invalidacao'])): ?>
+        <div class="linha"><strong>Motivo:</strong> <?= htmlspecialchars($documento['motivo_invalidacao']) ?></div>
+    <?php endif; ?>
+
+    <?php if ($documentoSubstituto): ?>
+        <div class="linha">
+            <strong>Substituído por:</strong>
+            Código <?= htmlspecialchars($documentoSubstituto['codigo']) ?>
+            (<?= date('d/m/Y H:i', strtotime($documentoSubstituto['criado_em'])) ?>)
+        </div>
+
+        <a class="btn" href="validar_documento.php?codigo=<?= urlencode($documentoSubstituto['codigo']) ?>">
+            Validar documento substituto
+        </a>
+
+        <a class="btn" href="../storage/pdfs/<?= urlencode($documentoSubstituto['ficheiro']) ?>" target="_blank">
+            📄 Abrir PDF substituto
+        </a>
+    <?php endif; ?>
 
 <?php else: ?>
 

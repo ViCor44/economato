@@ -8,6 +8,39 @@ use Dompdf\Options;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+function garantirVersionamentoDocumentos(PDO $pdo): void
+{
+    $colunasNecessarias = [
+        'estado' => "ALTER TABLE documentos ADD COLUMN estado ENUM('valido','invalidado') NOT NULL DEFAULT 'valido' AFTER criado_em",
+        'invalidado_em' => "ALTER TABLE documentos ADD COLUMN invalidado_em DATETIME NULL AFTER estado",
+        'motivo_invalidacao' => "ALTER TABLE documentos ADD COLUMN motivo_invalidacao VARCHAR(255) NULL AFTER invalidado_em",
+        'invalida_documento_id' => "ALTER TABLE documentos ADD COLUMN invalida_documento_id INT NULL AFTER motivo_invalidacao",
+        'invalidado_por_documento_id' => "ALTER TABLE documentos ADD COLUMN invalidado_por_documento_id INT NULL AFTER invalida_documento_id",
+    ];
+
+    foreach ($colunasNecessarias as $nomeColuna => $ddl) {
+        $stmt = $pdo->prepare("SHOW COLUMNS FROM documentos LIKE ?");
+        $stmt->execute([$nomeColuna]);
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $pdo->exec($ddl);
+        }
+    }
+
+    $indicesNecessarios = [
+        'idx_documentos_colaborador_tipo_estado' => "CREATE INDEX idx_documentos_colaborador_tipo_estado ON documentos (colaborador_id, tipo, estado)",
+        'idx_documentos_invalidado_por' => "CREATE INDEX idx_documentos_invalidado_por ON documentos (invalidado_por_documento_id)",
+        'idx_documentos_invalida' => "CREATE INDEX idx_documentos_invalida ON documentos (invalida_documento_id)",
+    ];
+
+    foreach ($indicesNecessarios as $nomeIndice => $ddl) {
+        $stmt = $pdo->prepare("SHOW INDEX FROM documentos WHERE Key_name = ?");
+        $stmt->execute([$nomeIndice]);
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $pdo->exec($ddl);
+        }
+    }
+}
+
 /* ======================================================
    CONFIG QR / BASE URL
 ====================================================== */
@@ -55,6 +88,12 @@ $colaborador = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$colaborador) {
     die("Colaborador não encontrado.");
 }
+
+garantirVersionamentoDocumentos($pdo);
+
+$stmt = $pdo->prepare("\n+    SELECT id, codigo, criado_em\n+    FROM documentos\n+    WHERE colaborador_id = ?\n+      AND tipo = 'termo_farda'\n+      AND estado = 'valido'\n+    ORDER BY criado_em DESC, id DESC\n+    LIMIT 1\n+");
+$stmt->execute([$colaborador_id]);
+$termoAnterior = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 
 /* ======================================================
    FARDAS
@@ -190,6 +229,19 @@ $html .= '
 </table>
 
 <br><p><strong>Valor total do fardamento: € '.number_format($valor_total_geral, 2, ',', '.').'</strong></p>
+';
+
+if ($termoAnterior) {
+    $html .= '
+<p style="margin-top:10px; border:1px solid #b91c1c; padding:10px; color:#991b1b; background:#fef2f2;">
+<strong>Nota de substituição:</strong> Este documento substitui e invalida o termo anterior
+código <strong>'.htmlspecialchars($termoAnterior['codigo']).'</strong>, emitido em
+'.date('d/m/Y H:i', strtotime($termoAnterior['criado_em'])).'.
+</p>
+';
+}
+
+$html .= '
 
 <p>Após o recebimento da farda, verifique todas as peças de vestuário, afim de confirmar se os respetivos tamanhos são adequados, e caso seja necessário a troca de tamanho de alguma peça de vestuário, a mesma tem de ser efetuada antes de ser usada.</p>
 
@@ -238,18 +290,60 @@ file_put_contents($caminho, $pdfContent);
    REGISTAR DOCUMENTO NA BD
 ====================================================== */
 
-$stmt = $pdo->prepare("
-    INSERT INTO documentos
-    (codigo, tipo, colaborador_id, ficheiro, criado_por)
-    VALUES (?, 'termo_farda', ?, ?, ?)
-");
+$pdo->beginTransaction();
 
-$stmt->execute([
-    $codigoDocumento,
-    $colaborador['id'],
-    $nomePdf,
-    $_SESSION['user_id']
-]);
+try {
+    $termoAnteriorAtualizado = null;
+
+    if ($termoAnterior) {
+        $stmt = $pdo->prepare("
+            SELECT id, codigo, criado_em
+            FROM documentos
+            WHERE id = ?
+            FOR UPDATE
+        ");
+        $stmt->execute([(int)$termoAnterior['id']]);
+        $termoAnteriorAtualizado = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    $stmt = $pdo->prepare("
+        INSERT INTO documentos
+        (codigo, tipo, colaborador_id, ficheiro, criado_por, estado, invalida_documento_id)
+        VALUES (?, 'termo_farda', ?, ?, ?, 'valido', ?)
+    ");
+
+    $stmt->execute([
+        $codigoDocumento,
+        $colaborador['id'],
+        $nomePdf,
+        $_SESSION['user_id'],
+        $termoAnteriorAtualizado ? (int)$termoAnteriorAtualizado['id'] : null,
+    ]);
+
+    $novoDocumentoId = (int)$pdo->lastInsertId();
+
+    if ($termoAnteriorAtualizado) {
+        $stmt = $pdo->prepare("
+            UPDATE documentos
+            SET estado = 'invalidado',
+                invalidado_em = NOW(),
+                motivo_invalidacao = ?,
+                invalidado_por_documento_id = ?
+            WHERE id = ?
+        ");
+        $stmt->execute([
+            'Substituido por novo termo apos alteracoes de atribuicao.',
+            $novoDocumentoId,
+            (int)$termoAnteriorAtualizado['id'],
+        ]);
+    }
+
+    $pdo->commit();
+} catch (Exception $e) {
+    $pdo->rollBack();
+    @unlink($caminho);
+    die('Erro ao registar documento: ' . $e->getMessage());
+}
 
 /* ======================================================
    ENVIAR EMAIL
