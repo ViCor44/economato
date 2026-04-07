@@ -379,6 +379,21 @@ try {
         } else {
             $termoEstado = 'em_vigor';
         }
+
+        $_stmtEmprestimos = $pdo->prepare(" 
+            SELECT e.id, e.quantidade, e.data_emprestimo,
+                   f.nome AS farda_nome, c.nome AS cor_nome, t.nome AS tamanho_nome,
+                   DATEDIFF(CURDATE(), DATE(e.data_emprestimo)) AS dias_em_aberto
+            FROM farda_emprestimos e
+            JOIN fardas f ON e.farda_id = f.id
+            JOIN cores c ON f.cor_id = c.id
+            JOIN tamanhos t ON f.tamanho_id = t.id
+            WHERE e.colaborador_id = ?
+              AND e.devolvido = 0
+            ORDER BY e.data_emprestimo ASC
+        ");
+        $_stmtEmprestimos->execute([$colaborador_id]);
+        $emprestimosPendentes = $_stmtEmprestimos->fetchAll(PDO::FETCH_ASSOC);
     ?>
 
 
@@ -559,6 +574,80 @@ try {
             </table>
         <?php else: ?>
             <p class="text-gray-500 italic">Nenhuma farda atribuída.</p>
+        <?php endif; ?>
+    </section>
+
+    <section class="mt-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">↩️ Empréstimos Pendentes</h2>
+            <a href="devolver_emprestimo.php?colaborador_id=<?= (int)$colaborador_id ?>" class="text-sm text-blue-600 hover:underline">
+                Abrir gestão completa
+            </a>
+        </div>
+
+        <?php if (empty($emprestimosPendentes)): ?>
+            <p class="text-gray-500 italic">Sem empréstimos pendentes para este colaborador.</p>
+        <?php else: ?>
+            <div class="overflow-x-auto">
+                <table class="min-w-full border border-gray-200 text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-2 border-b text-left">Peça</th>
+                            <th class="px-4 py-2 border-b text-left">Cor</th>
+                            <th class="px-4 py-2 border-b text-left">Tamanho</th>
+                            <th class="px-4 py-2 border-b text-center">Qtd</th>
+                            <th class="px-4 py-2 border-b text-center">Data Empréstimo</th>
+                            <th class="px-4 py-2 border-b text-center">Dias</th>
+                            <th class="px-4 py-2 border-b text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($emprestimosPendentes as $emp): ?>
+                            <?php $emAtraso = ((int)$emp['dias_em_aberto'] >= 15); ?>
+                            <tr class="<?= $emAtraso ? 'bg-red-50' : '' ?>">
+                                <td class="px-4 py-2 border-b"><?= htmlspecialchars($emp['farda_nome']) ?></td>
+                                <td class="px-4 py-2 border-b"><?= htmlspecialchars($emp['cor_nome']) ?></td>
+                                <td class="px-4 py-2 border-b"><?= htmlspecialchars($emp['tamanho_nome']) ?></td>
+                                <td class="px-4 py-2 border-b text-center"><?= (int)$emp['quantidade'] ?></td>
+                                <td class="px-4 py-2 border-b text-center"><?= date('d/m/Y H:i', strtotime($emp['data_emprestimo'])) ?></td>
+                                <td class="px-4 py-2 border-b text-center font-semibold <?= $emAtraso ? 'text-red-700' : 'text-gray-700' ?>">
+                                    <?= (int)$emp['dias_em_aberto'] ?>
+                                </td>
+                                <td class="px-4 py-2 border-b">
+                                    <div class="flex flex-wrap items-center justify-center gap-2">
+                                        <form method="POST" action="devolver_emprestimo.php?colaborador_id=<?= (int)$colaborador_id ?>" class="flex items-center gap-2">
+                                            <input type="hidden" name="emprestimo_id" value="<?= (int)$emp['id'] ?>">
+                                            <input type="hidden" name="acao" value="devolver">
+                                            <select name="condicao" required class="border rounded-md px-2 py-1 text-xs">
+                                                <option value="">Condição...</option>
+                                                <option value="bom_estado">Bom estado</option>
+                                                <option value="danificado">Danificado</option>
+                                                <option value="perdido">Perdido</option>
+                                            </select>
+                                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded-md text-xs font-semibold">
+                                                Devolver
+                                            </button>
+                                        </form>
+
+                                        <form method="POST" action="devolver_emprestimo.php?colaborador_id=<?= (int)$colaborador_id ?>">
+                                            <input type="hidden" name="emprestimo_id" value="<?= (int)$emp['id'] ?>">
+                                            <input type="hidden" name="acao" value="atribuir">
+                                            <input type="hidden" name="observacoes" value="Convertido em atribuição definitiva a partir dos detalhes do colaborador.">
+                                            <button
+                                                type="submit"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-md text-xs font-semibold"
+                                                onclick="return confirm('Este empréstimo será convertido em atribuição definitiva. Continuar?');"
+                                            >
+                                                Atribuir definitivo
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         <?php endif; ?>
     </section>
 <script>
