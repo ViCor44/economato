@@ -1,6 +1,29 @@
 <?php
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
+require_once '../src/log.php';
+
+function garantirConversaoEmprestimos(PDO $pdo): void
+{
+    $colunasNecessarias = [
+        'convertido_em_atribuicao' => "ALTER TABLE farda_emprestimos ADD COLUMN convertido_em_atribuicao TINYINT(1) NOT NULL DEFAULT 0 AFTER devolvido",
+        'atribuicao_id' => "ALTER TABLE farda_emprestimos ADD COLUMN atribuicao_id INT NULL AFTER convertido_em_atribuicao",
+    ];
+
+    foreach ($colunasNecessarias as $nomeColuna => $ddl) {
+        $stmt = $pdo->query("SHOW COLUMNS FROM farda_emprestimos LIKE '" . $nomeColuna . "'");
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            $pdo->exec($ddl);
+        }
+    }
+
+    $stmt = $pdo->query("SHOW INDEX FROM farda_emprestimos WHERE Key_name = 'idx_farda_emprestimos_atribuicao_id'");
+    if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+        $pdo->exec("CREATE INDEX idx_farda_emprestimos_atribuicao_id ON farda_emprestimos (atribuicao_id)");
+    }
+}
+
+garantirConversaoEmprestimos($pdo);
 
 $colaboradorId = isset($_GET['colaborador_id']) ? (int) $_GET['colaborador_id'] : 0;
 $colaborador = null;
@@ -20,8 +43,9 @@ $mensagem = '';
 
 // Se houver devolução
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $emprestimo_id = $_POST['emprestimo_id'];
-    $condicao = $_POST['condicao'];
+    $emprestimo_id = (int) ($_POST['emprestimo_id'] ?? 0);
+    $acao = $_POST['acao'] ?? 'devolver';
+    $condicao = $_POST['condicao'] ?? '';
     $observacoes = trim($_POST['observacoes'] ?? '');
     $user_id = $utilizador_logado['id'];
 
@@ -29,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         // Buscar empréstimo
-        $sqlEmprestimo = "SELECT farda_id, quantidade, colaborador_id FROM farda_emprestimos WHERE id = :id AND devolvido = 0";
+        $sqlEmprestimo = "SELECT id, farda_id, quantidade, colaborador_id FROM farda_emprestimos WHERE id = :id AND devolvido = 0";
         if ($colaboradorId > 0) {
             $sqlEmprestimo .= " AND colaborador_id = :colaborador_id";
         }
@@ -47,29 +71,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Empréstimo inválido ou já devolvido.");
         }
 
-        // Atualizar estado do empréstimo
-        $update = $pdo->prepare("
-            UPDATE farda_emprestimos
-            SET devolvido = 1, data_devolucao = NOW(), condicao_devolucao = :cond, observacoes = :obs
-            WHERE id = :id
-        ");
-        $update->execute([
-            'cond' => $condicao,
-            'obs' => $observacoes,
-            'id' => $emprestimo_id
-        ]);
-
-        // Se devolvido em bom estado, repor stock
-        if ($condicao === 'bom_estado') {
-            $repor = $pdo->prepare("UPDATE fardas SET quantidade = quantidade + :qtd WHERE id = :id");
-            $repor->execute([
-                'qtd' => $emprestimo['quantidade'],
-                'id' => $emprestimo['farda_id']
+        if ($acao === 'atribuir') {
+            $criarAtribuicao = $pdo->prepare("
+                INSERT INTO farda_atribuicoes
+                (colaborador_id, farda_id, quantidade, estado, data_atribuicao)
+                VALUES (:colaborador_id, :farda_id, :quantidade, 'atribuida', NOW())
+            ");
+            $criarAtribuicao->execute([
+                'colaborador_id' => $emprestimo['colaborador_id'],
+                'farda_id' => $emprestimo['farda_id'],
+                'quantidade' => $emprestimo['quantidade'],
             ]);
-        }
 
-        $pdo->commit();
-        $mensagem = "✅ Devolução registada com sucesso!";
+            $atribuicaoId = (int) $pdo->lastInsertId();
+            $observacoesConversao = $observacoes;
+            if ($observacoesConversao !== '') {
+                $observacoesConversao .= "\n";
+            }
+            $observacoesConversao .= 'Empréstimo convertido em atribuição definitiva.';
+
+            $update = $pdo->prepare("
+                UPDATE farda_emprestimos
+                SET devolvido = 1,
+                    data_devolucao = NOW(),
+                    convertido_em_atribuicao = 1,
+                    atribuicao_id = :atribuicao_id,
+                    observacoes = :obs
+                WHERE id = :id
+            ");
+            $update->execute([
+                'atribuicao_id' => $atribuicaoId,
+                'obs' => $observacoesConversao,
+                'id' => $emprestimo_id,
+            ]);
+
+            adicionarLog(
+                $pdo,
+                'Conversão de empréstimo em atribuição',
+                "Empréstimo ID {$emprestimo_id} convertido em atribuição ID {$atribuicaoId} para colaborador ID {$emprestimo['colaborador_id']}"
+            );
+
+            $pdo->commit();
+            $mensagem = '✅ Empréstimo convertido em atribuição com sucesso. Já pode gerar novo termo.';
+        } else {
+            if ($condicao === '') {
+                throw new Exception('Selecione a condição da devolução.');
+            }
+
+            // Atualizar estado do empréstimo
+            $update = $pdo->prepare("
+                UPDATE farda_emprestimos
+                SET devolvido = 1, data_devolucao = NOW(), condicao_devolucao = :cond, observacoes = :obs
+                WHERE id = :id
+            ");
+            $update->execute([
+                'cond' => $condicao,
+                'obs' => $observacoes,
+                'id' => $emprestimo_id
+            ]);
+
+            // Se devolvido em bom estado, repor stock
+            if ($condicao === 'bom_estado') {
+                $repor = $pdo->prepare("UPDATE fardas SET quantidade = quantidade + :qtd WHERE id = :id");
+                $repor->execute([
+                    'qtd' => $emprestimo['quantidade'],
+                    'id' => $emprestimo['farda_id']
+                ]);
+            }
+
+            adicionarLog(
+                $pdo,
+                'Devolução de empréstimo',
+                "Empréstimo ID {$emprestimo_id} devolvido pelo colaborador ID {$emprestimo['colaborador_id']} com condição {$condicao}"
+            );
+
+            $pdo->commit();
+            $mensagem = '✅ Devolução registada com sucesso!';
+        }
     } catch (Exception $e) {
         $pdo->rollBack();
         $mensagem = "❌ Erro: " . $e->getMessage();
@@ -155,8 +233,9 @@ $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td class="px-4 py-2 text-center"><?= (int)$e['quantidade'] ?></td>
                             <td class="px-4 py-2 text-center"><?= date('d/m/Y H:i', strtotime($e['data_emprestimo'])) ?></td>
                             <td class="px-4 py-2 text-center">
-                                <form method="POST" class="inline-block space-x-2">
+                                <form method="POST" class="inline-flex items-center gap-2 flex-wrap justify-center">
                                     <input type="hidden" name="emprestimo_id" value="<?= $e['id'] ?>">
+                                    <input type="hidden" name="acao" value="devolver">
                                     <select name="condicao" required class="border rounded-md px-2 py-1 text-sm">
                                         <option value="">Condição...</option>
                                         <option value="bom_estado">Bom estado</option>
@@ -165,6 +244,18 @@ $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     </select>
                                     <input type="text" name="observacoes" placeholder="Observações" class="border px-2 py-1 rounded-md text-sm w-40">
                                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm">Devolver</button>
+                                </form>
+                                <form method="POST" class="inline-flex items-center gap-2 ml-2 mt-2 sm:mt-0">
+                                    <input type="hidden" name="emprestimo_id" value="<?= $e['id'] ?>">
+                                    <input type="hidden" name="acao" value="atribuir">
+                                    <input type="hidden" name="observacoes" value="Convertido em atribuição definitiva a partir da gestão de empréstimos.">
+                                    <button
+                                        type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm"
+                                        onclick="return confirm('Este empréstimo será convertido em atribuição definitiva ao colaborador. Continuar?');"
+                                    >
+                                        Atribuir ao colaborador
+                                    </button>
                                 </form>
                             </td>
                         </tr>
