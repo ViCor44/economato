@@ -2,6 +2,19 @@
 require_once '../src/auth_guard.php';
 require_once '../config/db.php';
 
+$colaboradorId = isset($_GET['colaborador_id']) ? (int) $_GET['colaborador_id'] : 0;
+$colaborador = null;
+
+if ($colaboradorId > 0) {
+    $stmtColaborador = $pdo->prepare("SELECT id, nome FROM colaboradores WHERE id = ?");
+    $stmtColaborador->execute([$colaboradorId]);
+    $colaborador = $stmtColaborador->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    if (!$colaborador) {
+        die('Colaborador inválido.');
+    }
+}
+
 // Mensagem de estado
 $mensagem = '';
 
@@ -16,8 +29,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->beginTransaction();
 
         // Buscar empréstimo
-        $stmt = $pdo->prepare("SELECT farda_id, quantidade FROM farda_emprestimos WHERE id = :id AND devolvido = 0");
-        $stmt->execute(['id' => $emprestimo_id]);
+        $sqlEmprestimo = "SELECT farda_id, quantidade, colaborador_id FROM farda_emprestimos WHERE id = :id AND devolvido = 0";
+        if ($colaboradorId > 0) {
+            $sqlEmprestimo .= " AND colaborador_id = :colaborador_id";
+        }
+
+        $stmt = $pdo->prepare($sqlEmprestimo);
+        $paramsEmprestimo = ['id' => $emprestimo_id];
+        if ($colaboradorId > 0) {
+            $paramsEmprestimo['colaborador_id'] = $colaboradorId;
+        }
+
+        $stmt->execute($paramsEmprestimo);
         $emprestimo = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$emprestimo) {
@@ -53,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Buscar todos os empréstimos não devolvidos
-$stmt = $pdo->query("
+// Buscar empréstimos não devolvidos
+$sqlEmprestimos = "
     SELECT e.id, c.nome AS colaborador, f.nome AS farda, co.nome AS cor, t.nome AS tamanho,
            e.quantidade, e.data_emprestimo
     FROM farda_emprestimos e
@@ -63,8 +86,20 @@ $stmt = $pdo->query("
     JOIN cores co ON f.cor_id = co.id
     JOIN tamanhos t ON f.tamanho_id = t.id
     WHERE e.devolvido = 0
-    ORDER BY e.data_emprestimo ASC
-");
+";
+
+if ($colaboradorId > 0) {
+    $sqlEmprestimos .= " AND e.colaborador_id = :colaborador_id";
+}
+
+$sqlEmprestimos .= " ORDER BY e.data_emprestimo ASC";
+
+$stmt = $pdo->prepare($sqlEmprestimos);
+$paramsEmprestimos = [];
+if ($colaboradorId > 0) {
+    $paramsEmprestimos['colaborador_id'] = $colaboradorId;
+}
+$stmt->execute($paramsEmprestimos);
 $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -81,8 +116,14 @@ $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <main class="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-md mt-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">↩️ Devolução de Fardas Emprestadas</h1>
-            <a href="gerir_stock_farda.php" class="text-blue-600 hover:underline">← Voltar</a>
+            <a href="<?= $colaboradorId > 0 ? 'detalhes_colaborador.php?id=' . $colaboradorId : 'gerir_stock_farda.php' ?>" class="text-blue-600 hover:underline">← Voltar</a>
         </div>
+
+        <?php if ($colaborador): ?>
+            <p class="mb-4 text-sm text-gray-600">
+                A mostrar apenas os empréstimos de <strong><?= htmlspecialchars($colaborador['nome']) ?></strong>.
+            </p>
+        <?php endif; ?>
 
         <?php if ($mensagem): ?>
             <div class="mb-6 p-4 bg-blue-100 border-l-4 border-blue-600 text-blue-800 rounded-md"><?= $mensagem ?></div>
