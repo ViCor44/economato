@@ -337,6 +337,48 @@ try {
         $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $total_geral = 0;
         $temFardas = !empty($fardas_atribuidas);
+
+        // --- Estado do botão Gerar Termo ---
+        // Garantir coluna updated_at em farda_atribuicoes
+        $_mig = $pdo->query("SHOW COLUMNS FROM farda_atribuicoes LIKE 'updated_at'");
+        if (!$_mig->fetch()) {
+            $pdo->exec("ALTER TABLE farda_atribuicoes ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER data_atribuicao");
+        }
+
+        // Último termo válido para este colaborador
+        $_stmtTermo = $pdo->prepare("
+            SELECT id, codigo, criado_em
+            FROM documentos
+            WHERE colaborador_id = ?
+              AND tipo = 'termo_farda'
+              AND (estado = 'valido' OR estado IS NULL)
+            ORDER BY criado_em DESC, id DESC
+            LIMIT 1
+        ");
+        $_stmtTermo->execute([$colaborador_id]);
+        $ultimoTermo = $_stmtTermo->fetch(PDO::FETCH_ASSOC) ?: null;
+
+        // Última atividade: atribuição nova ou edição
+        $_stmtAtiv = $pdo->prepare("
+            SELECT MAX(GREATEST(data_atribuicao, COALESCE(updated_at, data_atribuicao))) AS ultima_atividade
+            FROM farda_atribuicoes
+            WHERE colaborador_id = ?
+              AND estado IN ('atribuida','marcada_devolucao')
+        ");
+        $_stmtAtiv->execute([$colaborador_id]);
+        $_rowAtiv = $_stmtAtiv->fetch(PDO::FETCH_ASSOC);
+        $ultimaAtividadeFarda = $_rowAtiv['ultima_atividade'] ?? null;
+
+        // gerar | novo_termo | em_vigor | sem_fardas
+        if (!$temFardas) {
+            $termoEstado = 'sem_fardas';
+        } elseif ($ultimoTermo === null) {
+            $termoEstado = 'gerar';
+        } elseif ($ultimaAtividadeFarda && strtotime($ultimaAtividadeFarda) > strtotime($ultimoTermo['criado_em'])) {
+            $termoEstado = 'novo_termo';
+        } else {
+            $termoEstado = 'em_vigor';
+        }
     ?>
 
 
@@ -409,7 +451,7 @@ try {
             </a>
 
             <!-- 📄 Termo de entrega -->
-            <?php if ($temFardas): ?>
+            <?php if ($termoEstado === 'gerar'): ?>
 
             <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
             id="btnGerarTermo"
@@ -421,6 +463,31 @@ try {
             onmouseout="this.style.backgroundColor='#2563eb';">
             📄 <span>Gerar Termo</span>
             </a>
+
+            <?php elseif ($termoEstado === 'novo_termo'): ?>
+
+            <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+            id="btnGerarTermo"
+            title="Existem alterações de fardamento desde o último termo de <?= date('d/m/Y H:i', strtotime($ultimoTermo['criado_em'])) ?>"
+            style="background-color:#d97706;color:#fff;font-weight:600;
+            display:flex;align-items:center;gap:8px;
+            padding:8px 16px;border-radius:8px;text-decoration:none;
+            box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
+            onmouseover="this.style.backgroundColor='#b45309';"
+            onmouseout="this.style.backgroundColor='#d97706';">
+            🔄 <span>Gerar Novo Termo</span>
+            </a>
+
+            <?php elseif ($termoEstado === 'em_vigor'): ?>
+
+            <span
+            title="Termo em vigor desde <?= date('d/m/Y H:i', strtotime($ultimoTermo['criado_em'])) ?>. Edite ou adicione fardas para poder gerar um novo."
+            style="background:#e5e7eb;color:#9ca3af;font-weight:600;
+            display:flex;align-items:center;gap:8px;
+            padding:8px 16px;border-radius:8px;
+            cursor:not-allowed;" class="mr-4">
+            📄 <span>Termo em vigor</span>
+            </span>
 
             <?php else: ?>
 
@@ -501,82 +568,90 @@ try {
 </main>
 <script>
 
-document.getElementById('btnGerarTermo').addEventListener('click', function(e){
+const btnGerarTermo = document.getElementById('btnGerarTermo');
+if (btnGerarTermo) {
 
-    e.preventDefault();
+    btnGerarTermo.addEventListener('click', function(e){
 
-    const url = this.href;
+        e.preventDefault();
 
-    let lista = '';
-    let total = 0;
+        const url = this.href;
+        const isNovoTermo = this.innerText.trim().includes('Novo');
 
-    fardas.forEach(f => {
+        let lista = '';
+        let total = 0;
 
-        const subtotal = f.quantidade * f.preco_unitario;
-        total += subtotal;
+        fardas.forEach(f => {
 
-        lista += `
-        <tr>
-            <td style="text-align:left">${f.nome}</td>
-            <td>${f.cor}</td>
-            <td>${f.tamanho}</td>
-            <td>${f.quantidade}</td>
-        </tr>`;
-    });
+            const subtotal = f.quantidade * f.preco_unitario;
+            total += subtotal;
 
-    const tabela = `
-    <table style="width:100%;font-size:14px;border-collapse:collapse">
-        <thead>
+            lista += `
             <tr>
-                <th style="text-align:left">Peça</th>
-                <th>Cor</th>
-                <th>Tam</th>
-                <th>Qtd</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${lista}
-        </tbody>
-    </table>
-    `;
+                <td style="text-align:left">${f.nome}</td>
+                <td>${f.cor}</td>
+                <td>${f.tamanho}</td>
+                <td>${f.quantidade}</td>
+            </tr>`;
+        });
 
-    Swal.fire({
+        const tabela = `
+        <table style="width:100%;font-size:14px;border-collapse:collapse">
+            <thead>
+                <tr>
+                    <th style="text-align:left">Peça</th>
+                    <th>Cor</th>
+                    <th>Tam</th>
+                    <th>Qtd</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${lista}
+            </tbody>
+        </table>
+        `;
 
-        icon: 'warning',
-        title: 'Confirmar Termo de Fardamento',
+        Swal.fire({
 
-        html: `
-        <p><strong>Colaborador:</strong> ${colaboradorNome}</p>
+            icon: 'warning',
+            title: isNovoTermo ? 'Confirmar Novo Termo de Fardamento' : 'Confirmar Termo de Fardamento',
 
-        ${tabela}
+            html: `
+            <p><strong>Colaborador:</strong> ${colaboradorNome}</p>
 
-        <br>
+            ${tabela}
 
-        <p style="font-weight:bold">
-        Total estimado: € ${total.toFixed(2)}
-        </p>
+            <br>
 
-        <p style="color:#dc2626;font-size:13px">
-        Após gerar o termo não será possível editar ou anular estas atribuições.
-        </p>
-        `,
+            <p style="font-weight:bold">
+            Total estimado: € ${total.toFixed(2)}
+            </p>
 
-        width: 600,
-        showCancelButton: true,
-        confirmButtonText: 'Gerar Termo',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#2563eb',
-        cancelButtonColor: '#6b7280'
+            ${isNovoTermo ? '<p style="color:#d97706;font-size:13px">Este termo substituirá e invalidará o anterior.</p>' : ''}
 
-    }).then((result) => {
+            <p style="color:#dc2626;font-size:13px">
+            Após gerar o termo não será possível editar ou anular estas atribuições.
+            </p>
+            `,
 
-        if (result.isConfirmed) {
-            window.open(url, '_blank');
-        }
+            width: 600,
+            showCancelButton: true,
+            confirmButtonText: isNovoTermo ? 'Gerar Novo Termo' : 'Gerar Termo',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: isNovoTermo ? '#d97706' : '#2563eb',
+            cancelButtonColor: '#6b7280'
+
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+                window.open(url, '_blank');
+            }
+
+        });
 
     });
 
-});
+}
 
 </script>
 <?php include_once '../src/templates/footer.php'; ?>

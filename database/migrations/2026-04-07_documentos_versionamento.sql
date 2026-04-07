@@ -1,5 +1,11 @@
--- Versionamento de documentos para reemissao de termos
+-- Versionamento de documentos e rastreamento de alteracoes de atribuicao
 -- Executar na base de dados econo_app
+
+-- 1. Rastreamento de edicoes nas atribuicoes de farda
+ALTER TABLE farda_atribuicoes
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER data_atribuicao;
+
+-- 2. Versionamento de documentos gerados
 
 ALTER TABLE documentos
     ADD COLUMN IF NOT EXISTS estado ENUM('valido','invalidado') NOT NULL DEFAULT 'valido' AFTER criado_em,
