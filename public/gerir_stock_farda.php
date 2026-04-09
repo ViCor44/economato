@@ -5,6 +5,10 @@ require_once '../config/db.php';
 // Pesquisa opcional
 $pesquisa = trim($_GET['pesquisa'] ?? '');
 $departamento_id = isset($_GET['departamento_id']) ? (int)$_GET['departamento_id'] : 0;
+$success_message = $_SESSION['success_message'] ?? (isset($_GET['sucesso']) ? 'Operação concluída com sucesso.' : '');
+$error_message = $_SESSION['error_message'] ?? '';
+
+unset($_SESSION['success_message'], $_SESSION['error_message']);
 
 // Buscar departamentos
 $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -127,6 +131,18 @@ try {
             </div>
         </div>
 
+        <?php if ($success_message): ?>
+            <div class="mb-6 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-green-800">
+                <?= htmlspecialchars($success_message) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($error_message): ?>
+            <div class="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-800">
+                <?= htmlspecialchars($error_message) ?>
+            </div>
+        <?php endif; ?>
+
 
         <?php if (empty($fardas)): ?>
             <p class="text-gray-600 italic">Nenhuma farda encontrada.</p>
@@ -156,7 +172,15 @@ try {
                                 <td class="px-4 py-2 text-right"><?= number_format($f['preco_unitario'], 2, ',', '.') ?></td>
                                 <td class="px-4 py-2 text-right"><?= (int)$f['quantidade'] ?></td>
                                 <td class="px-4 py-2 text-center">
-                                    <a href="editar_farda.php?id=<?= $f['id'] ?>&pesquisa=<?= urlencode($pesquisa) ?>&departamento_id=<?= $departamento_id ?>" class="text-blue-600 hover:underline">Editar</a>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <a href="editar_farda.php?id=<?= $f['id'] ?>&pesquisa=<?= urlencode($pesquisa) ?>&departamento_id=<?= $departamento_id ?>" class="text-blue-600 hover:underline">Editar</a>
+                                        <form action="eliminar_farda.php" method="POST" class="inline" onsubmit="return confirm('Tem a certeza que deseja eliminar esta farda?');">
+                                            <input type="hidden" name="id" value="<?= (int)$f['id'] ?>">
+                                            <input type="hidden" name="pesquisa" value="<?= htmlspecialchars($pesquisa) ?>">
+                                            <input type="hidden" name="departamento_id" value="<?= $departamento_id ?>">
+                                            <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
