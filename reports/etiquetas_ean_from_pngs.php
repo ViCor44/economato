@@ -181,25 +181,37 @@ body{font-family:Arial,sans-serif;color:#111;margin:20px}
 
 .card {
     display: inline-block;
-    width: 27%;              /* 3 por linha */
-    margin: 0 1.5% 14px 1.5%;
+    width: 31.3333%;         /* 3 por linha */
+    margin: 0 1% 12px 1%;
     font-size: 12px;         /* repõe o tamanho de texto dentro da card */
     vertical-align: top;
     border: 1px solid #e6e6e6;
     border-radius: 6px;
-    padding: 8px;
+    padding: 8px 9px;
     box-sizing: border-box;
     background: #fff;
+    min-height: 150px;
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 .card img {
     display: block;
     max-width: 100%;
+    max-height: 54px;
     height: auto;
-    margin: 0 auto 6px auto;
+    margin: 0 auto 8px auto;
 }
-.meta{font-size:12px;color:#333}
+.meta{font-size:12px;color:#333;line-height:1.25}
+.meta-title{font-size:13px;line-height:1.25;margin-bottom:2px}
 .small{font-size:11px;color:#666;margin-top:6px}
 .footer{font-size:11px;color:#666;margin-top:18px}
+
+@media print {
+    body { margin: 12px; }
+    .section { page-break-inside: avoid; }
+    .grid { page-break-inside: auto; }
+    .card { page-break-inside: avoid; break-inside: avoid; }
+}
 </style></head><body>';
 $html .= '<div class="header"><div><div class="logo">' . htmlspecialchars($appName) . '</div><div class="title">' . htmlspecialchars($title) . '</div></div>';
 $html .= '<div class="small">Gerado em ' . date('d/m/Y H:i') . '</div></div>';
@@ -214,13 +226,12 @@ if (empty($groups) && empty($unmatched)) {
         foreach ($list as $it) {
             $f = $it['farda'];
             $imgData = file_to_data_uri($it['path']);
-            $imgHtml = $imgData ? "<img src=\"$imgData\" alt=\"".htmlspecialchars($it['file'])."\">" : "<div style='height:120px;display:flex;align-items:center;justify-content:center;color:#999;border:1px dashed #ddd;'>Imagem indisponível</div>";
+            $imgHtml = $imgData ? "<img src=\"$imgData\" alt=\"".htmlspecialchars($it['file'])."\">" : "<div style='height:54px;display:flex;align-items:center;justify-content:center;color:#999;border:1px dashed #ddd;'>Imagem indisponível</div>";
             $html .= '<div class="card">';
             $html .= $imgHtml;
-            $html .= '<div class="meta"><strong>' . htmlspecialchars($f['nome']) . '</strong></div>';
+            $html .= '<div class="meta meta-title"><strong>' . htmlspecialchars($f['nome']) . '</strong></div>';
             $html .= '<div class="meta">' . htmlspecialchars($f['cor'] . ' / ' . $f['tamanho']) . '</div>';
             $html .= '<div class="meta">EAN: ' . htmlspecialchars($f['ean'] ?? '—') . '</div>';
-            $html .= '<div class="small">Farda ID: ' . htmlspecialchars($f['id']) . ' — Stock: ' . (int)$f['quantidade'] . '</div>';
             $html .= '</div>';
         }
         $html .= '</div></div>';
