@@ -168,42 +168,34 @@ if ($depFilterNome) $title .= " — " . htmlspecialchars($depFilterNome);
 
 $html = '<!doctype html><html><head><meta charset="utf-8"><title>' . htmlspecialchars($title) . '</title>';
 $html .= '<style>
-@page { size: A4 landscape; margin: 10mm 8mm; }
+@page { size: A4 portrait; margin: 10mm 8mm; }
 body{font-family:Arial,sans-serif;color:#111;margin:0}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .logo{font-weight:800;font-size:20px;color:#0f172a}
 .title{font-size:16px;color:#111}
-.section{margin-top:18px;margin-bottom:26px}
+.section{margin-top:18px;margin-bottom:22px;page-break-inside:avoid}
 .section h3{background:#f3f4f6;padding:8px 12px;border-radius:6px}
-.grid {
-    display: block;
-    width: 100%;
-    font-size: 0; /* evita espaços em branco entre inline-blocks */
+.labels-table{width:100%;border-collapse:separate;border-spacing:6px 8px;table-layout:fixed}
+.labels-table tr{page-break-inside:avoid}
+.labels-table td{
+    width:33.333%;
+    vertical-align:top;
+    page-break-inside:avoid;
 }
-.grid::after {
-    content: "";
-    display: block;
-    clear: both;
-}
-
 .card {
-    float: left;
-    width: 32.1%;            /* 3 por linha */
-    margin: 0 0.6% 8px 0.6%;
-    font-size: 12px;         /* repõe o tamanho de texto dentro da card */
     border: 1px solid #e6e6e6;
     border-radius: 6px;
-    padding: 6px 7px;
+    padding: 7px 8px;
     box-sizing: border-box;
     background: #fff;
-    min-height: 112px;
+    min-height: 110px;
     page-break-inside: avoid;
     break-inside: avoid;
 }
 .card img {
     display: block;
     max-width: 100%;
-    max-height: 40px;
+    max-height: 42px;
     height: auto;
     margin: 0 auto 5px auto;
 }
@@ -214,9 +206,8 @@ body{font-family:Arial,sans-serif;color:#111;margin:0}
 
 @media print {
     body { margin: 0; }
-    .section { page-break-inside: avoid; }
-    .grid { page-break-inside: auto; }
-    .card { page-break-inside: avoid; break-inside: avoid; }
+    .section { page-break-inside: auto; }
+    .labels-table tr, .labels-table td, .card { page-break-inside: avoid; break-inside: avoid; }
 }
 </style></head><body>';
 $html .= '<div class="header"><div><div class="logo">' . htmlspecialchars($appName) . '</div><div class="title">' . htmlspecialchars($title) . '</div></div>';
@@ -228,36 +219,52 @@ if (empty($groups) && empty($unmatched)) {
 } else {
     foreach ($groups as $dep => $list) {
         $html .= '<div class="section"><h3>' . htmlspecialchars($dep) . ' (' . count($list) . ')</h3>';
-        $html .= '<div class="grid">';
-        foreach ($list as $it) {
-            $f = $it['farda'];
-            $imgData = file_to_data_uri($it['path']);
-            $imgHtml = $imgData ? "<img src=\"$imgData\" alt=\"".htmlspecialchars($it['file'])."\">" : "<div style='height:54px;display:flex;align-items:center;justify-content:center;color:#999;border:1px dashed #ddd;'>Imagem indisponível</div>";
-            $html .= '<div class="card">';
-            $html .= $imgHtml;
-            $html .= '<div class="meta meta-title"><strong>' . htmlspecialchars($f['nome']) . '</strong></div>';
-            $html .= '<div class="meta">' . htmlspecialchars($f['cor'] . ' / ' . $f['tamanho']) . '</div>';
-            $html .= '<div class="meta">EAN: ' . htmlspecialchars($f['ean'] ?? '—') . '</div>';
-            $html .= '</div>';
+        $html .= '<table class="labels-table">';
+        foreach (array_chunk($list, 3) as $row) {
+            $html .= '<tr>';
+            foreach ($row as $it) {
+                $f = $it['farda'];
+                $imgData = file_to_data_uri($it['path']);
+                $imgHtml = $imgData ? "<img src=\"$imgData\" alt=\"" . htmlspecialchars($it['file']) . "\">" : "<div style='height:42px;display:flex;align-items:center;justify-content:center;color:#999;border:1px dashed #ddd;'>Imagem indisponível</div>";
+                $html .= '<td><div class="card">';
+                $html .= $imgHtml;
+                $html .= '<div class="meta meta-title"><strong>' . htmlspecialchars($f['nome']) . '</strong></div>';
+                $html .= '<div class="meta">' . htmlspecialchars($f['cor'] . ' / ' . $f['tamanho']) . '</div>';
+                $html .= '<div class="meta">EAN: ' . htmlspecialchars($f['ean'] ?? '—') . '</div>';
+                $html .= '</div></td>';
+            }
+            $missing = 3 - count($row);
+            for ($i = 0; $i < $missing; $i++) {
+                $html .= '<td></td>';
+            }
+            $html .= '</tr>';
         }
-        $html .= '</div></div>';
+        $html .= '</table></div>';
     }
 
     // unmatched
     if (!empty($unmatched)) {
         $html .= '<div class="section"><h3>Sem correspondência (' . count($unmatched) . ')</h3>';
-        $html .= '<div class="grid">';
-        foreach ($unmatched as $it) {
-            $imgData = file_to_data_uri($it['path']);
-            $imgHtml = $imgData ? "<img src=\"$imgData\" alt=\"".htmlspecialchars($it['file'])."\">" : "<div style='height:120px;display:flex;align-items:center;justify-content:center;color:#999;border:1px dashed #ddd;'>Imagem indisponível</div>";
-            $html .= '<div class="card">';
-            $html .= $imgHtml;
-            $html .= '<div class="meta"><strong>' . htmlspecialchars($it['basename']) . '</strong></div>';
-            $html .= '<div class="meta">Ficheiro: ' . htmlspecialchars($it['file']) . '</div>';
-            $html .= '<div class="small">Nenhuma peça encontrada para este ficheiro (verifica se o nome é EAN ou farda_id).</div>';
-            $html .= '</div>';
+        $html .= '<table class="labels-table">';
+        foreach (array_chunk($unmatched, 3) as $row) {
+            $html .= '<tr>';
+            foreach ($row as $it) {
+                $imgData = file_to_data_uri($it['path']);
+                $imgHtml = $imgData ? "<img src=\"$imgData\" alt=\"" . htmlspecialchars($it['file']) . "\">" : "<div style='height:42px;display:flex;align-items:center;justify-content:center;color:#999;border:1px dashed #ddd;'>Imagem indisponível</div>";
+                $html .= '<td><div class="card">';
+                $html .= $imgHtml;
+                $html .= '<div class="meta"><strong>' . htmlspecialchars($it['basename']) . '</strong></div>';
+                $html .= '<div class="meta">Ficheiro: ' . htmlspecialchars($it['file']) . '</div>';
+                $html .= '<div class="small">Nenhuma peça encontrada para este ficheiro (verifica se o nome é EAN ou farda_id).</div>';
+                $html .= '</div></td>';
+            }
+            $missing = 3 - count($row);
+            for ($i = 0; $i < $missing; $i++) {
+                $html .= '<td></td>';
+            }
+            $html .= '</tr>';
         }
-        $html .= '</div></div>';
+        $html .= '</table></div>';
     }
 }
 
@@ -277,7 +284,7 @@ $dompdf = new Dompdf($options);
 
 // Dompdf pode falhar ao carregar imagens via file:// por permissões; usamos data URIs já embutidos
 $dompdf->loadHtml($html);
-$dompdf->setPaper('A4', 'landscape');
+$dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 $filename = 'etiquetas_png_' . date('Ymd_His') . '.pdf';
 $dompdf->stream($filename, ['Attachment' => false]);
