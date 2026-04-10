@@ -168,7 +168,8 @@ if ($depFilterNome) $title .= " — " . htmlspecialchars($depFilterNome);
 
 $html = '<!doctype html><html><head><meta charset="utf-8"><title>' . htmlspecialchars($title) . '</title>';
 $html .= '<style>
-body{font-family:Arial,sans-serif;color:#111;margin:20px}
+@page { size: A4 landscape; margin: 10mm 8mm; }
+body{font-family:Arial,sans-serif;color:#111;margin:0}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .logo{font-weight:800;font-size:20px;color:#0f172a}
 .title{font-size:16px;color:#111}
@@ -176,38 +177,43 @@ body{font-family:Arial,sans-serif;color:#111;margin:20px}
 .section h3{background:#f3f4f6;padding:8px 12px;border-radius:6px}
 .grid {
     display: block;
+    width: 100%;
     font-size: 0; /* evita espaços em branco entre inline-blocks */
+}
+.grid::after {
+    content: "";
+    display: block;
+    clear: both;
 }
 
 .card {
-    display: inline-block;
-    width: 32.2%;            /* 3 por linha */
-    margin: 0 0.55% 10px 0.55%;
+    float: left;
+    width: 32.1%;            /* 3 por linha */
+    margin: 0 0.6% 8px 0.6%;
     font-size: 12px;         /* repõe o tamanho de texto dentro da card */
-    vertical-align: top;
     border: 1px solid #e6e6e6;
     border-radius: 6px;
-    padding: 7px 8px;
+    padding: 6px 7px;
     box-sizing: border-box;
     background: #fff;
-    min-height: 132px;
+    min-height: 112px;
     page-break-inside: avoid;
     break-inside: avoid;
 }
 .card img {
     display: block;
     max-width: 100%;
-    max-height: 48px;
+    max-height: 40px;
     height: auto;
-    margin: 0 auto 6px auto;
+    margin: 0 auto 5px auto;
 }
-.meta{font-size:12px;color:#333;line-height:1.2}
-.meta-title{font-size:13px;line-height:1.2;margin-bottom:1px}
+.meta{font-size:11px;color:#333;line-height:1.15}
+.meta-title{font-size:12px;line-height:1.15;margin-bottom:1px}
 .small{font-size:11px;color:#666;margin-top:6px}
 .footer{font-size:11px;color:#666;margin-top:18px}
 
 @media print {
-    body { margin: 12px; }
+    body { margin: 0; }
     .section { page-break-inside: avoid; }
     .grid { page-break-inside: auto; }
     .card { page-break-inside: avoid; break-inside: avoid; }
@@ -271,7 +277,7 @@ $dompdf = new Dompdf($options);
 
 // Dompdf pode falhar ao carregar imagens via file:// por permissões; usamos data URIs já embutidos
 $dompdf->loadHtml($html);
-$dompdf->setPaper('A4', 'portrait');
+$dompdf->setPaper('A4', 'landscape');
 $dompdf->render();
 $filename = 'etiquetas_png_' . date('Ymd_His') . '.pdf';
 $dompdf->stream($filename, ['Attachment' => false]);
