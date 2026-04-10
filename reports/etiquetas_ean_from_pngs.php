@@ -181,28 +181,28 @@ body{font-family:Arial,sans-serif;color:#111;margin:20px}
 
 .card {
     display: inline-block;
-    width: 31.3333%;         /* 3 por linha */
-    margin: 0 1% 12px 1%;
+    width: 32.2%;            /* 3 por linha */
+    margin: 0 0.55% 10px 0.55%;
     font-size: 12px;         /* repõe o tamanho de texto dentro da card */
     vertical-align: top;
     border: 1px solid #e6e6e6;
     border-radius: 6px;
-    padding: 8px 9px;
+    padding: 7px 8px;
     box-sizing: border-box;
     background: #fff;
-    min-height: 150px;
+    min-height: 132px;
     page-break-inside: avoid;
     break-inside: avoid;
 }
 .card img {
     display: block;
     max-width: 100%;
-    max-height: 54px;
+    max-height: 48px;
     height: auto;
-    margin: 0 auto 8px auto;
+    margin: 0 auto 6px auto;
 }
-.meta{font-size:12px;color:#333;line-height:1.25}
-.meta-title{font-size:13px;line-height:1.25;margin-bottom:2px}
+.meta{font-size:12px;color:#333;line-height:1.2}
+.meta-title{font-size:13px;line-height:1.2;margin-bottom:1px}
 .small{font-size:11px;color:#666;margin-top:6px}
 .footer{font-size:11px;color:#666;margin-top:18px}
 
