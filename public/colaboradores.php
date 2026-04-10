@@ -4,6 +4,13 @@ require_once '../config/db.php';
 
 $pesquisa = trim($_GET['pesquisa'] ?? '');
 $mostrar_inativos = isset($_GET['mostrar_inativos']) && $_GET['mostrar_inativos'] == '1';
+$estado = $_GET['estado'] ?? '';
+
+if (!in_array($estado, ['ativos', 'inativos', 'todos'], true)) {
+    $estado = $mostrar_inativos ? 'todos' : 'ativos';
+}
+
+$mostrar_inativos = ($estado === 'todos');
 
 $colaboradores = [];
 $total_ativos = 0;
@@ -49,9 +56,10 @@ try {
 
     $params = [];
 
-    /* 🔴 FILTRO ATIVOS / INATIVOS (FALTAVA ISTO) */
-    if (!$mostrar_inativos) {
+    if ($estado === 'ativos') {
         $sql .= " AND c.ativo = 1 ";
+    } elseif ($estado === 'inativos') {
+        $sql .= " AND c.ativo = 0 ";
     }
 
 
@@ -82,11 +90,6 @@ try {
             $params[] = $departamento_id;
         }
 
-    // ✅ Por defeito: apenas ativos
-    if (!$mostrar_inativos) {
-        $sql .= " AND c.ativo = 1 ";
-    }
-
     $sql .= "
         GROUP BY c.id, d.nome
         ORDER BY c.nome ASC
@@ -112,6 +115,13 @@ try {
 
 <?php include_once '../src/templates/header.php'; ?>
 
+<?php
+$queryBase = [
+    'pesquisa' => $pesquisa,
+    'departamento_id' => $departamento_id,
+];
+?>
+
 <main class="p-8 max-w-7xl mx-auto">
 
     <div class="flex items-center justify-between mb-6">
@@ -123,20 +133,23 @@ try {
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-        <div class="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+        <a href="?<?= htmlspecialchars(http_build_query($queryBase + ['estado' => 'ativos'])) ?>"
+           class="block rounded-xl border px-4 py-3 transition <?= $estado === 'ativos' ? 'bg-green-100 border-green-400 ring-2 ring-green-200' : 'bg-green-50 border-green-200 hover:bg-green-100' ?>">
             <p class="text-xs font-semibold text-green-700 uppercase tracking-wide">Ativos</p>
             <p class="text-2xl font-bold text-green-800"><?= $total_ativos ?></p>
-        </div>
-        <div class="bg-gray-100 border border-gray-300 rounded-xl px-4 py-3">
+        </a>
+        <a href="?<?= htmlspecialchars(http_build_query($queryBase + ['estado' => 'inativos'])) ?>"
+           class="block rounded-xl border px-4 py-3 transition <?= $estado === 'inativos' ? 'bg-gray-200 border-gray-500 ring-2 ring-gray-300' : 'bg-gray-100 border-gray-300 hover:bg-gray-200' ?>">
             <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Inativos</p>
             <p class="text-2xl font-bold text-gray-800"><?= $total_inativos ?></p>
-        </div>
+        </a>
     </div>
 
     <!-- 🔍 Pesquisa + filtro -->
     <form method="GET" class="mb-6 space-y-3">
 
         <input type="hidden" name="mostrar_inativos" value="0">
+        <input type="hidden" name="estado" id="estado_filtro" value="<?= htmlspecialchars($estado) ?>">
 
         <div class="flex items-center gap-2">
             <input type="text" name="pesquisa"
@@ -162,8 +175,16 @@ try {
         <label class="flex items-center gap-2 text-sm text-gray-700">
             <input type="checkbox" name="mostrar_inativos" value="1"
                 <?= $mostrar_inativos ? 'checked' : '' ?>>
-            Mostrar colaboradores inativos
+            Mostrar colaboradores inativos juntamente com os ativos
         </label>
+
+        <?php if ($estado === 'inativos'): ?>
+            <p class="text-sm text-gray-500">Filtro ativo: a lista está a mostrar apenas colaboradores inativos.</p>
+        <?php elseif ($estado === 'ativos'): ?>
+            <p class="text-sm text-gray-500">Filtro ativo: a lista está a mostrar apenas colaboradores ativos.</p>
+        <?php else: ?>
+            <p class="text-sm text-gray-500">Filtro ativo: a lista está a mostrar colaboradores ativos e inativos.</p>
+        <?php endif; ?>
 
     </form>
 
@@ -272,5 +293,15 @@ try {
 </main>
 
 <?php include_once '../src/templates/footer.php'; ?>
+<script>
+    const mostrarInativosCheckbox = document.querySelector('input[name="mostrar_inativos"][value="1"]');
+    const estadoFiltroInput = document.getElementById('estado_filtro');
+
+    if (mostrarInativosCheckbox && estadoFiltroInput) {
+        mostrarInativosCheckbox.addEventListener('change', () => {
+            estadoFiltroInput.value = mostrarInativosCheckbox.checked ? 'todos' : 'ativos';
+        });
+    }
+</script>
 </body>
 </html>
