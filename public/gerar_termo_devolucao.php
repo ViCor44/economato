@@ -122,7 +122,8 @@ try {
     // 🔒 Inativar colaborador
     $pdo->prepare("
         UPDATE colaboradores
-        SET ativo = 0
+        SET ativo = 0,
+            numero_funcionario = ''
         WHERE id = ?
     ")->execute([$colaborador_id]);
 

@@ -15,6 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $departamento_id = $_POST['departamento_id'] ?? null;
     $ativo = isset($_POST['ativo']) ? 1 : 0;
 
+    if (!$ativo) {
+        $numero_funcionario = '';
+    }
+
     $foto_nome = null;
 
     $sector = trim($_POST['sector'] ?? null);
@@ -29,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validação
     if (empty($nome)) $errors[] = "O nome é obrigatório.";
-    if (empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório.";
+    if ($ativo && empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório para colaboradores ativos.";
     if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "O email inserido não é válido.";
     }
@@ -38,22 +42,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verificar duplicados
     if (empty($errors)) {
         $cartao_tem_numero_real = ($cartao !== 'SEM CARTAO (Aguardando atribuicao)');
+        $stmt = null;
 
-        if ($cartao_tem_numero_real) {
+        if ($ativo && $cartao_tem_numero_real) {
             $stmt = $pdo->prepare("
                 SELECT id FROM colaboradores 
                 WHERE cartao = ? OR numero_funcionario = ?
             ");
             $stmt->execute([$cartao, $numero_funcionario]);
-        } else {
+        } elseif ($ativo) {
             $stmt = $pdo->prepare("
                 SELECT id FROM colaboradores 
                 WHERE numero_funcionario = ?
             ");
             $stmt->execute([$numero_funcionario]);
+        } elseif ($cartao_tem_numero_real) {
+            $stmt = $pdo->prepare("
+                SELECT id FROM colaboradores 
+                WHERE cartao = ?
+            ");
+            $stmt->execute([$cartao]);
         }
 
-        if ($stmt->fetch()) {
+        if ($stmt && $stmt->fetch()) {
             $errors[] = "O cartão ou número de funcionário já existe.";
         }
     }
@@ -141,9 +152,10 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-gray-700 font-medium mb-1">Número de Funcionário</label>
-                    <input type="text" name="numero_funcionario"
+                    <input type="text" name="numero_funcionario" id="numero_funcionario"
                         class="w-full px-4 py-2 border rounded-md"
                         required>
+                    <p class="text-sm text-gray-500 mt-1">Se o colaborador ficar inativo, este número é libertado automaticamente.</p>
                 </div>                
                 <div>
                     <label class="block text-gray-700 font-medium mb-1">Número do Cartão</label>
@@ -213,6 +225,8 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
 <script>
     const departamentoSelect = document.querySelector('select[name="departamento_id"]');
     const boxSector = document.getElementById('boxSector');
+    const ativoCheckbox = document.getElementById('ativo');
+    const numeroFuncionarioInput = document.getElementById('numero_funcionario');
 
     function toggleSector() {
         const selectedText =
@@ -226,8 +240,19 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
         }
     }
 
+    function toggleNumeroFuncionario() {
+        const colaboradorAtivo = ativoCheckbox.checked;
+
+        numeroFuncionarioInput.required = colaboradorAtivo;
+        numeroFuncionarioInput.placeholder = colaboradorAtivo
+            ? ''
+            : 'Será libertado ao guardar como inativo';
+    }
+
     departamentoSelect.addEventListener('change', toggleSector);
+    ativoCheckbox.addEventListener('change', toggleNumeroFuncionario);
     toggleSector(); // correr ao carregar a página
+    toggleNumeroFuncionario();
 </script>
 </body>
 </html>

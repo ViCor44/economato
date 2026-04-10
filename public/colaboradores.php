@@ -193,6 +193,7 @@ try {
 
                 <?php foreach ($colaboradores as $c): 
                     $temDivida = $c['total_divida'] > 0;
+                    $numeroColaborador = trim((string)($c['numero_funcionario'] ?? ''));
                 ?>
                 <tr class="<?= $temDivida ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50' ?>">
 
@@ -226,7 +227,9 @@ try {
                                 <?php endif; ?>
 
                                 <div class="text-xs text-gray-500">
-                                    Nº <?= htmlspecialchars($c['numero_funcionario']) ?>
+                                    <?= $numeroColaborador !== ''
+                                        ? 'Nº ' . htmlspecialchars($numeroColaborador)
+                                        : 'Sem número atribuído' ?>
                                 </div>
                             </div>
                         </div>

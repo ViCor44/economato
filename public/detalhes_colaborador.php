@@ -79,6 +79,7 @@ try {
     $fardas_em_divida = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $colaboradorInativo = !$colaborador['ativo'];
+    $numeroColaborador = trim((string)($colaborador['numero_funcionario'] ?? ''));
 
 } catch (PDOException $e) {
     die("Erro ao carregar detalhes do colaborador: " . $e->getMessage());
@@ -133,7 +134,7 @@ try {
                 </div>
 
                 <p class="text-sm text-gray-600">
-                    Nº Funcionário: <strong><?= htmlspecialchars($colaborador['numero_funcionario']) ?></strong>
+                    Nº Funcionário: <strong><?= htmlspecialchars($numeroColaborador !== '' ? $numeroColaborador : 'Sem número atribuído') ?></strong>
                 </p>
             </div>
         </div>
