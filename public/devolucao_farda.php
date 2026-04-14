@@ -40,34 +40,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // 🔄 Marcar como devolvida (rascunho)
+            // 🔍 Bloquear e obter a atribuição pendente para devolver 1 peça
             $stmt = $pdo->prepare("
-                UPDATE farda_atribuicoes
-                SET
-                    estado = 'marcada_devolucao',
-                    estado_devolucao = ?,
-                    data_devolucao = NOW()
+                SELECT id, farda_id, quantidade
+                FROM farda_atribuicoes
                 WHERE id = ?
                   AND colaborador_id = ?
-                  AND estado IN ('atribuida', 'marcada_devolucao')
+                  AND estado = 'atribuida'
+                FOR UPDATE
             ");
-            $stmt->execute([
-                $estado_devolucao,
-                $atribuicao_id,
-                $colaborador_id
-            ]);
+            $stmt->execute([$atribuicao_id, $colaborador_id]);
+            $atribuicao = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($stmt->rowCount() === 0) {
-                throw new Exception("Não foi possível atualizar a atribuição.");
+            if (!$atribuicao) {
+                throw new Exception("A atribuição já foi tratada ou não existe.");
+            }
+
+            $quantidadeAtual = (int)$atribuicao['quantidade'];
+            if ($quantidadeAtual <= 0) {
+                throw new Exception("Quantidade inválida para devolução.");
+            }
+
+            if ($quantidadeAtual === 1) {
+                // Última peça desta atribuição: marca diretamente a linha atual.
+                $stmt = $pdo->prepare("
+                    UPDATE farda_atribuicoes
+                    SET
+                        estado = 'marcada_devolucao',
+                        estado_devolucao = ?,
+                        data_devolucao = NOW()
+                    WHERE id = ?
+                ");
+                $stmt->execute([$estado_devolucao, $atribuicao_id]);
+            } else {
+                // Devolução unitária: reduz 1 na atribuição e cria um registo de devolução com qtd 1.
+                $stmt = $pdo->prepare("
+                    UPDATE farda_atribuicoes
+                    SET quantidade = quantidade - 1
+                    WHERE id = ?
+                ");
+                $stmt->execute([$atribuicao_id]);
+
+                $stmt = $pdo->prepare("
+                    INSERT INTO farda_atribuicoes
+                    (colaborador_id, farda_id, quantidade, estado, estado_devolucao, data_atribuicao, data_devolucao)
+                    VALUES (?, ?, 1, 'marcada_devolucao', ?, NOW(), NOW())
+                ");
+                $stmt->execute([
+                    $colaborador_id,
+                    (int)$atribuicao['farda_id'],
+                    $estado_devolucao
+                ]);
             }
 
             $pdo->commit();
-            $success = "Devolução registada. Gere o termo para concluir.";
+            $success = "Devolução unitária registada. Gere o termo para concluir.";
 
             adicionarLog(
                 $pdo,
                 "Pré-devolução de farda",
-                "Colaborador ID {$colaborador_id} marcou devolução (estado: {$estado_devolucao})"
+                "Colaborador ID {$colaborador_id} marcou devolução unitária (estado: {$estado_devolucao}, atribuição ID: {$atribuicao_id})"
             );
 
         } catch (Exception $e) {
@@ -92,7 +124,7 @@ $stmt = $pdo->prepare("
     JOIN cores c ON f.cor_id = c.id
     JOIN tamanhos t ON f.tamanho_id = t.id
     WHERE fa.colaborador_id = ?
-      AND fa.estado IN ('atribuida', 'marcada_devolucao')
+            AND fa.estado IN ('atribuida', 'marcada_devolucao')
     ORDER BY f.nome ASC
 ");
 $stmt->execute([$colaborador_id]);
@@ -159,16 +191,22 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php endif; ?>
                     </div>
 
-                    <button
-                        onclick="abrirModal(
-                            <?= $f['atribuicao_id'] ?>,
-                            '<?= htmlspecialchars($f['nome']) ?>',
-                            '<?= htmlspecialchars($f['cor']) ?>',
-                            '<?= htmlspecialchars($f['tamanho']) ?>'
-                        )"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                        ♻️ Devolver
-                    </button>
+                    <?php if ($f['estado'] === 'atribuida'): ?>
+                        <button
+                            onclick="abrirModal(
+                                <?= $f['atribuicao_id'] ?>,
+                                '<?= htmlspecialchars($f['nome']) ?>',
+                                '<?= htmlspecialchars($f['cor']) ?>',
+                                '<?= htmlspecialchars($f['tamanho']) ?>'
+                            )"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            ♻️ Devolver 1 peça
+                        </button>
+                    <?php else: ?>
+                        <span class="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium text-sm">
+                            Marcada para termo
+                        </span>
+                    <?php endif; ?>
 
                 </div>
             <?php endforeach; ?>
@@ -216,6 +254,7 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
 
         <h2 id="tituloModal" class="text-xl font-bold mb-4"></h2>
+        <p class="text-sm text-gray-600 mb-4">Vai ser registada a devolução de 1 peça.</p>
 
         <form method="POST">
             <input type="hidden" name="atribuicao_id" id="atribuicao_id">
@@ -232,7 +271,7 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     Cancelar
                 </button>
                 <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md">
-                    Confirmar
+                    Confirmar devolução
                 </button>
             </div>
         </form>
