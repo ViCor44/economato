@@ -25,11 +25,21 @@ $errors = [];
 // 🔄 PROCESSAR DEVOLUÇÃO (pré-registo)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $atribuicao_id   = (int)($_POST['atribuicao_id'] ?? 0);
+    $atribuicao_id    = (int)($_POST['atribuicao_id'] ?? 0);
     $estado_devolucao = $_POST['estado_devolucao'] ?? '';
+    $tipo_devolucao   = $_POST['tipo_devolucao'] ?? 'unitario';
+    $farda_id_param   = (int)($_POST['farda_id'] ?? 0);
 
-    if ($atribuicao_id <= 0) {
+    if (!in_array($tipo_devolucao, ['unitario', 'total_atribuicao', 'total_artigo'], true)) {
+        $errors[] = "Tipo de devolução inválido.";
+    }
+
+    if ($tipo_devolucao !== 'total_artigo' && $atribuicao_id <= 0) {
         $errors[] = "Atribuição inválida.";
+    }
+
+    if ($tipo_devolucao === 'total_artigo' && $farda_id_param <= 0) {
+        $errors[] = "Artigo inválido.";
     }
 
     if (!in_array($estado_devolucao, ['stock', 'reciclagem'], true)) {
@@ -40,29 +50,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // 🔍 Bloquear e obter a atribuição pendente para devolver 1 peça
-            $stmt = $pdo->prepare("
-                SELECT id, farda_id, quantidade
-                FROM farda_atribuicoes
-                WHERE id = ?
-                  AND colaborador_id = ?
-                  AND estado = 'atribuida'
-                FOR UPDATE
-            ");
-            $stmt->execute([$atribuicao_id, $colaborador_id]);
-            $atribuicao = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($tipo_devolucao === 'unitario') {
+                // 🔍 Bloquear e obter a atribuição pendente para devolver 1 peça
+                $stmt = $pdo->prepare("
+                    SELECT id, farda_id, quantidade
+                    FROM farda_atribuicoes
+                    WHERE id = ?
+                      AND colaborador_id = ?
+                      AND estado = 'atribuida'
+                    FOR UPDATE
+                ");
+                $stmt->execute([$atribuicao_id, $colaborador_id]);
+                $atribuicao = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$atribuicao) {
-                throw new Exception("A atribuição já foi tratada ou não existe.");
-            }
+                if (!$atribuicao) {
+                    throw new Exception("A atribuição já foi tratada ou não existe.");
+                }
 
-            $quantidadeAtual = (int)$atribuicao['quantidade'];
-            if ($quantidadeAtual <= 0) {
-                throw new Exception("Quantidade inválida para devolução.");
-            }
+                $quantidadeAtual = (int)$atribuicao['quantidade'];
+                if ($quantidadeAtual <= 0) {
+                    throw new Exception("Quantidade inválida para devolução.");
+                }
 
-            if ($quantidadeAtual === 1) {
-                // Última peça desta atribuição: marca diretamente a linha atual.
+                if ($quantidadeAtual === 1) {
+                    $stmt = $pdo->prepare("
+                        UPDATE farda_atribuicoes
+                        SET
+                            estado = 'marcada_devolucao',
+                            estado_devolucao = ?,
+                            data_devolucao = NOW()
+                        WHERE id = ?
+                    ");
+                    $stmt->execute([$estado_devolucao, $atribuicao_id]);
+                } else {
+                    // Devolução unitária: reduz 1 na atribuição e cria um registo de devolução com qtd 1.
+                    $stmt = $pdo->prepare("
+                        UPDATE farda_atribuicoes
+                        SET quantidade = quantidade - 1
+                        WHERE id = ?
+                    ");
+                    $stmt->execute([$atribuicao_id]);
+
+                    $stmt = $pdo->prepare("
+                        INSERT INTO farda_atribuicoes
+                        (colaborador_id, farda_id, quantidade, estado, estado_devolucao, data_atribuicao, data_devolucao)
+                        VALUES (?, ?, 1, 'marcada_devolucao', ?, NOW(), NOW())
+                    ");
+                    $stmt->execute([
+                        $colaborador_id,
+                        (int)$atribuicao['farda_id'],
+                        $estado_devolucao
+                    ]);
+                }
+
+                $logMsg  = "Colaborador ID {$colaborador_id} marcou devolução unitária (estado: {$estado_devolucao}, atribuição ID: {$atribuicao_id})";
+                $success = "Devolução unitária registada. Gere o termo para concluir.";
+
+            } elseif ($tipo_devolucao === 'total_atribuicao') {
+                // Devolver toda a quantidade desta atribuição de uma vez
+                $stmt = $pdo->prepare("
+                    SELECT id, quantidade
+                    FROM farda_atribuicoes
+                    WHERE id = ?
+                      AND colaborador_id = ?
+                      AND estado = 'atribuida'
+                    FOR UPDATE
+                ");
+                $stmt->execute([$atribuicao_id, $colaborador_id]);
+                $atribuicao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$atribuicao) {
+                    throw new Exception("A atribuição já foi tratada ou não existe.");
+                }
+
                 $stmt = $pdo->prepare("
                     UPDATE farda_atribuicoes
                     SET
@@ -72,35 +132,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     WHERE id = ?
                 ");
                 $stmt->execute([$estado_devolucao, $atribuicao_id]);
-            } else {
-                // Devolução unitária: reduz 1 na atribuição e cria um registo de devolução com qtd 1.
+
+                $logMsg  = "Colaborador ID {$colaborador_id} marcou devolução total da atribuição ID {$atribuicao_id} (estado: {$estado_devolucao})";
+                $success = "Toda a atribuição foi marcada para devolução. Gere o termo para concluir.";
+
+            } elseif ($tipo_devolucao === 'total_artigo') {
+                // Devolver todas as atribuições ativas deste artigo
                 $stmt = $pdo->prepare("
-                    UPDATE farda_atribuicoes
-                    SET quantidade = quantidade - 1
-                    WHERE id = ?
+                    SELECT id
+                    FROM farda_atribuicoes
+                    WHERE farda_id = ?
+                      AND colaborador_id = ?
+                      AND estado = 'atribuida'
+                    FOR UPDATE
                 ");
-                $stmt->execute([$atribuicao_id]);
+                $stmt->execute([$farda_id_param, $colaborador_id]);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (empty($rows)) {
+                    throw new Exception("Não existem atribuições ativas para este artigo.");
+                }
 
                 $stmt = $pdo->prepare("
-                    INSERT INTO farda_atribuicoes
-                    (colaborador_id, farda_id, quantidade, estado, estado_devolucao, data_atribuicao, data_devolucao)
-                    VALUES (?, ?, 1, 'marcada_devolucao', ?, NOW(), NOW())
+                    UPDATE farda_atribuicoes
+                    SET
+                        estado = 'marcada_devolucao',
+                        estado_devolucao = ?,
+                        data_devolucao = NOW()
+                    WHERE farda_id = ?
+                      AND colaborador_id = ?
+                      AND estado = 'atribuida'
                 ");
-                $stmt->execute([
-                    $colaborador_id,
-                    (int)$atribuicao['farda_id'],
-                    $estado_devolucao
-                ]);
+                $stmt->execute([$estado_devolucao, $farda_id_param, $colaborador_id]);
+
+                $logMsg  = "Colaborador ID {$colaborador_id} marcou devolução de todo o artigo (farda ID: {$farda_id_param}, estado: {$estado_devolucao})";
+                $success = "Todas as peças do artigo foram marcadas para devolução. Gere o termo para concluir.";
             }
 
             $pdo->commit();
-            $success = "Devolução unitária registada. Gere o termo para concluir.";
-
-            adicionarLog(
-                $pdo,
-                "Pré-devolução de farda",
-                "Colaborador ID {$colaborador_id} marcou devolução unitária (estado: {$estado_devolucao}, atribuição ID: {$atribuicao_id})"
-            );
+            adicionarLog($pdo, "Pré-devolução de farda", $logMsg);
 
         } catch (Exception $e) {
             $pdo->rollBack();
@@ -113,6 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->prepare("
     SELECT
         fa.id AS atribuicao_id,
+        fa.farda_id,
         f.nome,
         c.nome AS cor,
         t.nome AS tamanho,
@@ -192,16 +263,23 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <?php if ($f['estado'] === 'atribuida'): ?>
-                        <button
-                            onclick="abrirModal(
-                                <?= $f['atribuicao_id'] ?>,
-                                '<?= htmlspecialchars($f['nome']) ?>',
-                                '<?= htmlspecialchars($f['cor']) ?>',
-                                '<?= htmlspecialchars($f['tamanho']) ?>'
-                            )"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                            ♻️ Devolver 1 peça
-                        </button>
+                        <div class="flex flex-col gap-2 items-end">
+                            <button
+                                onclick="abrirModal('unitario', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap">
+                                ♻️ 1 peça
+                            </button>
+                            <button
+                                onclick="abrirModal('total_atribuicao', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
+                                class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-sm whitespace-nowrap">
+                                ♻️ Toda a atribuição
+                            </button>
+                            <button
+                                onclick="abrirModal('total_artigo', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
+                                class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm whitespace-nowrap">
+                                ♻️ Todo o artigo
+                            </button>
+                        </div>
                     <?php else: ?>
                         <span class="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium text-sm">
                             Marcada para termo
@@ -254,10 +332,12 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
 
         <h2 id="tituloModal" class="text-xl font-bold mb-4"></h2>
-        <p class="text-sm text-gray-600 mb-4">Vai ser registada a devolução de 1 peça.</p>
+        <p id="descricaoModal" class="text-sm text-gray-600 mb-4"></p>
 
         <form method="POST">
             <input type="hidden" name="atribuicao_id" id="atribuicao_id">
+            <input type="hidden" name="farda_id" id="farda_id">
+            <input type="hidden" name="tipo_devolucao" id="tipo_devolucao" value="unitario">
 
             <label class="block mb-2 font-medium">Estado da farda devolvida</label>
             <select name="estado_devolucao" class="w-full border rounded-md px-3 py-2 mb-4" required>
@@ -280,11 +360,23 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
-function abrirModal(atribuicaoId, nome, cor, tamanho) {
+function abrirModal(tipo, atribuicaoId, fardaId, nome, cor, tamanho) {
+    const labels = {
+        unitario: 'Devolver 1 peça',
+        total_atribuicao: 'Devolver toda a atribuição',
+        total_artigo: 'Devolver todas as peças do artigo'
+    };
+    const descricoes = {
+        unitario: 'Vai ser registada a devolução de 1 peça.',
+        total_atribuicao: 'Vai ser devolvida toda a quantidade desta atribuição.',
+        total_artigo: 'Vão ser devolvidas todas as peças deste artigo (todas as atribuições ativas).'
+    };
     document.getElementById('modalDevolucao').classList.remove('hidden');
     document.getElementById('atribuicao_id').value = atribuicaoId;
-    document.getElementById('tituloModal').innerText =
-        `Devolver: ${nome} (${cor}, ${tamanho})`;
+    document.getElementById('farda_id').value = fardaId;
+    document.getElementById('tipo_devolucao').value = tipo;
+    document.getElementById('tituloModal').innerText = `${labels[tipo]}: ${nome} (${cor}, ${tamanho})`;
+    document.getElementById('descricaoModal').innerText = descricoes[tipo];
 }
 
 function fecharModal() {
