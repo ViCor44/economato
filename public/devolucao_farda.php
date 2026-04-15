@@ -244,7 +244,10 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="flex justify-end mb-4">
             <button
                 onclick="abrirModal('tudo', 0, 0, '', '', '')"
-                class="bg-orange-600 text-white px-5 py-2 rounded-lg hover:bg-orange-700 font-medium text-sm">
+                class="px-5 py-2 rounded-lg font-medium text-sm"
+                style="background-color:#ea580c; color:#ffffff; border:1px solid #c2410c;"
+                onmouseover="this.style.backgroundColor='#c2410c';"
+                onmouseout="this.style.backgroundColor='#ea580c';">
                 ♻️ Devolver toda a atribuição
             </button>
         </div>
@@ -274,12 +277,18 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="flex flex-row gap-2 items-center flex-shrink-0 ml-4">
                             <button
                                 onclick="abrirModal('unitario', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
-                                class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap">
+                                class="px-3 py-2 rounded-lg text-sm whitespace-nowrap"
+                                style="background-color:#2563eb; color:#ffffff; border:1px solid #1d4ed8;"
+                                onmouseover="this.style.backgroundColor='#1d4ed8';"
+                                onmouseout="this.style.backgroundColor='#2563eb';">
                                 ♻️ 1 peça
                             </button>
                             <button
                                 onclick="abrirModal('total_artigo', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
-                                class="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 text-sm whitespace-nowrap">
+                                class="px-3 py-2 rounded-lg text-sm whitespace-nowrap"
+                                style="background-color:#4f46e5; color:#ffffff; border:1px solid #4338ca;"
+                                onmouseover="this.style.backgroundColor='#4338ca';"
+                                onmouseout="this.style.backgroundColor='#4f46e5';">
                                 ♻️ Todas
                             </button>
                         </div>
