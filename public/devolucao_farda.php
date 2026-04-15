@@ -30,11 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipo_devolucao   = $_POST['tipo_devolucao'] ?? 'unitario';
     $farda_id_param   = (int)($_POST['farda_id'] ?? 0);
 
-    if (!in_array($tipo_devolucao, ['unitario', 'total_atribuicao', 'total_artigo'], true)) {
+    if (!in_array($tipo_devolucao, ['unitario', 'total_artigo', 'tudo'], true)) {
         $errors[] = "Tipo de devolução inválido.";
     }
 
-    if ($tipo_devolucao !== 'total_artigo' && $atribuicao_id <= 0) {
+    if ($tipo_devolucao === 'unitario' && $atribuicao_id <= 0) {
         $errors[] = "Atribuição inválida.";
     }
 
@@ -106,36 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $logMsg  = "Colaborador ID {$colaborador_id} marcou devolução unitária (estado: {$estado_devolucao}, atribuição ID: {$atribuicao_id})";
                 $success = "Devolução unitária registada. Gere o termo para concluir.";
 
-            } elseif ($tipo_devolucao === 'total_atribuicao') {
-                // Devolver toda a quantidade desta atribuição de uma vez
-                $stmt = $pdo->prepare("
-                    SELECT id, quantidade
-                    FROM farda_atribuicoes
-                    WHERE id = ?
-                      AND colaborador_id = ?
-                      AND estado = 'atribuida'
-                    FOR UPDATE
-                ");
-                $stmt->execute([$atribuicao_id, $colaborador_id]);
-                $atribuicao = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if (!$atribuicao) {
-                    throw new Exception("A atribuição já foi tratada ou não existe.");
-                }
-
-                $stmt = $pdo->prepare("
-                    UPDATE farda_atribuicoes
-                    SET
-                        estado = 'marcada_devolucao',
-                        estado_devolucao = ?,
-                        data_devolucao = NOW()
-                    WHERE id = ?
-                ");
-                $stmt->execute([$estado_devolucao, $atribuicao_id]);
-
-                $logMsg  = "Colaborador ID {$colaborador_id} marcou devolução total da atribuição ID {$atribuicao_id} (estado: {$estado_devolucao})";
-                $success = "Toda a atribuição foi marcada para devolução. Gere o termo para concluir.";
-
             } elseif ($tipo_devolucao === 'total_artigo') {
                 // Devolver todas as atribuições ativas deste artigo
                 $stmt = $pdo->prepare("
@@ -167,6 +137,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $logMsg  = "Colaborador ID {$colaborador_id} marcou devolução de todo o artigo (farda ID: {$farda_id_param}, estado: {$estado_devolucao})";
                 $success = "Todas as peças do artigo foram marcadas para devolução. Gere o termo para concluir.";
+
+            } elseif ($tipo_devolucao === 'tudo') {
+                // Devolver todas as atribuições ativas do colaborador
+                $stmt = $pdo->prepare("
+                    SELECT id
+                    FROM farda_atribuicoes
+                    WHERE colaborador_id = ?
+                      AND estado = 'atribuida'
+                    FOR UPDATE
+                ");
+                $stmt->execute([$colaborador_id]);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (empty($rows)) {
+                    throw new Exception("Não existem atribuições ativas para devolver.");
+                }
+
+                $stmt = $pdo->prepare("
+                    UPDATE farda_atribuicoes
+                    SET
+                        estado = 'marcada_devolucao',
+                        estado_devolucao = ?,
+                        data_devolucao = NOW()
+                    WHERE colaborador_id = ?
+                      AND estado = 'atribuida'
+                ");
+                $stmt->execute([$estado_devolucao, $colaborador_id]);
+
+                $logMsg  = "Colaborador ID {$colaborador_id} marcou devolução de todas as atribuições (estado: {$estado_devolucao})";
+                $success = "Todas as fardas foram marcadas para devolução. Gere o termo para concluir.";
             }
 
             $pdo->commit();
@@ -241,6 +241,14 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </p>
     <?php else: ?>
 
+        <div class="flex justify-end mb-4">
+            <button
+                onclick="abrirModal('tudo', 0, 0, '', '', '')"
+                class="bg-orange-600 text-white px-5 py-2 rounded-lg hover:bg-orange-700 font-medium text-sm">
+                ♻️ Devolver toda a atribuição
+            </button>
+        </div>
+
         <div class="space-y-4">
             <?php foreach ($fardas_atribuidas as $f): ?>
                 <div class="p-4 bg-gray-50 border rounded-lg flex justify-between items-center">
@@ -263,21 +271,16 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <?php if ($f['estado'] === 'atribuida'): ?>
-                        <div class="flex flex-col gap-2 items-end">
+                        <div class="flex flex-row gap-2 items-center flex-shrink-0 ml-4">
                             <button
                                 onclick="abrirModal('unitario', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
-                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap">
+                                class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-sm whitespace-nowrap">
                                 ♻️ 1 peça
                             </button>
                             <button
-                                onclick="abrirModal('total_atribuicao', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
-                                class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-sm whitespace-nowrap">
-                                ♻️ Toda a atribuição
-                            </button>
-                            <button
                                 onclick="abrirModal('total_artigo', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
-                                class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm whitespace-nowrap">
-                                ♻️ Todo o artigo
+                                class="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 text-sm whitespace-nowrap">
+                                ♻️ Todas
                             </button>
                         </div>
                     <?php else: ?>
@@ -363,19 +366,22 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 function abrirModal(tipo, atribuicaoId, fardaId, nome, cor, tamanho) {
     const labels = {
         unitario: 'Devolver 1 peça',
-        total_atribuicao: 'Devolver toda a atribuição',
-        total_artigo: 'Devolver todas as peças do artigo'
+        total_artigo: 'Devolver todas as peças do artigo',
+        tudo: 'Devolver toda a atribuição'
     };
     const descricoes = {
         unitario: 'Vai ser registada a devolução de 1 peça.',
-        total_atribuicao: 'Vai ser devolvida toda a quantidade desta atribuição.',
-        total_artigo: 'Vão ser devolvidas todas as peças deste artigo (todas as atribuições ativas).'
+        total_artigo: 'Vão ser devolvidas todas as peças deste artigo (todas as atribuições ativas).',
+        tudo: 'Vão ser devolvidas TODAS as fardas atribuídas a este colaborador.'
     };
+    const titulo = tipo === 'tudo'
+        ? labels[tipo]
+        : `${labels[tipo]}: ${nome} (${cor}, ${tamanho})`;
     document.getElementById('modalDevolucao').classList.remove('hidden');
     document.getElementById('atribuicao_id').value = atribuicaoId;
     document.getElementById('farda_id').value = fardaId;
     document.getElementById('tipo_devolucao').value = tipo;
-    document.getElementById('tituloModal').innerText = `${labels[tipo]}: ${nome} (${cor}, ${tamanho})`;
+    document.getElementById('tituloModal').innerText = titulo;
     document.getElementById('descricaoModal').innerText = descricoes[tipo];
 }
 
