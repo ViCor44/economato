@@ -1,5 +1,18 @@
 -- Guia rápido para reverter termos de devolução no CrewGest
 -- ===========================================================
+--
+-- 📖 COMO USAR ESTE FICHEIRO:
+-- 
+-- 1. Abra phpMyAdmin ou qualquer cliente SQL
+-- 2. Selecione a base de dados "econo_app"
+-- 3. Copie a query que precisa (exemplo: "1. VERIFICAR SE EXISTEM TERMOS")
+-- 4. Cole no campo SQL
+-- 5. Se a query tiver números (1, 2), substitua pelos IDs corretos
+--
+-- Exemplo: Se quer verificar o colaborador ID 5, a query fica:
+--   WHERE id = 5    (em vez de WHERE id = 1)
+--
+-- ===========================================================
 
 -- 1. VERIFICAR SE EXISTEM TERMOS PARA REVERTER
 -- Mostra colaboradores inativos que têm termos de devolução
@@ -21,16 +34,17 @@ ORDER BY MAX(fa.data_devolucao) DESC;
 
 
 -- 2. VERIFICAR ESTADO DE UM COLABORADOR (ANTES DE REVERTER)
--- Substitua :colaborador_id pelo ID desejado
+-- Substitua 1 pelo ID do colaborador desejado (exemplo: ID = 1)
 SELECT 
     id,
     nome,
     ativo,
     numero_funcionario
 FROM colaboradores
-WHERE id = :colaborador_id;
+WHERE id = 1;
 
 -- Ver as atribuições associadas
+-- Substitua 1 pelo ID do colaborador desejado
 SELECT 
     fa.id,
     f.nome AS farda_nome,
@@ -42,7 +56,7 @@ SELECT
     (fa.quantidade * f.preco_unitario) AS valor_total
 FROM farda_atribuicoes fa
 JOIN fardas f ON fa.farda_id = f.id
-WHERE fa.colaborador_id = :colaborador_id
+WHERE fa.colaborador_id = 1
 ORDER BY fa.estado, f.nome;
 
 
@@ -60,7 +74,7 @@ ORDER BY f.nome;
 
 
 -- 4. VER UM TERMO ESPECÍFICO
--- Substitua :termo_id pelo ID do termo a reverter
+-- Substitua 1 pelo ID do termo a reverter (exemplo: termo_id = 1)
 SELECT 
     fa.id,
     fa.estado,
@@ -70,13 +84,13 @@ SELECT
     f.preco_unitario
 FROM farda_atribuicoes fa
 JOIN fardas f ON fa.farda_id = f.id
-WHERE fa.termo_id = :termo_id
+WHERE fa.termo_id = 1
 ORDER BY f.nome;
 
 
 -- 5. REVERTER MANUALMENTE (SE NECESSÁRIO)
 -- ⚠️ Cuidado: Apenas execute isto se tiver a certeza!
--- Substitua :termo_id e :colaborador_id
+-- Substitua 1 pelo termo_id e 2 pelo colaborador_id corretos
 
 -- 5a. Reverter atribuições devolvidas para 'atribuida'
 UPDATE farda_atribuicoes
@@ -85,31 +99,34 @@ SET
     estado_devolucao = NULL,
     data_devolucao = NULL,
     termo_id = NULL
-WHERE termo_id = :termo_id
+WHERE termo_id = 1
   AND estado IN ('devolvida_confirmada', 'em_divida');
 
 -- 5b. Reduzir o stock das fardas que tinham sido devolvidas ao stock
 -- (Esta operação é complexa e recomenda-se usar a interface)
 
 -- 5c. Reativar o colaborador
+-- Substitua 2 pelo colaborador_id
 UPDATE colaboradores
 SET ativo = 1
-WHERE id = :colaborador_id;
+WHERE id = 2;
 
 
 -- 6. VERIFICAR SE A REVERSÃO FUNCIONOU
 -- Executa isto APÓS reverter
 
 -- Status do colaborador
+-- Substitua 2 pelo colaborador_id
 SELECT 
     id,
     nome,
     ativo,
     numero_funcionario
 FROM colaboradores
-WHERE id = :colaborador_id;
+WHERE id = 2;
 
 -- Atribuições restauradas
+-- Substitua 2 pelo colaborador_id
 SELECT 
     fa.id,
     f.nome,
@@ -118,16 +135,17 @@ SELECT
     fa.termo_id
 FROM farda_atribuicoes fa
 JOIN fardas f ON fa.farda_id = f.id
-WHERE fa.colaborador_id = :colaborador_id
+WHERE fa.colaborador_id = 2
 ORDER BY f.nome;
 
 -- Dívida (deve ser 0 ou NULL)
+-- Substitua 2 pelo colaborador_id
 SELECT 
     COUNT(*) AS total_itens_divida,
     SUM(fa.quantidade * f.preco_unitario) AS total_divida
 FROM farda_atribuicoes fa
 JOIN fardas f ON fa.farda_id = f.id
-WHERE fa.colaborador_id = :colaborador_id
+WHERE fa.colaborador_id = 2
   AND fa.estado = 'em_divida';
 
 
