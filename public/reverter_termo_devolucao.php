@@ -122,7 +122,7 @@ if ($_POST && $acao === 'reverter_confirmar') {
             $colabRow = $stmt->fetch(PDO::FETCH_ASSOC);
             
             $logMsg = "Termo de devolução revertido para colaborador {$colabRow['nome']} (ID: {$colaborador_id})";
-            registarLog($_SESSION['user_id'], "Reverter termo de devolução", $logMsg);
+            adicionarLog($pdo, "Reverter termo de devolução", $logMsg);
             
             $sucesso = "✅ Termo revertido com sucesso! O colaborador foi reativado e as fardas foram restauradas.";
             
