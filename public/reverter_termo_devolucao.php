@@ -4,7 +4,8 @@ require_once '../config/db.php';
 require_once '../src/log.php';
 
 // 🔐 Apenas Admins podem reverter termos
-if ($_SESSION['role_id'] !== 1) {
+$userRoleId = (int)($_SESSION['role_id'] ?? 0);
+if ($userRoleId !== 1) {
     die("Acesso negado. Apenas administradores podem reverter termos.");
 }
 
