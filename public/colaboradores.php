@@ -126,10 +126,18 @@ $queryBase = [
 
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-3xl font-bold text-gray-800">👥 Colaboradores</h1>
-        <a href="adicionar_colaborador.php" 
-           class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95">
-            ➕ Adicionar Colaborador
-        </a>
+        <div class="flex items-center gap-3">
+            <?php if ($_SESSION['role_id'] === 1): // Apenas para admins ?>
+            <a href="reverter_termo_devolucao.php" 
+               class="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95">
+                🔄 Reverter Termos
+            </a>
+            <?php endif; ?>
+            <a href="adicionar_colaborador.php" 
+               class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95">
+                ➕ Adicionar Colaborador
+            </a>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">

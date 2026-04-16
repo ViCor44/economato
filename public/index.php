@@ -284,6 +284,22 @@ try {
                     </div>
                 </a>
                 <?php endif; ?>
+
+                <?php if ((int)($utilizador_logado['role_id'] ?? 0) === ROLE_ADMIN): ?>
+                <a href="reverter_termo_devolucao.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-orange-100 text-orange-600 p-3 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="font-semibold text-lg text-gray-800">Reverter Termos</h2>
+                            <p class="text-sm text-gray-600">Reverter termos de devolução por engano.</p>
+                        </div>
+                    </div>
+                </a>
+                <?php endif; ?>
                 
                 <a href="perfil.php" class="block bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                     <div class="flex items-center gap-4">
