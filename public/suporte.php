@@ -3,7 +3,7 @@ require_once '../src/auth_guard.php';
 require_once '../config/db.php';
 
 // 🔐 Apenas Admins podem acessar
-$userRoleId = (int)($_SESSION['role_id'] ?? 0);
+$userRoleId = (int)($_SESSION['user_role_id'] ?? 0);
 if ($userRoleId !== 1) {
     header('Location: index.php');
     exit;

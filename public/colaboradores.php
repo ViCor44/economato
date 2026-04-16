@@ -127,7 +127,7 @@ $queryBase = [
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-3xl font-bold text-gray-800">👥 Colaboradores</h1>
         <div class="flex items-center gap-3">
-            <?php if ((int)($_SESSION['role_id'] ?? 0) === 1): // Apenas para admins ?>
+            <?php if ((int)($_SESSION['user_role_id'] ?? 0) === 1): // Apenas para admins ?>
             <a href="reverter_termo_devolucao.php" 
                class="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95">
                 🔄 Reverter Termos
