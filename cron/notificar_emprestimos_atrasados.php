@@ -6,7 +6,7 @@
  *   php C:\xampp\economato\cron\notificar_emprestimos_atrasados.php
  *
  * Recomendação: correr 1x por dia (ex: todos os dias às 08:00).
- * Envia no máximo 1 email por empréstimo por dia (controlado por `ultimo_aviso_email`).
+ * Envia no máximo 1 email por empréstimo a cada 7 dias (controlado por `ultimo_aviso_email`).
  */
 
 declare(strict_types=1);
@@ -28,6 +28,7 @@ use PHPMailer\PHPMailer\Exception as MailerException;
 $smtp = require __DIR__ . '/../config/mail.php';
 
 $hoje = date('Y-m-d');
+$limiteAviso = date('Y-m-d', strtotime('-7 days'));
 $logFile = __DIR__ . '/notificacoes_emprestimos.log';
 
 function cron_log(string $msg, string $logFile): void
@@ -54,7 +55,7 @@ try {
 }
 
 // Buscar empréstimos com 15+ dias e email do colaborador
-// Exclui: já devolvidos, colaboradores sem email, aviso já enviado hoje
+// Exclui: já devolvidos, colaboradores sem email, aviso enviado nos últimos 7 dias
 try {
     $stmt = $pdo->prepare("
         SELECT
@@ -77,10 +78,10 @@ try {
           AND DATEDIFF(CURDATE(), DATE(fe.data_emprestimo)) >= 15
           AND c.email IS NOT NULL
           AND c.email != ''
-          AND (fe.ultimo_aviso_email IS NULL OR fe.ultimo_aviso_email < :hoje)
+                    AND (fe.ultimo_aviso_email IS NULL OR fe.ultimo_aviso_email < :limite_aviso)
         ORDER BY dias_em_aberto DESC
     ");
-    $stmt->execute(['hoje' => $hoje]);
+        $stmt->execute(['limite_aviso' => $limiteAviso]);
     $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     cron_log("ERRO ao consultar empréstimos: " . $e->getMessage(), $logFile);
@@ -88,7 +89,7 @@ try {
 }
 
 if (empty($emprestimos)) {
-    cron_log("Sem empréstimos a notificar hoje.", $logFile);
+    cron_log("Sem empréstimos a notificar nesta execução (janela de 7 dias).", $logFile);
     exit(0);
 }
 
