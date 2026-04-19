@@ -160,12 +160,12 @@ $queryBase = [
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-        <a href="?<?= htmlspecialchars(http_build_query($queryBase + ['estado' => 'ativos'])) ?>"
+        <a href="?<?= htmlspecialchars(http_build_query(array_merge($queryBase, ['estado' => 'ativos', 'pagina' => 1]))) ?>"
            class="block rounded-xl border px-4 py-3 transition <?= $estado === 'ativos' ? 'bg-green-100 border-green-400 ring-2 ring-green-200' : 'bg-green-50 border-green-200 hover:bg-green-100' ?>">
             <p class="text-xs font-semibold text-green-700 uppercase tracking-wide">Ativos</p>
             <p class="text-2xl font-bold text-green-800"><?= $total_ativos ?></p>
         </a>
-        <a href="?<?= htmlspecialchars(http_build_query($queryBase + ['estado' => 'inativos'])) ?>"
+        <a href="?<?= htmlspecialchars(http_build_query(array_merge($queryBase, ['estado' => 'inativos', 'pagina' => 1]))) ?>"
            class="block rounded-xl border px-4 py-3 transition <?= $estado === 'inativos' ? 'bg-gray-200 border-gray-500 ring-2 ring-gray-300' : 'bg-gray-100 border-gray-300 hover:bg-gray-200' ?>">
             <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Inativos</p>
             <p class="text-2xl font-bold text-gray-800"><?= $total_inativos ?></p>
