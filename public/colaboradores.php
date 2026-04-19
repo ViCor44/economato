@@ -352,12 +352,13 @@ $queryBase = [
         linhasColaboradores.forEach((linha) => {
             const searchTexto = (linha.getAttribute('data-search') || '').toLowerCase();
             const numero = (linha.getAttribute('data-numero') || '').trim();
+            const numeroDigitos = numero.replace(/\D/g, '');
             const termoNumerico = termo.replace(/\D/g, '');
             const pesquisaNumericaCurta = /^\d+$/.test(termo) && termo.length <= 4;
-            const correspondeNumero = termoNumerico !== '' && numero !== ''
+            const correspondeNumero = termoNumerico !== '' && numeroDigitos !== ''
                 ? (pesquisaNumericaCurta
-                    ? numero === termoNumerico
-                    : numero === termoNumerico || numero.includes(termoNumerico))
+                    ? parseInt(numeroDigitos, 10) === parseInt(termoNumerico, 10)
+                    : numeroDigitos.includes(termoNumerico))
                 : false;
             const corresponde = termo === '' || correspondeNumero || searchTexto.includes(termo);
             linha.style.display = corresponde ? '' : 'none';
