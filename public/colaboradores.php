@@ -154,13 +154,13 @@ $queryBase = [
     </div>
 
     <!-- 🔍 Pesquisa + filtro -->
-    <form method="GET" class="mb-6 space-y-3">
+    <form method="GET" class="mb-6 space-y-3" id="filtro_colaboradores_form">
 
         <input type="hidden" name="mostrar_inativos" value="0">
         <input type="hidden" name="estado" id="estado_filtro" value="<?= htmlspecialchars($estado) ?>">
 
         <div class="flex items-center gap-2">
-            <input type="text" name="pesquisa"
+            <input type="text" name="pesquisa" id="pesquisa_colaboradores"
                 value="<?= htmlspecialchars($pesquisa) ?>"
                 placeholder="🔍 Nome, cartão ou nº funcionário"
                 class="flex-1 px-4 py-2 border rounded-md">
@@ -174,9 +174,9 @@ $queryBase = [
                     <?php endforeach; ?>
                 </select>
 
-            <button type="submit"
+            <button type="button" id="limpar_pesquisa_colaboradores"
                     class="bg-blue-600 text-white px-4 py-2 rounded-md">
-                Pesquisar
+                Limpar
             </button>
         </div>
 
@@ -302,12 +302,47 @@ $queryBase = [
 
 <?php include_once '../src/templates/footer.php'; ?>
 <script>
+    const filtrosForm = document.getElementById('filtro_colaboradores_form');
+    const pesquisaInput = document.getElementById('pesquisa_colaboradores');
+    const limparPesquisaBtn = document.getElementById('limpar_pesquisa_colaboradores');
     const mostrarInativosCheckbox = document.querySelector('input[name="mostrar_inativos"][value="1"]');
+    const departamentoSelect = document.querySelector('select[name="departamento_id"]');
     const estadoFiltroInput = document.getElementById('estado_filtro');
+
+    let pesquisaTimeoutId = null;
 
     if (mostrarInativosCheckbox && estadoFiltroInput) {
         mostrarInativosCheckbox.addEventListener('change', () => {
             estadoFiltroInput.value = mostrarInativosCheckbox.checked ? 'todos' : 'ativos';
+            if (filtrosForm) {
+                filtrosForm.submit();
+            }
+        });
+    }
+
+    if (pesquisaInput && filtrosForm) {
+        pesquisaInput.addEventListener('input', () => {
+            if (pesquisaTimeoutId) {
+                clearTimeout(pesquisaTimeoutId);
+            }
+
+            pesquisaTimeoutId = setTimeout(() => {
+                filtrosForm.submit();
+            }, 300);
+        });
+    }
+
+    if (limparPesquisaBtn && pesquisaInput && filtrosForm) {
+        limparPesquisaBtn.addEventListener('click', () => {
+            pesquisaInput.value = '';
+            pesquisaInput.focus();
+            filtrosForm.submit();
+        });
+    }
+
+    if (departamentoSelect && filtrosForm) {
+        departamentoSelect.addEventListener('change', () => {
+            filtrosForm.submit();
         });
     }
 </script>
