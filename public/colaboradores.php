@@ -353,8 +353,11 @@ $queryBase = [
             const searchTexto = (linha.getAttribute('data-search') || '').toLowerCase();
             const numero = (linha.getAttribute('data-numero') || '').trim();
             const termoNumerico = termo.replace(/\D/g, '');
+            const pesquisaNumericaCurta = /^\d+$/.test(termo) && termo.length <= 4;
             const correspondeNumero = termoNumerico !== '' && numero !== ''
-                ? numero === termoNumerico || numero.includes(termoNumerico)
+                ? (pesquisaNumericaCurta
+                    ? numero === termoNumerico
+                    : numero === termoNumerico || numero.includes(termoNumerico))
                 : false;
             const corresponde = termo === '' || correspondeNumero || searchTexto.includes(termo);
             linha.style.display = corresponde ? '' : 'none';
