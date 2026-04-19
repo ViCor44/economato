@@ -15,6 +15,12 @@ $mostrar_inativos = ($estado === 'todos');
 $colaboradores = [];
 $total_ativos = 0;
 $total_inativos = 0;
+$total_colaboradores = 0;
+$total_paginas = 1;
+
+$por_pagina = 50;
+$pagina = max(1, (int)($_GET['pagina'] ?? 1));
+$offset = ($pagina - 1) * $por_pagina;
 
 // Carregar departamentos para o filtro
 $departamento_id = isset($_GET['departamento_id']) ? (int)$_GET['departamento_id'] : 0;
@@ -36,43 +42,23 @@ try {
     $total_ativos = (int)($totais['total_ativos'] ?? 0);
     $total_inativos = (int)($totais['total_inativos'] ?? 0);
 
-    $sql = "
-        SELECT
-            c.*,
-            d.nome AS departamento_nome,
-            COALESCE(SUM(
-                CASE 
-                    WHEN fa.estado = 'em_divida'
-                    THEN fa.quantidade * f.preco_unitario
-                    ELSE 0
-                END
-            ), 0) AS total_divida
-        FROM colaboradores c
-        LEFT JOIN departamentos d ON c.departamento_id = d.id
-        LEFT JOIN farda_atribuicoes fa ON fa.colaborador_id = c.id
-        LEFT JOIN fardas f ON f.id = fa.farda_id
-        WHERE 1 = 1
-    ";
-
+    $where = " WHERE 1 = 1 ";
     $params = [];
 
     if ($estado === 'ativos') {
-        $sql .= " AND c.ativo = 1 ";
+        $where .= " AND c.ativo = ? ";
+        $params[] = 1;
     } elseif ($estado === 'inativos') {
-        $sql .= " AND c.ativo = 0 ";
+        $where .= " AND c.ativo = ? ";
+        $params[] = 0;
     }
 
-
-    // 🔍 Pesquisa
     if ($pesquisa !== '') {
         if (ctype_digit($pesquisa) && strlen($pesquisa) <= 4) {
-            // 🔢 Nº funcionário (curto → exato)
-            $sql .= " AND c.numero_funcionario = ? ";
+            $where .= " AND c.numero_funcionario = ? ";
             $params[] = (int)$pesquisa;
-
         } else {
-            // 🔎 Nome, email OU cartão (numérico ou texto)
-            $sql .= " AND (
+            $where .= " AND (
                 c.nome LIKE ?
                 OR c.cartao LIKE ?
                 OR c.email LIKE ?
@@ -84,19 +70,51 @@ try {
         }
     }
 
-        // Filtro por departamento
-        if ($departamento_id > 0) {
-            $sql .= " AND c.departamento_id = ? ";
-            $params[] = $departamento_id;
-        }
+    if ($departamento_id > 0) {
+        $where .= " AND c.departamento_id = ? ";
+        $params[] = $departamento_id;
+    }
 
-    $sql .= "
-        GROUP BY c.id, d.nome
+    $sqlCount = "SELECT COUNT(*) FROM colaboradores c" . $where;
+    $stmtCount = $pdo->prepare($sqlCount);
+    $stmtCount->execute($params);
+    $total_colaboradores = (int)$stmtCount->fetchColumn();
+
+    $total_paginas = max(1, (int)ceil($total_colaboradores / $por_pagina));
+    if ($pagina > $total_paginas) {
+        $pagina = $total_paginas;
+        $offset = ($pagina - 1) * $por_pagina;
+    }
+
+    $sql = "
+        SELECT
+            c.*,
+            d.nome AS departamento_nome,
+            COALESCE(div.total_divida, 0) AS total_divida
+        FROM colaboradores c
+        LEFT JOIN departamentos d ON c.departamento_id = d.id
+        LEFT JOIN (
+            SELECT
+                fa.colaborador_id,
+                SUM(fa.quantidade * f.preco_unitario) AS total_divida
+            FROM farda_atribuicoes fa
+            INNER JOIN fardas f ON f.id = fa.farda_id
+            WHERE fa.estado = 'em_divida'
+            GROUP BY fa.colaborador_id
+        ) div ON div.colaborador_id = c.id
+    " . $where . "
         ORDER BY c.nome ASC
+        LIMIT ? OFFSET ?
     ";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    $bindIndex = 1;
+    foreach ($params as $param) {
+        $stmt->bindValue($bindIndex++, $param);
+    }
+    $stmt->bindValue($bindIndex++, $por_pagina, PDO::PARAM_INT);
+    $stmt->bindValue($bindIndex, $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $colaboradores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
@@ -119,6 +137,7 @@ try {
 $queryBase = [
     'pesquisa' => $pesquisa,
     'departamento_id' => $departamento_id,
+    'estado' => $estado,
 ];
 ?>
 
@@ -158,6 +177,7 @@ $queryBase = [
 
         <input type="hidden" name="mostrar_inativos" value="0">
         <input type="hidden" name="estado" id="estado_filtro" value="<?= htmlspecialchars($estado) ?>">
+        <input type="hidden" name="pagina" value="1">
 
         <div class="flex items-center gap-2">
             <input type="text" name="pesquisa" id="pesquisa_colaboradores"
@@ -310,6 +330,31 @@ $queryBase = [
             </tbody>
         </table>
     </div>
+
+    <?php if ($total_paginas > 1): ?>
+        <?php
+            $paginaAnterior = max(1, $pagina - 1);
+            $paginaSeguinte = min($total_paginas, $pagina + 1);
+            $inicioRegistos = $total_colaboradores > 0 ? (($pagina - 1) * $por_pagina) + 1 : 0;
+            $fimRegistos = min($total_colaboradores, $pagina * $por_pagina);
+        ?>
+        <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-gray-600">
+                A mostrar <?= $inicioRegistos ?>-<?= $fimRegistos ?> de <?= $total_colaboradores ?> colaboradores
+            </p>
+            <div class="flex items-center gap-2">
+                <a href="?<?= htmlspecialchars(http_build_query($queryBase + ['pagina' => $paginaAnterior])) ?>"
+                   class="px-3 py-2 rounded-md border text-sm <?= $pagina <= 1 ? 'pointer-events-none opacity-50' : 'hover:bg-gray-50' ?>">
+                    Anterior
+                </a>
+                <span class="text-sm text-gray-700">Página <?= $pagina ?> de <?= $total_paginas ?></span>
+                <a href="?<?= htmlspecialchars(http_build_query($queryBase + ['pagina' => $paginaSeguinte])) ?>"
+                   class="px-3 py-2 rounded-md border text-sm <?= $pagina >= $total_paginas ? 'pointer-events-none opacity-50' : 'hover:bg-gray-50' ?>">
+                    Seguinte
+                </a>
+            </div>
+        </div>
+    <?php endif; ?>
 
 </main>
 
