@@ -90,7 +90,7 @@ try {
         SELECT
             c.*,
             d.nome AS departamento_nome,
-            COALESCE(div.total_divida, 0) AS total_divida
+            COALESCE(dividas.total_divida, 0) AS total_divida
         FROM colaboradores c
         LEFT JOIN departamentos d ON c.departamento_id = d.id
         LEFT JOIN (
@@ -101,7 +101,7 @@ try {
             INNER JOIN fardas f ON f.id = fa.farda_id
             WHERE fa.estado = 'em_divida'
             GROUP BY fa.colaborador_id
-        ) div ON div.colaborador_id = c.id
+        ) dividas ON dividas.colaborador_id = c.id
     " . $where . "
         ORDER BY c.nome ASC
         LIMIT ? OFFSET ?
