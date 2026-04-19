@@ -210,7 +210,7 @@ $queryBase = [
                     <th class="px-6 py-3 text-right">Ações</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="colaboradores_tbody">
 
             <?php if (empty($colaboradores)): ?>
                 <tr>
@@ -224,7 +224,7 @@ $queryBase = [
                     $temDivida = $c['total_divida'] > 0;
                     $numeroColaborador = trim((string)($c['numero_funcionario'] ?? ''));
                 ?>
-                <tr class="<?= $temDivida ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50' ?>">
+                <tr data-colaborador-row="1" class="<?= $temDivida ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50' ?>">
 
                     <!-- 👤 Colaborador -->
                     <td class="px-6 py-3 border-b">
@@ -308,8 +308,48 @@ $queryBase = [
     const mostrarInativosCheckbox = document.querySelector('input[name="mostrar_inativos"][value="1"]');
     const departamentoSelect = document.querySelector('select[name="departamento_id"]');
     const estadoFiltroInput = document.getElementById('estado_filtro');
+    const colaboradoresTbody = document.getElementById('colaboradores_tbody');
+    const linhasColaboradores = colaboradoresTbody
+        ? Array.from(colaboradoresTbody.querySelectorAll('tr[data-colaborador-row="1"]'))
+        : [];
+    let linhaSemResultadosPesquisa = null;
 
-    let pesquisaTimeoutId = null;
+    function obterOuCriarLinhaSemResultadosPesquisa() {
+        if (linhaSemResultadosPesquisa || !colaboradoresTbody) {
+            return linhaSemResultadosPesquisa;
+        }
+
+        linhaSemResultadosPesquisa = document.createElement('tr');
+        linhaSemResultadosPesquisa.innerHTML =
+            '<td colspan="7" class="text-center py-6 text-gray-500">Nenhum colaborador encontrado.</td>';
+        linhaSemResultadosPesquisa.style.display = 'none';
+        colaboradoresTbody.appendChild(linhaSemResultadosPesquisa);
+
+        return linhaSemResultadosPesquisa;
+    }
+
+    function filtrarTabelaLocalColaboradores() {
+        if (!pesquisaInput || !linhasColaboradores.length) {
+            return;
+        }
+
+        const termo = pesquisaInput.value.trim().toLowerCase();
+        let visiveis = 0;
+
+        linhasColaboradores.forEach((linha) => {
+            const textoLinha = linha.innerText.toLowerCase();
+            const corresponde = termo === '' || textoLinha.includes(termo);
+            linha.style.display = corresponde ? '' : 'none';
+            if (corresponde) {
+                visiveis += 1;
+            }
+        });
+
+        const linhaSemResultados = obterOuCriarLinhaSemResultadosPesquisa();
+        if (linhaSemResultados) {
+            linhaSemResultados.style.display = visiveis === 0 ? '' : 'none';
+        }
+    }
 
     if (mostrarInativosCheckbox && estadoFiltroInput) {
         mostrarInativosCheckbox.addEventListener('change', () => {
@@ -320,15 +360,15 @@ $queryBase = [
         });
     }
 
-    if (pesquisaInput && filtrosForm) {
+    if (pesquisaInput) {
         pesquisaInput.addEventListener('input', () => {
-            if (pesquisaTimeoutId) {
-                clearTimeout(pesquisaTimeoutId);
-            }
+            filtrarTabelaLocalColaboradores();
+        });
 
-            pesquisaTimeoutId = setTimeout(() => {
-                filtrosForm.submit();
-            }, 300);
+        pesquisaInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+            }
         });
     }
 
@@ -336,7 +376,13 @@ $queryBase = [
         limparPesquisaBtn.addEventListener('click', () => {
             pesquisaInput.value = '';
             pesquisaInput.focus();
-            filtrosForm.submit();
+            const pesquisaUrl = new URLSearchParams(window.location.search).get('pesquisa') || '';
+            if (pesquisaUrl !== '') {
+                filtrosForm.submit();
+                return;
+            }
+
+            filtrarTabelaLocalColaboradores();
         });
     }
 
@@ -350,6 +396,7 @@ $queryBase = [
         const cursorPosicao = pesquisaInput.value.length;
         pesquisaInput.focus();
         pesquisaInput.setSelectionRange(cursorPosicao, cursorPosicao);
+        filtrarTabelaLocalColaboradores();
     }
 </script>
 </body>
