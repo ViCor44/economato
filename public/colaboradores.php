@@ -345,6 +345,12 @@ $queryBase = [
             filtrosForm.submit();
         });
     }
+
+    if (pesquisaInput) {
+        const cursorPosicao = pesquisaInput.value.length;
+        pesquisaInput.focus();
+        pesquisaInput.setSelectionRange(cursorPosicao, cursorPosicao);
+    }
 </script>
 </body>
 </html>
