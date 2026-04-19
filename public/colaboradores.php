@@ -223,8 +223,21 @@ $queryBase = [
                 <?php foreach ($colaboradores as $c): 
                     $temDivida = $c['total_divida'] > 0;
                     $numeroColaborador = trim((string)($c['numero_funcionario'] ?? ''));
+                    $searchParts = [
+                        (string)($c['nome'] ?? ''),
+                        (string)($c['cartao'] ?? ''),
+                        (string)($c['email'] ?? ''),
+                        (string)($c['departamento_nome'] ?? ''),
+                        $numeroColaborador,
+                    ];
+                    $searchTexto = mb_strtolower(trim(implode(' ', array_filter($searchParts, static function ($v) {
+                        return $v !== null && trim((string)$v) !== '';
+                    }))));
                 ?>
-                <tr data-colaborador-row="1" class="<?= $temDivida ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50' ?>">
+                <tr data-colaborador-row="1"
+                    data-search="<?= htmlspecialchars($searchTexto, ENT_QUOTES, 'UTF-8') ?>"
+                    data-numero="<?= htmlspecialchars($numeroColaborador, ENT_QUOTES, 'UTF-8') ?>"
+                    class="<?= $temDivida ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50' ?>">
 
                     <!-- 👤 Colaborador -->
                     <td class="px-6 py-3 border-b">
@@ -337,8 +350,13 @@ $queryBase = [
         let visiveis = 0;
 
         linhasColaboradores.forEach((linha) => {
-            const textoLinha = linha.innerText.toLowerCase();
-            const corresponde = termo === '' || textoLinha.includes(termo);
+            const searchTexto = (linha.getAttribute('data-search') || '').toLowerCase();
+            const numero = (linha.getAttribute('data-numero') || '').trim();
+            const termoNumerico = termo.replace(/\D/g, '');
+            const correspondeNumero = termoNumerico !== '' && numero !== ''
+                ? numero === termoNumerico || numero.includes(termoNumerico)
+                : false;
+            const corresponde = termo === '' || correspondeNumero || searchTexto.includes(termo);
             linha.style.display = corresponde ? '' : 'none';
             if (corresponde) {
                 visiveis += 1;
