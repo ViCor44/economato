@@ -390,6 +390,9 @@ $queryBase = [
         pesquisaInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
+                if (filtrosForm) {
+                    filtrosForm.submit();
+                }
             }
         });
     }
