@@ -200,6 +200,10 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$colaborador_id]);
 $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Verifica se ainda há fardas com estado 'atribuida' (não marcadas para devolução)
+$tem_fardas_por_marcar = array_filter($fardas_atribuidas, fn($f) => $f['estado'] === 'atribuida');
+$pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_por_marcar);
 ?>
 <!DOCTYPE html>
 <html lang="pt-PT" class="bg-gray-100">
@@ -312,7 +316,7 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="mt-8 border-t pt-6 text-right">
 
-        <?php if (!empty($fardas_atribuidas)): ?>
+        <?php if ($pode_gerar_termo): ?>
 
             <a href="gerar_termo_devolucao.php?colaborador_id=<?= $colaborador_id ?>"           
                 style="background-color:#16a34a; color:#fff; font-weight:600;
@@ -333,13 +337,19 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     border-radius:8px;
                     box-shadow:0 2px 4px rgba(0,0,0,0.1);
                     cursor:not-allowed;"
-                title="Não existem fardas atribuídas para gerar termo">
+                title="<?= !empty($tem_fardas_por_marcar) ? 'Marque todas as fardas para devolução antes de gerar o termo' : 'Não existem fardas atribuídas para gerar termo' ?>">
                 📄 <span>Gerar Termo de Devolução</span>
             </span>
 
-            <p class="text-sm text-gray-500 mt-2">
-                Não existem fardas atribuídas a este colaborador.
-            </p>
+            <?php if (!empty($tem_fardas_por_marcar)): ?>
+                <p class="text-sm text-orange-500 mt-2">
+                    ⚠ Existem fardas ainda não marcadas para devolução.
+                </p>
+            <?php else: ?>
+                <p class="text-sm text-gray-500 mt-2">
+                    Não existem fardas atribuídas a este colaborador.
+                </p>
+            <?php endif; ?>
 
         <?php endif; ?>
     </div>
