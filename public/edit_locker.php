@@ -162,7 +162,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="actions">
-      <a class="btn btn-ghost" href="list_lockers.php">Cancelar</a>
+      <?php if ($colaborador_id): ?>
+        <a class="btn btn-ghost" href="<?= BASE_URL ?>/public/detalhes_colaborador.php?id=<?= $colaborador_id ?>">← Voltar ao colaborador</a>
+      <?php else: ?>
+        <a class="btn btn-ghost" href="list_lockers.php">Cancelar</a>
+      <?php endif; ?>
       <button type="submit" class="btn btn-primary">Atualizar</button>
     </div>
   </form>
