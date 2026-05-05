@@ -214,7 +214,13 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <main class="max-w-4xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
 
-    <h1 class="text-3xl font-bold mb-2 text-gray-800">♻️ Devolução de Farda</h1>
+    <div class="flex items-center justify-between mb-2">
+        <h1 class="text-3xl font-bold text-gray-800">♻️ Devolução de Farda</h1>
+        <a href="<?= BASE_URL ?>/public/detalhes_colaborador.php?id=<?= $colaborador_id ?>"
+           class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium">
+            ← Voltar ao colaborador
+        </a>
+    </div>
     <p class="text-gray-600 mb-6">
         Colaborador: <strong><?= htmlspecialchars($colaborador['nome']) ?></strong>
     </p>
