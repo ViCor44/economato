@@ -71,8 +71,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
     }
 }
 
+// 🔄 PROCESSAR DESMARCAR COMO DÍVIDA
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'desmarcar_divida') {
+    $atribuicao_id = (int)($_POST['atribuicao_id'] ?? 0);
+
+    if ($atribuicao_id <= 0) {
+        $errors[] = "Atribuição inválida.";
+    } else {
+        try {
+            $pdo->beginTransaction();
+
+            // Verificar que a atribuição existe e está marcada como dívida
+            $stmt = $pdo->prepare("
+                SELECT id
+                FROM farda_atribuicoes
+                WHERE id = ?
+                  AND colaborador_id = ?
+                  AND marcado_como_divida = 1
+                FOR UPDATE
+            ");
+            $stmt->execute([$atribuicao_id, $colaborador_id]);
+            $atribuicao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$atribuicao) {
+                throw new Exception("A atribuição não existe ou não está marcada como dívida.");
+            }
+
+            // Desmarcar como dívida
+            $stmt = $pdo->prepare("
+                UPDATE farda_atribuicoes
+                SET
+                    marcado_como_divida = 0,
+                    data_marcacao_divida = NULL
+                WHERE id = ?
+            ");
+            $stmt->execute([$atribuicao_id]);
+
+            $pdo->commit();
+
+            $logMsg  = "Colaborador ID {$colaborador_id} desmarcou atribuição ID {$atribuicao_id} de dívida";
+            $success = "Marcação de dívida removida com sucesso.";
+            adicionarLog($pdo, "Desmarcar farda como dívida", $logMsg);
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $errors[] = "Erro ao desmarcar como dívida: " . $e->getMessage();
+        }
+    }
+}
+
 // 🔄 PROCESSAR DEVOLUÇÃO (pré-registo)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['acao']) || $_POST['acao'] !== 'marcar_divida')) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['acao']) || ($_POST['acao'] !== 'marcar_divida' && $_POST['acao'] !== 'desmarcar_divida'))) {
 
     $atribuicao_id    = (int)($_POST['atribuicao_id'] ?? 0);
     $estado_devolucao = $_POST['estado_devolucao'] ?? '';
@@ -373,6 +422,19 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                             <span class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg font-medium text-sm">
                                 💳 Marcada como dívida
                             </span>
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="acao" value="desmarcar_divida">
+                                <input type="hidden" name="atribuicao_id" value="<?= $f['atribuicao_id'] ?>">
+                                <button
+                                    type="submit"
+                                    class="px-3 py-2 rounded-lg text-sm whitespace-nowrap"
+                                    style="background-color:#6b7280; color:#ffffff; border:1px solid #4b5563;"
+                                    onmouseover="this.style.backgroundColor='#4b5563';"
+                                    onmouseout="this.style.backgroundColor='#6b7280';"
+                                    onclick="return confirm('Tem a certeza que quer remover a marcação de dívida?');">
+                                    ↩️ Desmarcar de dívida
+                                </button>
+                            </form>
                         </div>
                     <?php else: ?>
                         <span class="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium text-sm">
