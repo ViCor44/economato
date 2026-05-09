@@ -243,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['acao']) || ($_POST[
                     ");
                     $stmt->execute([$estado_devolucao, $atribuicao_id]);
                 } else {
-                    // Devolução unitária: reduz 1 na atribuição e cria um registo de devolução com qtd 1.
+                    // Devolução unitária: reduz 1 na atribuição original
                     $stmt = $pdo->prepare("
                         UPDATE farda_atribuicoes
                         SET quantidade = quantidade - 1
@@ -251,16 +251,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['acao']) || ($_POST[
                     ");
                     $stmt->execute([$atribuicao_id]);
 
+                    // Verificar se já existe um registo marcada_devolucao para o mesmo artigo e mesmo estado
                     $stmt = $pdo->prepare("
-                        INSERT INTO farda_atribuicoes
-                        (colaborador_id, farda_id, quantidade, estado, estado_devolucao, data_atribuicao, data_devolucao)
-                        VALUES (?, ?, 1, 'marcada_devolucao', ?, NOW(), NOW())
+                        SELECT id
+                        FROM farda_atribuicoes
+                        WHERE farda_id = ?
+                          AND colaborador_id = ?
+                          AND estado = 'marcada_devolucao'
+                          AND estado_devolucao = ?
+                        LIMIT 1
+                        FOR UPDATE
                     ");
-                    $stmt->execute([
-                        $colaborador_id,
-                        (int)$atribuicao['farda_id'],
-                        $estado_devolucao
-                    ]);
+                    $stmt->execute([(int)$atribuicao['farda_id'], $colaborador_id, $estado_devolucao]);
+                    $registo_existente = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($registo_existente) {
+                        // Reagrupar: incrementar quantidade no registo existente
+                        $stmt = $pdo->prepare("
+                            UPDATE farda_atribuicoes
+                            SET quantidade = quantidade + 1
+                            WHERE id = ?
+                        ");
+                        $stmt->execute([$registo_existente['id']]);
+                    } else {
+                        // Criar novo registo de devolução
+                        $stmt = $pdo->prepare("
+                            INSERT INTO farda_atribuicoes
+                            (colaborador_id, farda_id, quantidade, estado, estado_devolucao, data_atribuicao, data_devolucao)
+                            VALUES (?, ?, 1, 'marcada_devolucao', ?, NOW(), NOW())
+                        ");
+                        $stmt->execute([
+                            $colaborador_id,
+                            (int)$atribuicao['farda_id'],
+                            $estado_devolucao
+                        ]);
+                    }
                 }
 
                 $logMsg  = "Colaborador ID {$colaborador_id} marcou devolução unitária (estado: {$estado_devolucao}, atribuição ID: {$atribuicao_id})";
