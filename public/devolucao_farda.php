@@ -623,10 +623,12 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
             <input type="number" name="quantidade_divida" id="quantidade_divida" min="1" max="1" class="w-full border rounded-md px-3 py-2 mb-4" required>
 
             <div class="flex justify-end gap-3 mt-4">
-                <button type="button" onclick="fecharModalDivida()" class="px-4 py-2 bg-gray-200 rounded-md">
+                <button type="button" onclick="fecharModalDivida()"
+                    style="padding:8px 16px;background:#e5e7eb;border-radius:6px;font-weight:600;border:none;cursor:pointer;">
                     Cancelar
                 </button>
-                <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-md">
+                <button type="submit"
+                    style="padding:8px 24px;background:#dc2626;color:#fff;border-radius:6px;font-weight:600;border:none;cursor:pointer;">
                     Confirmar Dívida
                 </button>
             </div>
