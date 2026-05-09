@@ -197,8 +197,18 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
             <ul id="rgpdListaCampos" style="margin:0;padding-left:20px;font-size:0.88rem;color:#374151;"></ul>
         </div>
 
-        <div style="background:#fff8e1;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:0.85rem;color:#78350f;">
+        <div style="background:#fff8e1;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.85rem;color:#78350f;">
             ⚠ Os dados gerados neste relatório devem ser utilizados apenas para fins legítimos e armazenados de forma segura. Não partilhe com terceiros sem autorização.
+        </div>
+
+        <!-- Seletor de colunas -->
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+            <p style="margin:0 0 10px 0;font-weight:600;font-size:0.9rem;color:#1e3a5f;">Colunas a incluir no relatório:</p>
+            <div id="rgpdColunasGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font-size:0.88rem;color:#374151;"></div>
+            <div style="margin-top:8px;display:flex;gap:12px;">
+                <button type="button" onclick="selecionarTodasColunas(true)" style="font-size:0.8rem;color:#2563eb;background:none;border:none;cursor:pointer;padding:0;">Selecionar todas</button>
+                <button type="button" onclick="selecionarTodasColunas(false)" style="font-size:0.8rem;color:#6b7280;background:none;border:none;cursor:pointer;padding:0;">Limpar</button>
+            </div>
         </div>
 
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:20px;">
@@ -227,6 +237,27 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
     const boxThreshold = document.getElementById('boxThreshold');
     const boxFreeText = document.getElementById('boxFreeText');
     const form = document.getElementById('reportForm');
+
+    // Mapa de TODAS as colunas por relatório (para seleção)
+    const todasColunasMap = {
+        lista_colaboradores:           ['Nº Colaborador','Nome','Cartão','Telefone','Email','Ativo','Criado Em'],
+        colaboradores_ativos:          ['Nº Colaborador','Nome','Cartão','Telefone','Email','Criado Em'],
+        colaboradores_inativos:        ['Nº Colaborador','Nome','Cartão','Telefone','Email','Criado Em'],
+        colaboradores_sem_farda:       ['Nº Colaborador','Nome','Cartão','Email'],
+        colaboradores_com_farda:       ['Nº Colaborador','Nome','Cartão','Email'],
+        colaboradores_com_emprestimos: ['Nº Colaborador','Nome','Cartão','Email'],
+        colaboradores_com_dividas:     ['Colaborador','Nº Funcionário','Departamento','Itens em Dívida','Total em Dívida (€)'],
+        colaboradores_por_departamento:['Departamento','Nome','Cartão','Telefone','Email','Ativo'],
+        devolucoes_motivo:             ['ID','Farda','Cor','Tamanho','Qtd','Motivo','Data','Colaborador'],
+        inativos_com_farda:            ['Nº Colaborador','Nome','Cartão','Telefone','Total Peças','Peças Atribuídas'],
+        cacifos_lista:                 ['Número','Colaborador','Avariado'],
+        cacifos_ocupados:              ['Número','Colaborador'],
+        cacifos_avariados:             ['Número','Colaborador'],
+        cacifos_colabs_inativos:       ['Número','Colaborador','Observações'],
+        custo_por_colaborador:         ['Colaborador','Total (€)'],
+        logs_filtrados:                ['ID','Data','Ação','Detalhes','Utilizador','IP'],
+        historico_atribuicoes:         ['ID','Data','Colaborador','Peça','Qtd'],
+    };
 
     // Mapa de campos com dados pessoais por relatório
     const dadosPessoaisMap = {
@@ -264,7 +295,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
 
         const campos = dadosPessoaisMap[val];
         if (campos && campos.length > 0) {
-            // Preencher modal
+            // Preencher lista de campos pessoais
             const lista = document.getElementById('rgpdListaCampos');
             lista.innerHTML = '';
             campos.forEach(c => {
@@ -272,7 +303,24 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                 li.textContent = c;
                 lista.appendChild(li);
             });
-            // Reset checkbox
+            // Preencher seletor de colunas
+            const grid = document.getElementById('rgpdColunasGrid');
+            grid.innerHTML = '';
+            const todasColunas = todasColunasMap[val] || [];
+            todasColunas.forEach(col => {
+                const lbl = document.createElement('label');
+                lbl.style.cssText = 'display:flex;align-items:center;gap:6px;cursor:pointer;';
+                const chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.name = 'rgpd_col';
+                chk.value = col;
+                chk.checked = true;
+                chk.style.cssText = 'width:14px;height:14px;flex-shrink:0;';
+                lbl.appendChild(chk);
+                lbl.appendChild(document.createTextNode(col));
+                grid.appendChild(lbl);
+            });
+            // Reset checkbox RGPD
             const check = document.getElementById('rgpdConfirmCheck');
             check.checked = false;
             atualizarBotaoConfirmar();
@@ -306,6 +354,10 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
         submeterFormulario();
     }
 
+    function selecionarTodasColunas(sel) {
+        document.querySelectorAll('#rgpdColunasGrid input[type=checkbox]').forEach(c => c.checked = sel);
+    }
+
     function submeterFormulario() {
         const val = report.value;
         if (val === 'print_ean') {
@@ -317,6 +369,24 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
             const url = 'etiquetas_ean_from_pngs.php' + (params.toString() ? ('?' + params.toString()) : '');
             window.open(url, '_blank');
             return;
+        }
+        // Remover inputs de colunas anteriores
+        form.querySelectorAll('input[name="cols[]"]').forEach(el => el.remove());
+        // Adicionar colunas selecionadas (se houver seletor ativo)
+        const colChecks = document.querySelectorAll('#rgpdColunasGrid input[type=checkbox]');
+        if (colChecks.length > 0) {
+            const selecionadas = [...colChecks].filter(c => c.checked).map(c => c.value);
+            if (selecionadas.length === 0) {
+                alert('Seleciona pelo menos uma coluna para incluir no relatório.');
+                return;
+            }
+            selecionadas.forEach(col => {
+                const inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'cols[]';
+                inp.value = col;
+                form.appendChild(inp);
+            });
         }
         form.submit();
     }
