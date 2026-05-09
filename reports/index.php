@@ -91,15 +91,16 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                                 <option value="valor_total_stock">21. Valor total em stock</option>
                                 <option value="custo_por_colaborador">22. Custo de fardamento entregue por colaborador</option>
                                 <option value="custo_por_departamento">23. Custo total por departamento</option>
+                                <option value="custo_total_fardas">24. Custo total de fardas (atribuídas + stock)</option>
                             </optgroup>
 
                             <!-- Diversos -->
                             <optgroup label="Diversos">
-                                <option value="logs_filtrados">24. Logs de sistema filtráveis</option>
-                                <option value="export_ean">25. Export EAN / códigos de barras (CSV)</option>
-                                <option value="print_ean">26. Imprimir EAN (etiquetas a partir dos PNGs)</option>
-                                <option value="itens_sem_ean">27. Itens de farda sem EAN</option>
-                                <option value="historico_atribuicoes">28. Histórico de atribuições</option>
+                                <option value="logs_filtrados">25. Logs de sistema filtráveis</option>
+                                <option value="export_ean">26. Export EAN / códigos de barras (CSV)</option>
+                                <option value="print_ean">27. Imprimir EAN (etiquetas a partir dos PNGs)</option>
+                                <option value="itens_sem_ean">28. Itens de farda sem EAN</option>
+                                <option value="historico_atribuicoes">29. Histórico de atribuições</option>
                             </optgroup>
                         </select>
                     </div>

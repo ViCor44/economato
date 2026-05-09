@@ -724,6 +724,30 @@ break;
             $rows = array_map(function($r){ return ['Departamento'=>$r['departamento'],'Total (€)'=>number_format($r['total'],2,',','.')]; }, $data);
             break;
 
+        case 'custo_total_fardas':
+            $title = "Custo Total de Fardas (Atribuídas + Stock)";
+            // Valor em stock
+            $stmtStock = $pdo->query("
+                SELECT COALESCE(SUM(preco_unitario * quantidade), 0) AS total
+                FROM fardas
+            ");
+            $totalStock = (float)$stmtStock->fetchColumn();
+            // Valor atribuído a colaboradores
+            $stmtAtrib = $pdo->query("
+                SELECT COALESCE(SUM(f.preco_unitario * fa.quantidade), 0) AS total
+                FROM farda_atribuicoes fa
+                JOIN fardas f ON f.id = fa.farda_id
+                WHERE fa.estado IN ('atribuida', 'marcada_devolucao', 'em_divida')
+            ");
+            $totalAtrib = (float)$stmtAtrib->fetchColumn();
+            $columns = ['Descrição', 'Valor (€)'];
+            $rows = [
+                ['Descrição' => 'Valor das fardas em stock',             'Valor (€)' => number_format($totalStock, 2, ',', '.')],
+                ['Descrição' => 'Valor das fardas atribuídas a colaboradores', 'Valor (€)' => number_format($totalAtrib, 2, ',', '.')],
+                ['Descrição' => 'TOTAL GERAL',                            'Valor (€)' => number_format($totalStock + $totalAtrib, 2, ',', '.')],
+            ];
+            break;
+
         // ------------------- Diversos -------------------
         case 'logs_filtrados':
             $title = "Logs do Sistema";
