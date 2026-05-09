@@ -548,33 +548,33 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                 </button>
                 <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md">
                     Confirmar devolução
+                </button>
+            </div>
+        </form>
 
-                <!-- ==================== MODAL DE DÍVIDA ==================== -->
-                <div id="modalDivida" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+    </div>
+</div>
 
-                        <h2 class="text-xl font-bold mb-4">Marcar como Dívida</h2>
-                        <p id="descricaoDivida" class="text-sm text-gray-600 mb-4"></p>
+<!-- ==================== MODAL DE DÍVIDA ==================== -->
+<div id="modalDivida" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
 
-                        <form method="POST">
-                            <input type="hidden" name="acao" value="marcar_divida">
-                            <input type="hidden" name="atribuicao_id" id="atribuicao_id_divida">
+        <h2 class="text-xl font-bold mb-4">💳 Marcar como Dívida</h2>
+        <p id="descricaoDivida" class="text-sm text-gray-600 mb-4"></p>
 
-                            <label class="block mb-2 font-medium">Quantidade a marcar como dívida</label>
-                            <input type="number" name="quantidade_divida" id="quantidade_divida" min="1" max="1" class="w-full border rounded-md px-3 py-2 mb-4" required>
+        <form method="POST">
+            <input type="hidden" name="acao" value="marcar_divida">
+            <input type="hidden" name="atribuicao_id" id="atribuicao_id_divida">
 
-                            <div class="flex justify-end gap-3 mt-4">
-                                <button type="button" onclick="fecharModalDivida()" class="px-4 py-2 bg-gray-200 rounded-md">
-                                    Cancelar
-                                </button>
-                                <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-md">
-                                    Confirmar Dívida
-                                </button>
-                            </div>
-                        </form>
+            <label class="block mb-2 font-medium">Quantidade a marcar como dívida</label>
+            <input type="number" name="quantidade_divida" id="quantidade_divida" min="1" max="1" class="w-full border rounded-md px-3 py-2 mb-4" required>
 
-                    </div>
-                </div>
+            <div class="flex justify-end gap-3 mt-4">
+                <button type="button" onclick="fecharModalDivida()" class="px-4 py-2 bg-gray-200 rounded-md">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-md">
+                    Confirmar Dívida
                 </button>
             </div>
         </form>
@@ -607,6 +607,7 @@ function abrirModal(tipo, atribuicaoId, fardaId, nome, cor, tamanho) {
 
 function fecharModal() {
     document.getElementById('modalDevolucao').classList.add('hidden');
+}
 
 function abrirModalDivida(atribuicaoId, quantidade, nome, cor, tamanho) {
     document.getElementById('modalDivida').classList.remove('hidden');
@@ -618,7 +619,6 @@ function abrirModalDivida(atribuicaoId, quantidade, nome, cor, tamanho) {
 
 function fecharModalDivida() {
     document.getElementById('modalDivida').classList.add('hidden');
-}
 }
 </script>
 
