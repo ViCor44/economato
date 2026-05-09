@@ -14,7 +14,7 @@ $html = <<<HTML
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { margin: 22mm 20mm; }
+  @page { margin: 0; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -23,6 +23,7 @@ $html = <<<HTML
     font-size: 10pt;
     color: #1a202c;
     line-height: 1.6;
+    padding: 22mm 20mm;
   }
 
   /* ── Capa ─────────────────────────────────────── */
@@ -72,15 +73,16 @@ $html = <<<HTML
 
   /* ── Cabeçalho de página ──────────────────────── */
   .page-header {
+    display: table;
+    width: 100%;
     border-bottom: 1px solid #e5e7eb;
     padding-bottom: 3mm;
     margin-bottom: 6mm;
     font-size: 8pt;
     color: #9ca3af;
-    overflow: hidden;
   }
-  .page-header .ph-right { float: right; }
-  .page-header .ph-left  { float: left; }
+  .page-header .ph-left  { display: table-cell; }
+  .page-header .ph-right { display: table-cell; text-align: right; }
 
   /* ── Capítulos e secções ─────────────────────── */
   .chapter {
