@@ -385,7 +385,26 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                         <?php endif; ?>
                     </div>
 
-                    <?php if ($f['estado'] === 'atribuida'): ?>
+                    <?php if ($f['marcado_como_divida']): ?>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg font-medium text-sm">
+                                💳 Marcada como dívida
+                            </span>
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="acao" value="desmarcar_divida">
+                                <input type="hidden" name="atribuicao_id" value="<?= $f['atribuicao_id'] ?>">
+                                <button
+                                    type="submit"
+                                    class="px-3 py-2 rounded-lg text-sm whitespace-nowrap"
+                                    style="background-color:#6b7280; color:#ffffff; border:1px solid #4b5563;"
+                                    onmouseover="this.style.backgroundColor='#4b5563';"
+                                    onmouseout="this.style.backgroundColor='#6b7280';"
+                                    onclick="return confirm('Tem a certeza que quer remover a marcação de dívida?');">
+                                    ↩️ Desmarcar de dívida
+                                </button>
+                            </form>
+                        </div>
+                    <?php elseif ($f['estado'] === 'atribuida'): ?>
                         <div class="flex flex-row gap-2 items-center flex-shrink-0 ml-4">
                             <button
                                 onclick="abrirModal('unitario', <?= $f['atribuicao_id'] ?>, <?= $f['farda_id'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')"
@@ -414,25 +433,6 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                                     onmouseout="this.style.backgroundColor='#dc2626';"
                                     onclick="return confirm('Tem a certeza que quer marcar esta farda como dívida?');">
                                     💳 Marcar como dívida
-                                </button>
-                            </form>
-                        </div>
-                    <?php elseif ($f['marcado_como_divida']): ?>
-                        <div class="flex items-center gap-2">
-                            <span class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg font-medium text-sm">
-                                💳 Marcada como dívida
-                            </span>
-                            <form method="POST" class="inline">
-                                <input type="hidden" name="acao" value="desmarcar_divida">
-                                <input type="hidden" name="atribuicao_id" value="<?= $f['atribuicao_id'] ?>">
-                                <button
-                                    type="submit"
-                                    class="px-3 py-2 rounded-lg text-sm whitespace-nowrap"
-                                    style="background-color:#6b7280; color:#ffffff; border:1px solid #4b5563;"
-                                    onmouseover="this.style.backgroundColor='#4b5563';"
-                                    onmouseout="this.style.backgroundColor='#6b7280';"
-                                    onclick="return confirm('Tem a certeza que quer remover a marcação de dívida?');">
-                                    ↩️ Desmarcar de dívida
                                 </button>
                             </form>
                         </div>
