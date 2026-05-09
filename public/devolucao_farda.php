@@ -26,8 +26,12 @@ $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'marcar_divida') {
     $atribuicao_id = (int)($_POST['atribuicao_id'] ?? 0);
 
+    $quantidade_divida = (int)($_POST['quantidade_divida'] ?? 0);
+
     if ($atribuicao_id <= 0) {
         $errors[] = "Atribuição inválida.";
+    } elseif ($quantidade_divida <= 0) {
+        $errors[] = "Quantidade inválida.";
     } else {
         try {
             $pdo->beginTransaction();
@@ -48,19 +52,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 throw new Exception("A atribuição não existe ou já foi tratada.");
             }
 
-            // Marcar como dívida
-            $stmt = $pdo->prepare("
-                UPDATE farda_atribuicoes
-                SET
-                    marcado_como_divida = 1,
-                    data_marcacao_divida = NOW()
-                WHERE id = ?
-            ");
-            $stmt->execute([$atribuicao_id]);
+            $quantidadeAtual = (int)$atribuicao['quantidade'];
+            if ($quantidade_divida > $quantidadeAtual) {
+                throw new Exception("Não pode marcar mais unidades do que as atribuídas.");
+            }
+
+            if ($quantidade_divida === $quantidadeAtual) {
+                // Marcar TUDO como dívida
+                $stmt = $pdo->prepare("
+                    UPDATE farda_atribuicoes
+                    SET
+                        marcado_como_divida = 1,
+                        data_marcacao_divida = NOW()
+                    WHERE id = ?
+                ");
+                $stmt->execute([$atribuicao_id]);
+                $msg_acao = "todas as " . $quantidade_divida . " unidade(s)";
+            } else {
+                // Marcar APENAS algumas como dívida
+                // 1. Reduzir quantidade da atribuição original
+                $stmt = $pdo->prepare("
+                    UPDATE farda_atribuicoes
+                    SET quantidade = quantidade - ?
+                    WHERE id = ?
+                ");
+                $stmt->execute([$quantidade_divida, $atribuicao_id]);
+
+                // 2. Criar nova atribuição com as unidades em dívida
+                $stmt = $pdo->prepare("
+                    INSERT INTO farda_atribuicoes
+                    (colaborador_id, farda_id, quantidade, estado, marcado_como_divida, data_atribuicao, data_marcacao_divida)
+                    VALUES (?, ?, ?, 'atribuida', 1, NOW(), NOW())
+                ");
+                $stmt->execute([
+                    $colaborador_id,
+                    (int)$atribuicao['farda_id'],
+                    $quantidade_divida
+                ]);
+                $msg_acao = $quantidade_divida . " de " . $quantidadeAtual . " unidade(s)";
+            }
 
             $pdo->commit();
 
-            $logMsg  = "Colaborador ID {$colaborador_id} marcou atribuição ID {$atribuicao_id} como dívida";
+            $logMsg  = "Colaborador ID {$colaborador_id} marcou {$msg_acao} da atribuição ID {$atribuicao_id} como dívida";
             $success = "Farda marcada como dívida com sucesso.";
             adicionarLog($pdo, "Marcar farda como dívida", $logMsg);
 
@@ -426,12 +460,12 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                                 <input type="hidden" name="acao" value="marcar_divida">
                                 <input type="hidden" name="atribuicao_id" value="<?= $f['atribuicao_id'] ?>">
                                 <button
-                                    type="submit"
+                                    type="button"
                                     class="px-3 py-2 rounded-lg text-sm whitespace-nowrap"
                                     style="background-color:#dc2626; color:#ffffff; border:1px solid #b91c1c;"
                                     onmouseover="this.style.backgroundColor='#b91c1c';"
                                     onmouseout="this.style.backgroundColor='#dc2626';"
-                                    onclick="return confirm('Tem a certeza que quer marcar esta farda como dívida?');">
+                                    onclick="abrirModalDivida(<?= $f['atribuicao_id'] ?>, <?= $f['quantidade'] ?>, '<?= htmlspecialchars($f['nome'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['cor'], ENT_QUOTES) ?>', '<?= htmlspecialchars($f['tamanho'], ENT_QUOTES) ?>')">
                                     💳 Marcar como dívida
                                 </button>
                             </form>
@@ -514,6 +548,33 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                 </button>
                 <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md">
                     Confirmar devolução
+
+                <!-- ==================== MODAL DE DÍVIDA ==================== -->
+                <div id="modalDivida" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+
+                        <h2 class="text-xl font-bold mb-4">Marcar como Dívida</h2>
+                        <p id="descricaoDivida" class="text-sm text-gray-600 mb-4"></p>
+
+                        <form method="POST">
+                            <input type="hidden" name="acao" value="marcar_divida">
+                            <input type="hidden" name="atribuicao_id" id="atribuicao_id_divida">
+
+                            <label class="block mb-2 font-medium">Quantidade a marcar como dívida</label>
+                            <input type="number" name="quantidade_divida" id="quantidade_divida" min="1" max="1" class="w-full border rounded-md px-3 py-2 mb-4" required>
+
+                            <div class="flex justify-end gap-3 mt-4">
+                                <button type="button" onclick="fecharModalDivida()" class="px-4 py-2 bg-gray-200 rounded-md">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-md">
+                                    Confirmar Dívida
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
                 </button>
             </div>
         </form>
@@ -546,6 +607,18 @@ function abrirModal(tipo, atribuicaoId, fardaId, nome, cor, tamanho) {
 
 function fecharModal() {
     document.getElementById('modalDevolucao').classList.add('hidden');
+
+function abrirModalDivida(atribuicaoId, quantidade, nome, cor, tamanho) {
+    document.getElementById('modalDivida').classList.remove('hidden');
+    document.getElementById('atribuicao_id_divida').value = atribuicaoId;
+    document.getElementById('quantidade_divida').max = quantidade;
+    document.getElementById('quantidade_divida').value = quantidade;
+    document.getElementById('descricaoDivida').innerText = `${nome} (${cor}, ${tamanho}) - Quantidade disponível: ${quantidade}`;
+}
+
+function fecharModalDivida() {
+    document.getElementById('modalDivida').classList.add('hidden');
+}
 }
 </script>
 
