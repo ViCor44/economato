@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
 
             // Verificar que a atribuição existe e está marcada como dívida
             $stmt = $pdo->prepare("
-                SELECT id
+                SELECT id, farda_id, quantidade
                 FROM farda_atribuicoes
                 WHERE id = ?
                   AND colaborador_id = ?
@@ -131,19 +131,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
                 throw new Exception("A atribuição não existe ou não está marcada como dívida.");
             }
 
-            // Desmarcar como dívida
+            // Verificar se existe outra atribuição ativa do mesmo farda para reagrupar
             $stmt = $pdo->prepare("
-                UPDATE farda_atribuicoes
-                SET
-                    marcado_como_divida = 0,
-                    data_marcacao_divida = NULL
-                WHERE id = ?
+                SELECT id
+                FROM farda_atribuicoes
+                WHERE farda_id = ?
+                  AND colaborador_id = ?
+                  AND estado = 'atribuida'
+                  AND marcado_como_divida = 0
+                  AND id != ?
+                LIMIT 1
+                FOR UPDATE
             ");
-            $stmt->execute([$atribuicao_id]);
+            $stmt->execute([$atribuicao['farda_id'], $colaborador_id, $atribuicao_id]);
+            $atribuicao_existente = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($atribuicao_existente) {
+                // Reagrupar: somar a quantidade na atribuição existente e eliminar esta
+                $stmt = $pdo->prepare("
+                    UPDATE farda_atribuicoes
+                    SET quantidade = quantidade + ?
+                    WHERE id = ?
+                ");
+                $stmt->execute([$atribuicao['quantidade'], $atribuicao_existente['id']]);
+
+                $stmt = $pdo->prepare("DELETE FROM farda_atribuicoes WHERE id = ?");
+                $stmt->execute([$atribuicao_id]);
+            } else {
+                // Apenas desmarcar como dívida
+                $stmt = $pdo->prepare("
+                    UPDATE farda_atribuicoes
+                    SET
+                        marcado_como_divida = 0,
+                        data_marcacao_divida = NULL
+                    WHERE id = ?
+                ");
+                $stmt->execute([$atribuicao_id]);
+            }
 
             $pdo->commit();
 
-            $logMsg  = "Colaborador ID {$colaborador_id} desmarcou atribuição ID {$atribuicao_id} de dívida";
+            $logMsg  = "Colaborador ID {$colaborador_id} desmarcou atribuição ID {$atribuicao_id} de dívida" . ($atribuicao_existente ? " (reagrupado)" : "");
             $success = "Marcação de dívida removida com sucesso.";
             adicionarLog($pdo, "Desmarcar farda como dívida", $logMsg);
 
