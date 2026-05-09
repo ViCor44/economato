@@ -157,7 +157,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                     </div>
 
                     <div class="actions" style="margin-top:18px;">
-                        <button type="submit" class="btn btn-primary">Gerar Relatório</button>
+                        <button type="button" class="btn btn-primary" onclick="verificarRGPD()">Gerar Relatório</button>
                     </div>
 
                 </form>
@@ -180,6 +180,45 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
     </div>
 </div>
 
+<!-- ===== MODAL RGPD ===== -->
+<div id="modalRGPD" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:28px 32px;max-width:520px;width:95%;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <span style="font-size:1.5rem;">🔒</span>
+            <h2 style="margin:0;font-size:1.2rem;font-weight:700;color:#1e3a5f;">Confirmação RGPD</h2>
+        </div>
+
+        <p style="color:#374151;margin-bottom:12px;font-size:0.95rem;">
+            Este relatório inclui <strong>dados pessoais</strong>. Certifique-se de que o acesso tem base legal ao abrigo do <strong>Regulamento Geral de Proteção de Dados (RGPD, Art.º 6.º)</strong>.
+        </p>
+
+        <div id="rgpdCampos" style="background:#f0f4ff;border:1px solid #c7d7f5;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+            <p style="margin:0 0 8px 0;font-weight:600;font-size:0.9rem;color:#1e3a5f;">Campos com dados pessoais neste relatório:</p>
+            <ul id="rgpdListaCampos" style="margin:0;padding-left:20px;font-size:0.88rem;color:#374151;"></ul>
+        </div>
+
+        <div style="background:#fff8e1;border:1px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:0.85rem;color:#78350f;">
+            ⚠ Os dados gerados neste relatório devem ser utilizados apenas para fins legítimos e armazenados de forma segura. Não partilhe com terceiros sem autorização.
+        </div>
+
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:20px;">
+            <input type="checkbox" id="rgpdConfirmCheck" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;">
+            <span style="font-size:0.9rem;color:#111827;">Confirmo que tenho <strong>base legal</strong> para aceder e tratar estes dados pessoais, nos termos do RGPD.</span>
+        </label>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+            <button type="button" onclick="fecharModalRGPD()"
+                style="padding:9px 20px;background:#e5e7eb;color:#374151;border:none;border-radius:8px;font-weight:600;cursor:pointer;">
+                Cancelar
+            </button>
+            <button type="button" id="rgpdBtnConfirmar" onclick="confirmarRGPD()"
+                style="padding:9px 20px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;opacity:0.4;pointer-events:none;">
+                ✔ Confirmar e Gerar
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     const report = document.getElementById('report');
     const boxDates = document.getElementById('boxDates');
@@ -188,6 +227,99 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
     const boxThreshold = document.getElementById('boxThreshold');
     const boxFreeText = document.getElementById('boxFreeText');
     const form = document.getElementById('reportForm');
+
+    // Mapa de campos com dados pessoais por relatório
+    const dadosPessoaisMap = {
+        lista_colaboradores:           ['Nome', 'Nº Colaborador', 'Cartão', 'Telefone', 'Email'],
+        colaboradores_ativos:          ['Nome', 'Nº Colaborador', 'Cartão', 'Telefone', 'Email'],
+        colaboradores_inativos:        ['Nome', 'Nº Colaborador', 'Cartão', 'Telefone', 'Email'],
+        colaboradores_sem_farda:       ['Nome', 'Nº Colaborador', 'Cartão', 'Email'],
+        colaboradores_com_farda:       ['Nome', 'Nº Colaborador', 'Cartão', 'Email'],
+        colaboradores_com_emprestimos: ['Nome', 'Nº Colaborador', 'Cartão', 'Email'],
+        colaboradores_com_dividas:     ['Nome', 'Nº Colaborador', 'Cartão', 'Email'],
+        colaboradores_por_departamento:['Nome', 'Nº Colaborador', 'Cartão', 'Telefone', 'Email'],
+        devolucoes_motivo:             ['Nome do Colaborador'],
+        inativos_com_farda:            ['Nome', 'Nº Colaborador', 'Cartão', 'Telefone'],
+        cacifos_lista:                 ['Nome do Colaborador'],
+        cacifos_ocupados:              ['Nome do Colaborador'],
+        cacifos_avariados:             ['Nome do Colaborador'],
+        cacifos_colabs_inativos:       ['Nome do Colaborador'],
+        custo_por_colaborador:         ['Nome do Colaborador'],
+        logs_filtrados:                ['Nome do Utilizador', 'Endereço IP', 'Registo de ações do sistema'],
+        historico_atribuicoes:         ['Nome do Colaborador'],
+    };
+
+    function verificarRGPD() {
+        const val = report.value;
+        if (!val) {
+            alert('Por favor seleciona um relatório.');
+            return;
+        }
+
+        // Relatório print_ean é tratado separadamente
+        if (val === 'print_ean') {
+            submeterFormulario();
+            return;
+        }
+
+        const campos = dadosPessoaisMap[val];
+        if (campos && campos.length > 0) {
+            // Preencher modal
+            const lista = document.getElementById('rgpdListaCampos');
+            lista.innerHTML = '';
+            campos.forEach(c => {
+                const li = document.createElement('li');
+                li.textContent = c;
+                lista.appendChild(li);
+            });
+            // Reset checkbox
+            const check = document.getElementById('rgpdConfirmCheck');
+            check.checked = false;
+            atualizarBotaoConfirmar();
+            // Mostrar modal
+            document.getElementById('modalRGPD').style.display = 'flex';
+        } else {
+            // Sem dados pessoais — submeter diretamente
+            submeterFormulario();
+        }
+    }
+
+    function atualizarBotaoConfirmar() {
+        const check = document.getElementById('rgpdConfirmCheck');
+        const btn = document.getElementById('rgpdBtnConfirmar');
+        if (check.checked) {
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        } else {
+            btn.style.opacity = '0.4';
+            btn.style.pointerEvents = 'none';
+        }
+    }
+    document.getElementById('rgpdConfirmCheck').addEventListener('change', atualizarBotaoConfirmar);
+
+    function fecharModalRGPD() {
+        document.getElementById('modalRGPD').style.display = 'none';
+    }
+
+    function confirmarRGPD() {
+        fecharModalRGPD();
+        submeterFormulario();
+    }
+
+    function submeterFormulario() {
+        const val = report.value;
+        if (val === 'print_ean') {
+            const params = new URLSearchParams();
+            const deptEl = document.getElementById('departamento');
+            if (deptEl && deptEl.value) params.set('departamento', deptEl.value);
+            const qEl = form.querySelector('input[name="q"]');
+            if (qEl && qEl.value.trim() !== '') params.set('q', qEl.value.trim());
+            const url = 'etiquetas_ean_from_pngs.php' + (params.toString() ? ('?' + params.toString()) : '');
+            window.open(url, '_blank');
+            return;
+        }
+        form.submit();
+    }
 
     function updateBoxes() {
         const val = report.value;
@@ -218,37 +350,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
     }
 
     report.addEventListener('change', updateBoxes);
-    // inicializar (se desejar preseleção)
     updateBoxes();
-
-    // Interceptar submit: se relatório for print_ean, abrir etiquetas_ean_from_pngs.php em nova aba
-    form.addEventListener('submit', function(e){
-        const val = report.value;
-        if (val === 'print_ean') {
-            e.preventDefault();
-
-            // construir query string com os filtros que fazem sentido para as etiquetas
-            const params = new URLSearchParams();
-
-            // departamento (opcional)
-            const deptEl = document.getElementById('departamento');
-            if (deptEl && deptEl.value) params.set('departamento', deptEl.value);
-
-            // filtro livre / termo (q)
-            const qEl = form.querySelector('input[name="q"]');
-            if (qEl && qEl.value.trim() !== '') params.set('q', qEl.value.trim());
-
-            // poderás querer passar também format / outras flags
-            // abrir numa nova aba a página que processa os PNGs localmente
-            const url = 'etiquetas_ean_from_pngs.php' + (params.toString() ? ('?' + params.toString()) : '');
-            window.open(url, '_blank');
-
-            // opcional: mostrar um pequeno feedback ao utilizador na mesma aba
-            // alert('A abrir etiquetas em nova aba...');
-            return false;
-        }
-        // caso contrário, deixa o form submeter normalmente para generate.php (já tem target="_blank")
-    });
 </script>
 <?php include_once '../src/templates/footer.php'; ?>
 
