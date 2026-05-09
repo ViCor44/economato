@@ -14,7 +14,7 @@ $html = <<<HTML
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { margin: 0; }
+  @page { margin: 22mm 20mm; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -23,7 +23,6 @@ $html = <<<HTML
     font-size: 10pt;
     color: #1a202c;
     line-height: 1.6;
-    padding: 22mm 20mm;
   }
 
   /* ── Capa ─────────────────────────────────────── */
