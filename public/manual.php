@@ -36,16 +36,20 @@ $html = <<<HTML
     margin-bottom: 10mm;
   }
   .cover-logo-box {
-    display: inline-block;
-    width: 22mm;
-    height: 22mm;
+    display: table;
+    width: 24mm;
+    height: 24mm;
     border-radius: 5mm;
     background: #1d4ed8;
-    color: #ffffff;
-    font-size: 22pt;
-    font-weight: 700;
-    line-height: 22mm;
+    margin: 0 auto;
+  }
+  .cover-logo-cell {
+    display: table-cell;
+    vertical-align: middle;
     text-align: center;
+    color: #ffffff;
+    font-size: 20pt;
+    font-weight: 700;
   }
   .cover-title {
     font-size: 28pt;
@@ -234,7 +238,7 @@ $html = <<<HTML
 
 <!-- CAPA -->
 <div class="cover">
-  <div class="cover-logo"><div class="cover-logo-box">Cr</div></div>
+  <div class="cover-logo"><div class="cover-logo-box"><div class="cover-logo-cell">Cr</div></div></div>
   <div class="cover-title">CrewGest</div>
   <div class="cover-subtitle">Sistema de Gestão de Fardamento e Colaboradores</div>
   <hr class="cover-line">
