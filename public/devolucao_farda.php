@@ -22,8 +22,57 @@ if (!$colaborador) {
 $success = '';
 $errors = [];
 
+// � PROCESSAR MARCAR COMO DÍVIDA
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'marcar_divida') {
+    $atribuicao_id = (int)($_POST['atribuicao_id'] ?? 0);
+
+    if ($atribuicao_id <= 0) {
+        $errors[] = "Atribuição inválida.";
+    } else {
+        try {
+            $pdo->beginTransaction();
+
+            // Verificar que a atribuição existe e está em estado 'atribuida'
+            $stmt = $pdo->prepare("
+                SELECT id, farda_id, quantidade
+                FROM farda_atribuicoes
+                WHERE id = ?
+                  AND colaborador_id = ?
+                  AND estado = 'atribuida'
+                FOR UPDATE
+            ");
+            $stmt->execute([$atribuicao_id, $colaborador_id]);
+            $atribuicao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$atribuicao) {
+                throw new Exception("A atribuição não existe ou já foi tratada.");
+            }
+
+            // Marcar como dívida
+            $stmt = $pdo->prepare("
+                UPDATE farda_atribuicoes
+                SET
+                    marcado_como_divida = 1,
+                    data_marcacao_divida = NOW()
+                WHERE id = ?
+            ");
+            $stmt->execute([$atribuicao_id]);
+
+            $pdo->commit();
+
+            $logMsg  = "Colaborador ID {$colaborador_id} marcou atribuição ID {$atribuicao_id} como dívida";
+            $success = "Farda marcada como dívida com sucesso.";
+            adicionarLog($pdo, "Marcar farda como dívida", $logMsg);
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $errors[] = "Erro ao marcar como dívida: " . $e->getMessage();
+        }
+    }
+}
+
 // 🔄 PROCESSAR DEVOLUÇÃO (pré-registo)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['acao']) || $_POST['acao'] !== 'marcar_divida')) {
 
     $atribuicao_id    = (int)($_POST['atribuicao_id'] ?? 0);
     $estado_devolucao = $_POST['estado_devolucao'] ?? '';
@@ -189,7 +238,9 @@ $stmt = $pdo->prepare("
         t.nome AS tamanho,
         fa.quantidade,
         fa.estado,
-        fa.estado_devolucao
+        fa.estado_devolucao,
+        fa.marcado_como_divida,
+        fa.data_marcacao_divida
     FROM farda_atribuicoes fa
     JOIN fardas f ON fa.farda_id = f.id
     JOIN cores c ON f.cor_id = c.id
@@ -201,9 +252,11 @@ $stmt = $pdo->prepare("
 $stmt->execute([$colaborador_id]);
 $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Verifica se ainda há fardas com estado 'atribuida' (não marcadas para devolução)
-$tem_fardas_por_marcar = array_filter($fardas_atribuidas, fn($f) => $f['estado'] === 'atribuida');
-$pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_por_marcar);
+// Verifica se ainda há fardas não tratadas (não devolvidas e não marcadas como dívida)
+$tem_fardas_nao_tratadas = array_filter($fardas_atribuidas, fn($f) => 
+    $f['estado'] === 'atribuida' && !$f['marcado_como_divida']
+);
+$pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas);
 ?>
 <!DOCTYPE html>
 <html lang="pt-PT" class="bg-gray-100">
@@ -301,6 +354,25 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_por_marcar);
                                 onmouseout="this.style.backgroundColor='#4f46e5';">
                                 ♻️ Todas
                             </button>
+                            <form method="POST" class="inline">
+                                <input type="hidden" name="acao" value="marcar_divida">
+                                <input type="hidden" name="atribuicao_id" value="<?= $f['atribuicao_id'] ?>">
+                                <button
+                                    type="submit"
+                                    class="px-3 py-2 rounded-lg text-sm whitespace-nowrap"
+                                    style="background-color:#dc2626; color:#ffffff; border:1px solid #b91c1c;"
+                                    onmouseover="this.style.backgroundColor='#b91c1c';"
+                                    onmouseout="this.style.backgroundColor='#dc2626';"
+                                    onclick="return confirm('Tem a certeza que quer marcar esta farda como dívida?');">
+                                    💳 Marcar como dívida
+                                </button>
+                            </form>
+                        </div>
+                    <?php elseif ($f['marcado_como_divida']): ?>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg font-medium text-sm">
+                                💳 Marcada como dívida
+                            </span>
                         </div>
                     <?php else: ?>
                         <span class="bg-green-100 text-green-700 px-4 py-2 rounded-lg font-medium text-sm">
@@ -337,13 +409,13 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_por_marcar);
                     border-radius:8px;
                     box-shadow:0 2px 4px rgba(0,0,0,0.1);
                     cursor:not-allowed;"
-                title="<?= !empty($tem_fardas_por_marcar) ? 'Marque todas as fardas para devolução antes de gerar o termo' : 'Não existem fardas atribuídas para gerar termo' ?>">
+                title="<?= !empty($tem_fardas_nao_tratadas) ? 'Marque todas as fardas para devolução ou como dívida antes de gerar o termo' : 'Não existem fardas atribuídas para gerar termo' ?>">
                 📄 <span>Gerar Termo de Devolução</span>
             </span>
 
-            <?php if (!empty($tem_fardas_por_marcar)): ?>
+            <?php if (!empty($tem_fardas_nao_tratadas)): ?>
                 <p class="text-sm text-orange-500 mt-2">
-                    ⚠ Existem fardas ainda não marcadas para devolução.
+                    ⚠ Existem fardas ainda não marcadas para devolução ou como dívida.
                 </p>
             <?php else: ?>
                 <p class="text-sm text-gray-500 mt-2">
