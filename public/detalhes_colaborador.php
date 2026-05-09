@@ -319,20 +319,21 @@ try {
     <?php
         $stmt = $pdo->prepare("
             SELECT
-                fa.id,
+                MIN(fa.id) AS id,
                 f.nome,
                 c.nome AS cor,
                 t.nome AS tamanho,
-                fa.quantidade,
+                SUM(fa.quantidade) AS quantidade,
                 f.preco_unitario,
-                fa.data_atribuicao
+                MIN(fa.data_atribuicao) AS data_atribuicao
             FROM farda_atribuicoes fa
             JOIN fardas f ON fa.farda_id = f.id
             JOIN cores c ON f.cor_id = c.id
             JOIN tamanhos t ON f.tamanho_id = t.id
             WHERE fa.colaborador_id = ?
             AND fa.estado IN ('atribuida','marcada_devolucao')
-            ORDER BY fa.data_atribuicao DESC
+            GROUP BY fa.farda_id, f.nome, c.nome, t.nome, f.preco_unitario
+            ORDER BY MIN(fa.data_atribuicao) DESC
         ");
         $stmt->execute([$colaborador_id]);
         $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
