@@ -225,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </a>
 
             <button type="submit"
-                    class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700">
+                    class="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600">
                 Confirmar Baixa
             </button>
         </div>
