@@ -173,7 +173,19 @@ try {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             <p><strong>Cartão:</strong> <?= htmlspecialchars($colaborador['cartao']) ?></p>
             <p><strong>Telefone:</strong> <?= htmlspecialchars($colaborador['telefone'] ?: '—') ?></p>
-            <p><strong>Email:</strong> <?= htmlspecialchars($colaborador['email'] ?: '—') ?></p>
+            <p>
+                <strong>Email:</strong>
+                <?php if (!empty($colaborador['email'])): ?>
+                    <a href="#"
+                       id="btn-enviar-email-colaborador"
+                       class="text-blue-600 hover:underline"
+                       title="Enviar email a este colaborador">
+                        <?= htmlspecialchars($colaborador['email']) ?>
+                    </a>
+                <?php else: ?>
+                    —
+                <?php endif; ?>
+            </p>
             <p><strong>Departamento:</strong> <?= htmlspecialchars($colaborador['departamento_nome'] ?? '—') ?></p>
             <?php if (
                 !empty($colaborador['sector']) &&
@@ -692,6 +704,8 @@ try {
     </section>
 <script>
     const colaboradorNome = "<?= addslashes($colaborador['nome']) ?>";
+    const colaboradorId = <?= (int)$colaborador['id'] ?>;
+    const colaboradorEmail = "<?= addslashes($colaborador['email'] ?? '') ?>";
     const fardas = <?= json_encode($fardas_atribuidas) ?>;
 </script>
 </main>
@@ -781,6 +795,85 @@ if (btnGerarTermo) {
 
     });
 
+}
+
+const btnEnviarEmail = document.getElementById('btn-enviar-email-colaborador');
+if (btnEnviarEmail) {
+    btnEnviarEmail.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if (!colaboradorEmail) {
+            Swal.fire('Sem email', 'Este colaborador não tem email registado.', 'info');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Enviar email',
+            html: `
+                <div style="text-align:left;font-size:14px;">
+                    <p style="margin-bottom:8px;">
+                        <strong>Para:</strong> ${colaboradorEmail}
+                    </p>
+                    <label for="email-assunto" style="display:block;font-weight:600;margin-bottom:4px;">Assunto</label>
+                    <input id="email-assunto" type="text" maxlength="200"
+                        class="swal2-input" style="width:100%;margin:0 0 12px 0;"
+                        placeholder="Assunto do email">
+
+                    <label for="email-mensagem" style="display:block;font-weight:600;margin-bottom:4px;">Mensagem</label>
+                    <textarea id="email-mensagem" rows="6" maxlength="5000"
+                        class="swal2-textarea" style="width:100%;margin:0;"
+                        placeholder="Escreva a sua mensagem..."></textarea>
+                </div>
+            `,
+            width: 600,
+            showCancelButton: true,
+            confirmButtonText: '📧 Enviar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#6b7280',
+            focusConfirm: false,
+            preConfirm: () => {
+                const assunto = document.getElementById('email-assunto').value.trim();
+                const mensagem = document.getElementById('email-mensagem').value.trim();
+                if (!assunto || !mensagem) {
+                    Swal.showValidationMessage('Preencha o assunto e a mensagem.');
+                    return false;
+                }
+                return { assunto, mensagem };
+            },
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            const formData = new FormData();
+            formData.append('colaborador_id', colaboradorId);
+            formData.append('assunto', result.value.assunto);
+            formData.append('mensagem', result.value.mensagem);
+
+            Swal.fire({
+                title: 'A enviar...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            fetch('enviar_email_colaborador.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json().then(data => ({ ok: r.ok, data })))
+            .then(({ ok, data }) => {
+                if (ok && data.ok) {
+                    Swal.fire('Enviado!', data.mensagem || 'Email enviado com sucesso.', 'success');
+                } else {
+                    Swal.fire('Erro', (data && data.erro) || 'Não foi possível enviar o email.', 'error');
+                }
+            })
+            .catch(() => {
+                Swal.fire('Erro', 'Falha de comunicação com o servidor.', 'error');
+            });
+        });
+    });
 }
 
 </script>
