@@ -821,8 +821,16 @@ if (btnEnviarEmail) {
 
                     <label for="email-mensagem" style="display:block;font-weight:600;margin-bottom:4px;">Mensagem</label>
                     <textarea id="email-mensagem" rows="6" maxlength="5000"
-                        class="swal2-textarea" style="width:100%;margin:0;"
+                        class="swal2-textarea" style="width:100%;margin:0 0 12px 0;"
                         placeholder="Escreva a sua mensagem..."></textarea>
+
+                    <label for="email-anexos" style="display:block;font-weight:600;margin-bottom:4px;">
+                        Anexos <span style="font-weight:400;color:#6b7280;">(opcional — máx. 5 ficheiros, 10 MB cada, 25 MB total)</span>
+                    </label>
+                    <input id="email-anexos" type="file" multiple
+                        style="width:100%;font-size:13px;"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.gif,.webp,.zip">
+                    <div id="email-anexos-info" style="font-size:12px;color:#6b7280;margin-top:4px;"></div>
                 </div>
             `,
             width: 600,
@@ -832,14 +840,42 @@ if (btnEnviarEmail) {
             confirmButtonColor: '#2563eb',
             cancelButtonColor: '#6b7280',
             focusConfirm: false,
+            didOpen: () => {
+                const inputAnexos = document.getElementById('email-anexos');
+                const info        = document.getElementById('email-anexos-info');
+                inputAnexos.addEventListener('change', () => {
+                    const files = Array.from(inputAnexos.files || []);
+                    if (!files.length) { info.textContent = ''; return; }
+                    const totalMB = (files.reduce((s, f) => s + f.size, 0) / (1024 * 1024)).toFixed(2);
+                    info.textContent = `${files.length} ficheiro(s) seleccionado(s) — ${totalMB} MB no total`;
+                });
+            },
             preConfirm: () => {
-                const assunto = document.getElementById('email-assunto').value.trim();
+                const assunto  = document.getElementById('email-assunto').value.trim();
                 const mensagem = document.getElementById('email-mensagem').value.trim();
+                const anexos   = document.getElementById('email-anexos').files;
+
                 if (!assunto || !mensagem) {
                     Swal.showValidationMessage('Preencha o assunto e a mensagem.');
                     return false;
                 }
-                return { assunto, mensagem };
+                if (anexos.length > 5) {
+                    Swal.showValidationMessage('Máximo de 5 anexos.');
+                    return false;
+                }
+                let total = 0;
+                for (const f of anexos) {
+                    if (f.size > 10 * 1024 * 1024) {
+                        Swal.showValidationMessage(`O ficheiro "${f.name}" excede 10 MB.`);
+                        return false;
+                    }
+                    total += f.size;
+                }
+                if (total > 25 * 1024 * 1024) {
+                    Swal.showValidationMessage('Tamanho total dos anexos excede 25 MB.');
+                    return false;
+                }
+                return { assunto, mensagem, anexos };
             },
             showLoaderOnConfirm: true,
             allowOutsideClick: () => !Swal.isLoading()
@@ -850,6 +886,9 @@ if (btnEnviarEmail) {
             formData.append('colaborador_id', colaboradorId);
             formData.append('assunto', result.value.assunto);
             formData.append('mensagem', result.value.mensagem);
+            for (const f of result.value.anexos) {
+                formData.append('anexos[]', f, f.name);
+            }
 
             Swal.fire({
                 title: 'A enviar...',

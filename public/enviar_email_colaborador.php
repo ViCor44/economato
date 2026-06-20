@@ -79,12 +79,103 @@ try {
     $mail->Body    = $corpo;
     $mail->AltBody = $mensagem;
 
+    // 📎 Anexos
+    $anexosInfo = [];
+    if (!empty($_FILES['anexos']) && is_array($_FILES['anexos']['name'])) {
+
+        $maxFicheiro   = 10 * 1024 * 1024;  // 10 MB por ficheiro
+        $maxTotal      = 25 * 1024 * 1024;  // 25 MB total
+        $maxQuantidade = 5;
+        $tipoPermitido = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'text/plain',
+            'text/csv',
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'application/zip',
+            'application/x-zip-compressed',
+        ];
+
+        $totalBytes = 0;
+        $files      = $_FILES['anexos'];
+        $n          = count($files['name']);
+
+        if ($n > $maxQuantidade) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'erro' => "Máximo de {$maxQuantidade} anexos por email."]);
+            exit;
+        }
+
+        $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : false;
+
+        for ($i = 0; $i < $n; $i++) {
+            if ($files['error'][$i] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                http_response_code(400);
+                echo json_encode(['ok' => false, 'erro' => "Falha ao receber o anexo \"{$files['name'][$i]}\"."]);
+                exit;
+            }
+
+            $tmp  = $files['tmp_name'][$i];
+            $nome = basename((string)$files['name'][$i]);
+            $tam  = (int)$files['size'][$i];
+
+            if (!is_uploaded_file($tmp)) {
+                http_response_code(400);
+                echo json_encode(['ok' => false, 'erro' => "Anexo inválido: {$nome}"]);
+                exit;
+            }
+
+            if ($tam > $maxFicheiro) {
+                http_response_code(400);
+                echo json_encode(['ok' => false, 'erro' => "O anexo \"{$nome}\" excede 10 MB."]);
+                exit;
+            }
+
+            $totalBytes += $tam;
+            if ($totalBytes > $maxTotal) {
+                http_response_code(400);
+                echo json_encode(['ok' => false, 'erro' => 'Tamanho total dos anexos excede 25 MB.']);
+                exit;
+            }
+
+            $mime = $finfo ? (finfo_file($finfo, $tmp) ?: '') : (string)$files['type'][$i];
+            if (!in_array($mime, $tipoPermitido, true)) {
+                http_response_code(400);
+                echo json_encode(['ok' => false, 'erro' => "Tipo de ficheiro não permitido: {$nome} ({$mime})"]);
+                exit;
+            }
+
+            $mail->addAttachment($tmp, $nome);
+            $anexosInfo[] = $nome;
+        }
+
+        if ($finfo) {
+            finfo_close($finfo);
+        }
+    }
+
     $mail->send();
+
+    $detalhesLog = "Colaborador ID {$colaborador_id} ({$colaborador['nome']}) — Assunto: {$assunto}";
+    if (!empty($anexosInfo)) {
+        $detalhesLog .= ' — Anexos: ' . implode(', ', $anexosInfo);
+    }
 
     adicionarLog(
         $pdo,
         'Envio de email a colaborador',
-        "Colaborador ID {$colaborador_id} ({$colaborador['nome']}) — Assunto: {$assunto}"
+        $detalhesLog
     );
 
     echo json_encode(['ok' => true, 'mensagem' => 'Email enviado com sucesso.']);
