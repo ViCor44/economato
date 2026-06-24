@@ -34,10 +34,17 @@ try {
 
 try {
 
-    $stmtTotais = $pdo->query("SELECT
+    $sqlTotais = "SELECT
         SUM(CASE WHEN ativo = 1 THEN 1 ELSE 0 END) AS total_ativos,
         SUM(CASE WHEN ativo = 0 THEN 1 ELSE 0 END) AS total_inativos
-        FROM colaboradores");
+        FROM colaboradores";
+    $paramsTotais = [];
+    if ($departamento_id > 0) {
+        $sqlTotais .= " WHERE departamento_id = ?";
+        $paramsTotais[] = $departamento_id;
+    }
+    $stmtTotais = $pdo->prepare($sqlTotais);
+    $stmtTotais->execute($paramsTotais);
     $totais = $stmtTotais->fetch(PDO::FETCH_ASSOC);
     $total_ativos = (int)($totais['total_ativos'] ?? 0);
     $total_inativos = (int)($totais['total_inativos'] ?? 0);
@@ -153,15 +160,31 @@ $queryBase = [
         </div>
     </div>
 
+    <?php
+        $departamentoSelecionadoNome = '';
+        if ($departamento_id > 0) {
+            foreach ($departamentos as $dep) {
+                if ((int)$dep['id'] === $departamento_id) {
+                    $departamentoSelecionadoNome = $dep['nome'];
+                    break;
+                }
+            }
+        }
+    ?>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         <a href="?<?= htmlspecialchars(http_build_query(array_merge($queryBase, ['estado' => 'ativos', 'pagina' => 1]))) ?>"
            class="block rounded-xl border px-4 py-3 transition <?= $estado === 'ativos' ? 'bg-green-100 border-green-400 ring-2 ring-green-200' : 'bg-green-50 border-green-200 hover:bg-green-100' ?>">
-            <p class="text-xs font-semibold text-green-700 uppercase tracking-wide">Ativos</p>
+            <p class="text-xs font-semibold text-green-700 uppercase tracking-wide">
+                Ativos<?= $departamentoSelecionadoNome !== '' ? ' — ' . htmlspecialchars($departamentoSelecionadoNome) : '' ?>
+            </p>
             <p class="text-2xl font-bold text-green-800"><?= $total_ativos ?></p>
         </a>
         <a href="?<?= htmlspecialchars(http_build_query(array_merge($queryBase, ['estado' => 'inativos', 'pagina' => 1]))) ?>"
            class="block rounded-xl border px-4 py-3 transition <?= $estado === 'inativos' ? 'bg-gray-200 border-gray-500 ring-2 ring-gray-300' : 'bg-gray-100 border-gray-300 hover:bg-gray-200' ?>">
-            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Inativos</p>
+            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                Inativos<?= $departamentoSelecionadoNome !== '' ? ' — ' . htmlspecialchars($departamentoSelecionadoNome) : '' ?>
+            </p>
             <p class="text-2xl font-bold text-gray-800"><?= $total_inativos ?></p>
         </a>
     </div>
@@ -270,7 +293,7 @@ $queryBase = [
                             <?php endif; ?>
 
                             <div>
-                                <a href="detalhes_colaborador.php?id=<?= $c['id'] ?>"
+                                <a href="detalhes_colaborador.php?<?= htmlspecialchars(http_build_query(array_merge($queryBase, ['id' => $c['id'], 'pagina' => $pagina]))) ?>"
                                    class="text-blue-600 hover:underline font-medium">
                                     <?= htmlspecialchars($c['nome']) ?>
                                 </a>

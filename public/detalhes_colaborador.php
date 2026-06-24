@@ -9,6 +9,15 @@ if ($colaborador_id <= 0) {
     exit;
 }
 
+// Reconstruir URL de regresso à listagem preservando filtros
+$voltarParams = [];
+foreach (['pesquisa', 'departamento_id', 'estado', 'pagina', 'mostrar_inativos'] as $_p) {
+    if (isset($_GET[$_p]) && $_GET[$_p] !== '') {
+        $voltarParams[$_p] = $_GET[$_p];
+    }
+}
+$voltarUrl = 'colaboradores.php' . (!empty($voltarParams) ? '?' . http_build_query($voltarParams) : '');
+
 $success = '';
 
 try {
@@ -140,7 +149,7 @@ try {
         </div>
 
         <div class="flex items-center gap-3">
-            <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
+            <a href="<?= htmlspecialchars($voltarUrl) ?>" class="text-blue-600 hover:underline">← Voltar</a>
 
             <form method="POST" style="margin:0;">
                 <input type="hidden" name="cartao_entregue_status" value="<?= $colaborador['cartao_entregue'] ? '0' : '1' ?>">
