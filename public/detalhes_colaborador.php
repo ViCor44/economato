@@ -181,7 +181,18 @@ try {
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Informações Pessoais</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             <p><strong>Cartão:</strong> <?= htmlspecialchars($colaborador['cartao']) ?></p>
-            <p><strong>Telefone:</strong> <?= htmlspecialchars($colaborador['telefone'] ?: '—') ?></p>
+            <p><strong>Telefone:</strong>
+                <?php if (!empty($colaborador['telefone'])): ?>
+                    <a href="#"
+                       id="btn-enviar-sms-colaborador"
+                       class="text-green-600 hover:underline"
+                       title="Enviar SMS a este colaborador">
+                        <?= htmlspecialchars($colaborador['telefone']) ?>
+                    </a>
+                <?php else: ?>
+                    —
+                <?php endif; ?>
+            </p>
             <p>
                 <strong>Email:</strong>
                 <?php if (!empty($colaborador['email'])): ?>
@@ -712,9 +723,10 @@ try {
         <?php endif; ?>
     </section>
 <script>
-    const colaboradorNome = "<?= addslashes($colaborador['nome']) ?>";
-    const colaboradorId = <?= (int)$colaborador['id'] ?>;
+    const colaboradorNome  = "<?= addslashes($colaborador['nome']) ?>";
+    const colaboradorId    = <?= (int)$colaborador['id'] ?>;
     const colaboradorEmail = "<?= addslashes($colaborador['email'] ?? '') ?>";
+    const colaboradorTel   = "<?= addslashes($colaborador['telefone'] ?? '') ?>";
     const fardas = <?= json_encode($fardas_atribuidas) ?>;
 </script>
 </main>
@@ -915,6 +927,102 @@ if (btnEnviarEmail) {
                     Swal.fire('Enviado!', data.mensagem || 'Email enviado com sucesso.', 'success');
                 } else {
                     Swal.fire('Erro', (data && data.erro) || 'Não foi possível enviar o email.', 'error');
+                }
+            })
+            .catch(() => {
+                Swal.fire('Erro', 'Falha de comunicação com o servidor.', 'error');
+            });
+        });
+    });
+}
+
+// ─── Modal SMS ────────────────────────────────────────────────
+const btnEnviarSms = document.getElementById('btn-enviar-sms-colaborador');
+if (btnEnviarSms) {
+    btnEnviarSms.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if (!colaboradorTel) {
+            Swal.fire('Sem telefone', 'Este colaborador não tem número de telefone registado.', 'info');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Enviar SMS',
+            html: `
+                <div style="text-align:left;font-size:14px;">
+                    <p style="margin-bottom:12px;">
+                        <strong>Para:</strong> ${colaboradorTel}
+                    </p>
+                    <label for="sms-mensagem" style="display:block;font-weight:600;margin-bottom:4px;">Mensagem</label>
+                    <textarea id="sms-mensagem" rows="5" maxlength="320"
+                        class="swal2-textarea" style="width:100%;margin:0 0 4px 0;"
+                        placeholder="Escreva a mensagem SMS..."></textarea>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;">
+                        <span id="sms-aviso"></span>
+                        <span><span id="sms-contador">0</span> / 320 caracteres</span>
+                    </div>
+                </div>
+            `,
+            width: 540,
+            showCancelButton: true,
+            confirmButtonText: '📱 Enviar SMS',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#6b7280',
+            focusConfirm: false,
+            didOpen: () => {
+                const ta      = document.getElementById('sms-mensagem');
+                const counter = document.getElementById('sms-contador');
+                const aviso   = document.getElementById('sms-aviso');
+                ta.addEventListener('input', () => {
+                    const n = ta.value.length;
+                    counter.textContent = n;
+                    if (n <= 160) {
+                        aviso.textContent = '1 SMS';
+                        aviso.style.color = '#16a34a';
+                    } else if (n <= 320) {
+                        aviso.textContent = '2 SMS';
+                        aviso.style.color = '#d97706';
+                    } else {
+                        aviso.textContent = 'Limite excedido';
+                        aviso.style.color = '#dc2626';
+                    }
+                });
+            },
+            preConfirm: () => {
+                const mensagem = document.getElementById('sms-mensagem').value.trim();
+                if (!mensagem) {
+                    Swal.showValidationMessage('A mensagem não pode estar vazia.');
+                    return false;
+                }
+                return { mensagem };
+            },
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            const formData = new FormData();
+            formData.append('colaborador_id', colaboradorId);
+            formData.append('mensagem', result.value.mensagem);
+
+            Swal.fire({
+                title: 'A enviar SMS...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            fetch('enviar_sms_colaborador.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json().then(data => ({ ok: r.ok, data })))
+            .then(({ ok, data }) => {
+                if (ok && data.ok) {
+                    Swal.fire('Enviado!', data.mensagem || 'SMS enviado com sucesso.', 'success');
+                } else {
+                    Swal.fire('Erro', (data && data.erro) || 'Não foi possível enviar o SMS.', 'error');
                 }
             })
             .catch(() => {
