@@ -21,11 +21,13 @@ define('BASE_URL', 'http://localhost/economato');
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../src/sms_trb145.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailerException;
 
-$smtp = require __DIR__ . '/../config/mail.php';
+$smtp     = require __DIR__ . '/../config/mail.php';
+$smsCfg   = require __DIR__ . '/../config/sms.php';
 
 $hoje = date('Y-m-d');
 $logFile = __DIR__ . '/notificacoes_emprestimos.log';
@@ -37,7 +39,7 @@ function cron_log(string $msg, string $logFile): void
     echo $linha;
 }
 
-// Garantir que a coluna de tracking existe
+// Garantir que as colunas de tracking existem (email + SMS)
 try {
     $check = $pdo->query("SHOW COLUMNS FROM farda_emprestimos LIKE 'ultimo_aviso_email'");
     if (!$check->fetch()) {
@@ -47,6 +49,16 @@ try {
                 COMMENT 'Data do último email de aviso de atraso enviado'
         ");
         cron_log("Coluna 'ultimo_aviso_email' criada na tabela farda_emprestimos.", $logFile);
+    }
+
+    $check = $pdo->query("SHOW COLUMNS FROM farda_emprestimos LIKE 'ultimo_aviso_sms'");
+    if (!$check->fetch()) {
+        $pdo->exec("
+            ALTER TABLE farda_emprestimos
+            ADD COLUMN ultimo_aviso_sms DATE NULL DEFAULT NULL
+                COMMENT 'Data do último SMS de aviso de atraso enviado'
+        ");
+        cron_log("Coluna 'ultimo_aviso_sms' criada na tabela farda_emprestimos.", $logFile);
     }
 } catch (PDOException $e) {
     cron_log("ERRO ao verificar/criar coluna: " . $e->getMessage(), $logFile);
@@ -65,6 +77,9 @@ try {
             c.id             AS colaborador_id,
             c.nome           AS colaborador_nome,
             c.email          AS colaborador_email,
+            c.telefone       AS colaborador_telefone,
+            fe.ultimo_aviso_email,
+            fe.ultimo_aviso_sms,
             f.nome           AS farda_nome,
             co.nome          AS cor_nome,
             t.nome           AS tamanho_nome
@@ -75,12 +90,13 @@ try {
         JOIN tamanhos t       ON f.tamanho_id = t.id
         WHERE fe.devolvido = 0
           AND DATEDIFF(CURDATE(), DATE(fe.data_emprestimo)) >= 15
-          AND c.email IS NOT NULL
-          AND c.email != ''
-          AND (fe.ultimo_aviso_email IS NULL OR fe.ultimo_aviso_email < :hoje)
+          AND (
+                (c.email    IS NOT NULL AND c.email    != '' AND (fe.ultimo_aviso_email IS NULL OR fe.ultimo_aviso_email < :hoje))
+             OR (c.telefone IS NOT NULL AND c.telefone != '' AND (fe.ultimo_aviso_sms   IS NULL OR fe.ultimo_aviso_sms   < :hoje2))
+          )
         ORDER BY dias_em_aberto DESC
     ");
-    $stmt->execute(['hoje' => $hoje]);
+    $stmt->execute(['hoje' => $hoje, 'hoje2' => $hoje]);
     $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     cron_log("ERRO ao consultar empréstimos: " . $e->getMessage(), $logFile);
@@ -94,22 +110,40 @@ if (empty($emprestimos)) {
 
 cron_log("Empréstimos a notificar: " . count($emprestimos), $logFile);
 
-$enviados = 0;
-$erros    = 0;
+$enviados     = 0;
+$erros        = 0;
+$smsEnviados  = 0;
+$smsErros     = 0;
 
-// Agrupar por colaborador para enviar apenas 1 email com todos os itens em atraso
+// Instanciar cliente SMS (lazy — só falha se realmente for usado sem password)
+$smsClient = null;
+try {
+    if (!empty($smsCfg['password'])) {
+        $smsClient = new Trb145SmsClient($smsCfg);
+    } else {
+        cron_log("Aviso: GSM_APP_PASSWORD não definida — SMS desativado.", $logFile);
+    }
+} catch (Throwable $e) {
+    cron_log("Aviso: cliente SMS indisponível: " . $e->getMessage(), $logFile);
+    $smsClient = null;
+}
+
+// Agrupar por colaborador para enviar apenas 1 email + 1 SMS com todos os itens em atraso
 $porColaborador = [];
 foreach ($emprestimos as $row) {
     $porColaborador[$row['colaborador_id']][] = $row;
 }
 
 foreach ($porColaborador as $colaboradorId => $itens) {
-    $colaboradorNome  = $itens[0]['colaborador_nome'];
-    $colaboradorEmail = $itens[0]['colaborador_email'];
+    $colaboradorNome     = $itens[0]['colaborador_nome'];
+    $colaboradorEmail    = (string)($itens[0]['colaborador_email'] ?? '');
+    $colaboradorTelefone = (string)($itens[0]['colaborador_telefone'] ?? '');
 
     // Construir lista de itens em atraso
     $listaHtml = '';
     $listaTxt  = '';
+    $totalPecas = 0;
+    $maxDias    = 0;
     foreach ($itens as $item) {
         $dataEmp = date('d/m/Y', strtotime((string)$item['data_emprestimo']));
         $listaHtml .= sprintf(
@@ -135,11 +169,25 @@ foreach ($porColaborador as $colaboradorId => $itens) {
             $dataEmp,
             (int)$item['dias_em_aberto']
         );
+        $totalPecas += (int)$item['quantidade'];
+        if ((int)$item['dias_em_aberto'] > $maxDias) {
+            $maxDias = (int)$item['dias_em_aberto'];
+        }
     }
 
-    $assunto = 'Aviso: Farda(s) por devolver — CrewGest';
+    $assunto  = 'Aviso: Farda(s) por devolver — CrewGest';
+    $ids      = array_column($itens, 'emprestimo_id');
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
 
-    $bodyHtml = <<<HTML
+    // ----------------------------- EMAIL -----------------------------
+    $precisaEmail = $colaboradorEmail !== '' && array_reduce(
+        $itens,
+        static fn(bool $carry, array $it) => $carry || empty($it['ultimo_aviso_email']) || $it['ultimo_aviso_email'] < $GLOBALS['hoje'],
+        false
+    );
+
+    if ($precisaEmail) {
+        $bodyHtml = <<<HTML
 <!DOCTYPE html>
 <html lang="pt">
 <head><meta charset="UTF-8"></head>
@@ -175,51 +223,97 @@ foreach ($porColaborador as $colaboradorId => $itens) {
 </html>
 HTML;
 
-    $bodyTxt = "Olá {$colaboradorNome},\n\n"
-        . "Tem farda(s) emprestada(s) há mais de 15 dias por devolver:\n\n"
-        . $listaTxt
-        . "\nPor favor, proceda à devolução junto do responsável do economato.\n\n"
-        . "-- CrewGest (mensagem automática)";
+        $bodyTxt = "Olá {$colaboradorNome},\n\n"
+            . "Tem farda(s) emprestada(s) há mais de 15 dias por devolver:\n\n"
+            . $listaTxt
+            . "\nPor favor, proceda à devolução junto do responsável do economato.\n\n"
+            . "-- CrewGest (mensagem automática)";
 
-    try {
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host       = $smtp['host'];
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $smtp['username'];
-        $mail->Password   = $smtp['password'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = (int)$smtp['port'];
-        $mail->CharSet    = 'UTF-8';
+        try {
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host       = $smtp['host'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $smtp['username'];
+            $mail->Password   = $smtp['password'];
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = (int)$smtp['port'];
+            $mail->CharSet    = 'UTF-8';
 
-        $mail->setFrom((string)$smtp['from_email'], (string)$smtp['from_name']);
-        $mail->addAddress((string)$colaboradorEmail, (string)$colaboradorNome);
+            $mail->setFrom((string)$smtp['from_email'], (string)$smtp['from_name']);
+            $mail->addAddress($colaboradorEmail, (string)$colaboradorNome);
 
-        $mail->Subject = $assunto;
-        $mail->isHTML(true);
-        $mail->Body    = $bodyHtml;
-        $mail->AltBody = $bodyTxt;
+            $mail->Subject = $assunto;
+            $mail->isHTML(true);
+            $mail->Body    = $bodyHtml;
+            $mail->AltBody = $bodyTxt;
 
-        $mail->send();
+            $mail->send();
 
-        // Marcar todos os empréstimos deste colaborador como notificados hoje
-        $ids = array_column($itens, 'emprestimo_id');
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $upd = $pdo->prepare("
-            UPDATE farda_emprestimos
-            SET ultimo_aviso_email = ?
-            WHERE id IN ($placeholders)
-        ");
-        $upd->execute(array_merge([$hoje], $ids));
+            $upd = $pdo->prepare("
+                UPDATE farda_emprestimos
+                SET ultimo_aviso_email = ?
+                WHERE id IN ($placeholders)
+            ");
+            $upd->execute(array_merge([$hoje], $ids));
 
-        cron_log("Email enviado → {$colaboradorNome} <{$colaboradorEmail}> (" . count($itens) . " item(ns))", $logFile);
-        $enviados++;
+            cron_log("Email enviado → {$colaboradorNome} <{$colaboradorEmail}> (" . count($itens) . " item(ns))", $logFile);
+            $enviados++;
 
-    } catch (MailerException $e) {
-        cron_log("ERRO ao enviar para {$colaboradorNome} <{$colaboradorEmail}>: " . $mail->ErrorInfo, $logFile);
-        $erros++;
+        } catch (MailerException $e) {
+            cron_log("ERRO email para {$colaboradorNome} <{$colaboradorEmail}>: " . $mail->ErrorInfo, $logFile);
+            $erros++;
+        }
+    }
+
+    // ----------------------------- SMS -----------------------------
+    $precisaSms = $smsClient !== null
+        && $colaboradorTelefone !== ''
+        && array_reduce(
+            $itens,
+            static fn(bool $carry, array $it) => $carry || empty($it['ultimo_aviso_sms']) || $it['ultimo_aviso_sms'] < $GLOBALS['hoje'],
+            false
+        );
+
+    if ($precisaSms) {
+        $numero = Trb145SmsClient::normalizeNumber(
+            $colaboradorTelefone,
+            (string)$smsCfg['country_code']
+        );
+
+        if ($numero === null) {
+            cron_log("SMS ignorado — número inválido para {$colaboradorNome}: '{$colaboradorTelefone}'", $logFile);
+        } else {
+            // SMS curto (limite prático ~160 chars GSM-7 / 70 UCS-2).
+            // Evitamos acentos para caber num único SMS.
+            $primeiroNome = strtok($colaboradorNome, ' ') ?: $colaboradorNome;
+            $texto = sprintf(
+                "CrewGest: Ola %s, tem %d peca(s) de farda por devolver ha %d dias. Por favor entregue no economato.",
+                $primeiroNome,
+                $totalPecas,
+                $maxDias
+            );
+            // Remover acentos para maximizar compatibilidade GSM-7
+            $texto = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $texto) ?: $texto;
+
+            $errSms = null;
+            if ($smsClient->sendSms($numero, $texto, $errSms)) {
+                $upd = $pdo->prepare("
+                    UPDATE farda_emprestimos
+                    SET ultimo_aviso_sms = ?
+                    WHERE id IN ($placeholders)
+                ");
+                $upd->execute(array_merge([$hoje], $ids));
+
+                cron_log("SMS enviado → {$colaboradorNome} <{$numero}> (" . count($itens) . " item(ns))", $logFile);
+                $smsEnviados++;
+            } else {
+                cron_log("ERRO SMS para {$colaboradorNome} <{$numero}>: " . ($errSms ?? 'desconhecido'), $logFile);
+                $smsErros++;
+            }
+        }
     }
 }
 
-cron_log("Concluído. Enviados: {$enviados} | Erros: {$erros}", $logFile);
-exit($erros > 0 ? 1 : 0);
+cron_log("Concluído. Email: {$enviados} ok / {$erros} erro | SMS: {$smsEnviados} ok / {$smsErros} erro", $logFile);
+exit(($erros > 0 || $smsErros > 0) ? 1 : 0);
