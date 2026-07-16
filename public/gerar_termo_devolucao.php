@@ -46,6 +46,7 @@ $stmt = $pdo->prepare("
         fa.quantidade,
         fa.estado,
         fa.estado_devolucao,
+        fa.marcado_como_divida,
         f.preco_unitario,
         f.id AS farda_id
     FROM farda_atribuicoes fa
@@ -53,7 +54,7 @@ $stmt = $pdo->prepare("
     JOIN cores c ON f.cor_id = c.id
     JOIN tamanhos t ON f.tamanho_id = t.id
     WHERE fa.colaborador_id = ?
-      AND fa.estado IN ('atribuida', 'marcada_devolucao')
+      AND (fa.estado IN ('atribuida', 'marcada_devolucao') OR fa.marcado_como_divida = 1)
     ORDER BY f.nome ASC
 ");
 $stmt->execute([$colaborador_id]);
@@ -65,9 +66,15 @@ $fardas_em_divida = [];
 $total_divida = 0;
 
 foreach ($fardas as $f) {
-    if ($f['estado'] === 'marcada_devolucao') {
+    if ($f['marcado_como_divida']) {
+        // Farda marcada explicitamente como dívida
+        $fardas_em_divida[] = $f;
+        $total_divida += $f['quantidade'] * $f['preco_unitario'];
+    } elseif ($f['estado'] === 'marcada_devolucao') {
+        // Farda marcada para devolução
         $fardas_devolvidas[] = $f;
     } else {
+        // Farda que não foi marcada nem para devolução nem como dívida (não deveria acontecer)
         $fardas_em_divida[] = $f;
         $total_divida += $f['quantidade'] * $f['preco_unitario'];
     }

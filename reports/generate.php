@@ -542,65 +542,6 @@ break;
             }, $data);
             break;
 
-        // ------------------- Colaboradores inativos com farda -------------------
-        case 'inativos_com_farda':
-            $title = "Colaboradores Inativos com Fardas Atribuídas";
-
-            // 1) buscar colaboradores inativos que têm atribuições
-            $stmt = $pdo->prepare("
-                SELECT DISTINCT col.id, col.numero_funcionario, col.nome, col.cartao, col.telefone
-                FROM colaboradores col
-                JOIN farda_atribuicoes fa ON fa.colaborador_id = col.id
-                WHERE col.ativo = 0
-                ORDER BY col.nome ASC
-            ");
-            $stmt->execute();
-            $colabs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $columns = ['Nº Colaborador','Nome','Cartão','Telefone','Total Peças','Peças Atribuídas'];
-            $rows = [];
-
-            // 2) para cada colaborador, agregamos por peça (nome+cor+tamanho) e somamos a quantidade
-            $stmtPecas = $pdo->prepare("
-                SELECT f.id AS farda_id, f.nome AS farda, c.nome AS cor, t.nome AS tamanho, SUM(fa.quantidade) AS qty
-                FROM farda_atribuicoes fa
-                JOIN fardas f ON f.id = fa.farda_id
-                JOIN cores c ON c.id = f.cor_id
-                JOIN tamanhos t ON t.id = f.tamanho_id
-                WHERE fa.colaborador_id = ?
-                GROUP BY f.id
-                ORDER BY f.nome ASC
-            ");
-
-            foreach ($colabs as $col) {
-                $stmtPecas->execute([$col['id']]);
-                $pecas = $stmtPecas->fetchAll(PDO::FETCH_ASSOC);
-
-                $lista = [];
-                $totalPecas = 0;
-                foreach ($pecas as $p) {
-                    $q = (int)$p['qty'];
-                    $totalPecas += $q;
-                    // formatação: Nome (Cor/Tamanho) xQuantidade
-                    $nomeItem = $p['farda'] . " (" . $p['cor'] . "/" . $p['tamanho'] . ")";
-                    $lista[] = $nomeItem . " x" . $q;
-                }
-
-                // separar por ponto-e-vírgula e espaço — fica legível tanto em HTML como em CSV/PDF
-                $pecasText = $lista ? implode('; ', $lista) : '';
-
-                $rows[] = [
-                    'Nº Colaborador' => $col['numero_funcionario'] ?? '',
-                    'Nome' => $col['nome'],
-                    'Cartão' => $col['cartao'] ?? '',
-                    'Telefone' => $col['telefone'] ?? '',
-                    'Total Peças' => $totalPecas,
-                    'Peças Atribuídas' => $pecasText
-                ];
-            }
-
-            break;
-
         // ------------------- Cacifos -------------------
         case 'cacifos_lista':
             $title = "Lista Completa de Cacifos";
@@ -722,6 +663,30 @@ break;
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $columns = ['Departamento','Total (€)'];
             $rows = array_map(function($r){ return ['Departamento'=>$r['departamento'],'Total (€)'=>number_format($r['total'],2,',','.')]; }, $data);
+            break;
+
+        case 'custo_total_fardas':
+            $title = "Custo Total de Fardas (Atribuídas + Stock)";
+            // Valor em stock
+            $stmtStock = $pdo->query("
+                SELECT COALESCE(SUM(preco_unitario * quantidade), 0) AS total
+                FROM fardas
+            ");
+            $totalStock = (float)$stmtStock->fetchColumn();
+            // Valor atribuído a colaboradores
+            $stmtAtrib = $pdo->query("
+                SELECT COALESCE(SUM(f.preco_unitario * fa.quantidade), 0) AS total
+                FROM farda_atribuicoes fa
+                JOIN fardas f ON f.id = fa.farda_id
+                WHERE fa.estado IN ('atribuida', 'marcada_devolucao', 'em_divida')
+            ");
+            $totalAtrib = (float)$stmtAtrib->fetchColumn();
+            $columns = ['Descrição', 'Valor (€)'];
+            $rows = [
+                ['Descrição' => 'Valor das fardas em stock',             'Valor (€)' => number_format($totalStock, 2, ',', '.')],
+                ['Descrição' => 'Valor das fardas atribuídas a colaboradores', 'Valor (€)' => number_format($totalAtrib, 2, ',', '.')],
+                ['Descrição' => 'TOTAL GERAL',                            'Valor (€)' => number_format($totalStock + $totalAtrib, 2, ',', '.')],
+            ];
             break;
 
         // ------------------- Diversos -------------------
@@ -958,6 +923,19 @@ break;
             http_response_code(400);
             echo "Relatório inválido ou não especificado.";
             exit;
+    }
+
+    // --- Filtrar colunas selecionadas pelo utilizador (via modal RGPD) ---
+    if (!empty($_GET['cols']) && is_array($_GET['cols'])) {
+        $colsSel = array_map('strval', $_GET['cols']);
+        $columns = array_values(array_filter($columns, fn($c) => in_array($c, $colsSel, true)));
+        $rows = array_map(function ($r) use ($columns) {
+            $filtered = [];
+            foreach ($columns as $col) {
+                $filtered[$col] = $r[$col] ?? '';
+            }
+            return $filtered;
+        }, $rows);
     }
 
 } catch (Exception $e) {

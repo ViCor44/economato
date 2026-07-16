@@ -203,7 +203,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        
 
         <button type="submit" class="btn">Guardar</button>
-        <a href="list_lockers.php<?= $colaborador_preselecionado > 0 ? '?colaborador_id=' . $colaborador_preselecionado : '' ?>" class="back">← Voltar à lista</a>
+        <?php if ($colaborador_preselecionado > 0): ?>
+            <a href="<?= BASE_URL ?>/public/detalhes_colaborador.php?id=<?= $colaborador_preselecionado ?>" class="back">← Voltar ao colaborador</a>
+        <?php else: ?>
+            <a href="list_lockers.php" class="back">← Voltar à lista</a>
+        <?php endif; ?>
     </form>
 </main>
 

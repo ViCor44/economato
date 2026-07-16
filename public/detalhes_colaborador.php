@@ -9,6 +9,15 @@ if ($colaborador_id <= 0) {
     exit;
 }
 
+// Reconstruir URL de regresso à listagem preservando filtros
+$voltarParams = [];
+foreach (['pesquisa', 'departamento_id', 'estado', 'pagina', 'mostrar_inativos'] as $_p) {
+    if (isset($_GET[$_p]) && $_GET[$_p] !== '') {
+        $voltarParams[$_p] = $_GET[$_p];
+    }
+}
+$voltarUrl = 'colaboradores.php' . (!empty($voltarParams) ? '?' . http_build_query($voltarParams) : '');
+
 $success = '';
 
 try {
@@ -140,7 +149,7 @@ try {
         </div>
 
         <div class="flex items-center gap-3">
-            <a href="colaboradores.php" class="text-blue-600 hover:underline">← Voltar</a>
+            <a href="<?= htmlspecialchars($voltarUrl) ?>" class="text-blue-600 hover:underline">← Voltar</a>
 
             <form method="POST" style="margin:0;">
                 <input type="hidden" name="cartao_entregue_status" value="<?= $colaborador['cartao_entregue'] ? '0' : '1' ?>">
@@ -173,7 +182,19 @@ try {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             <p><strong>Cartão:</strong> <?= htmlspecialchars($colaborador['cartao']) ?></p>
             <p><strong>Telefone:</strong> <?= htmlspecialchars($colaborador['telefone'] ?: '—') ?></p>
-            <p><strong>Email:</strong> <?= htmlspecialchars($colaborador['email'] ?: '—') ?></p>
+            <p>
+                <strong>Email:</strong>
+                <?php if (!empty($colaborador['email'])): ?>
+                    <a href="#"
+                       id="btn-enviar-email-colaborador"
+                       class="text-blue-600 hover:underline"
+                       title="Enviar email a este colaborador">
+                        <?= htmlspecialchars($colaborador['email']) ?>
+                    </a>
+                <?php else: ?>
+                    —
+                <?php endif; ?>
+            </p>
             <p><strong>Departamento:</strong> <?= htmlspecialchars($colaborador['departamento_nome'] ?? '—') ?></p>
             <?php if (
                 !empty($colaborador['sector']) &&
@@ -319,20 +340,21 @@ try {
     <?php
         $stmt = $pdo->prepare("
             SELECT
-                fa.id,
+                MIN(fa.id) AS id,
                 f.nome,
                 c.nome AS cor,
                 t.nome AS tamanho,
-                fa.quantidade,
+                SUM(fa.quantidade) AS quantidade,
                 f.preco_unitario,
-                fa.data_atribuicao
+                MIN(fa.data_atribuicao) AS data_atribuicao
             FROM farda_atribuicoes fa
             JOIN fardas f ON fa.farda_id = f.id
             JOIN cores c ON f.cor_id = c.id
             JOIN tamanhos t ON f.tamanho_id = t.id
             WHERE fa.colaborador_id = ?
             AND fa.estado IN ('atribuida','marcada_devolucao')
-            ORDER BY fa.data_atribuicao DESC
+            GROUP BY fa.farda_id, f.nome, c.nome, t.nome, f.preco_unitario
+            ORDER BY MIN(fa.data_atribuicao) DESC
         ");
         $stmt->execute([$colaborador_id]);
         $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -691,6 +713,8 @@ try {
     </section>
 <script>
     const colaboradorNome = "<?= addslashes($colaborador['nome']) ?>";
+    const colaboradorId = <?= (int)$colaborador['id'] ?>;
+    const colaboradorEmail = "<?= addslashes($colaborador['email'] ?? '') ?>";
     const fardas = <?= json_encode($fardas_atribuidas) ?>;
 </script>
 </main>
@@ -780,6 +804,124 @@ if (btnGerarTermo) {
 
     });
 
+}
+
+const btnEnviarEmail = document.getElementById('btn-enviar-email-colaborador');
+if (btnEnviarEmail) {
+    btnEnviarEmail.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if (!colaboradorEmail) {
+            Swal.fire('Sem email', 'Este colaborador não tem email registado.', 'info');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Enviar email',
+            html: `
+                <div style="text-align:left;font-size:14px;">
+                    <p style="margin-bottom:8px;">
+                        <strong>Para:</strong> ${colaboradorEmail}
+                    </p>
+                    <label for="email-assunto" style="display:block;font-weight:600;margin-bottom:4px;">Assunto</label>
+                    <input id="email-assunto" type="text" maxlength="200"
+                        class="swal2-input" style="width:100%;margin:0 0 12px 0;"
+                        placeholder="Assunto do email">
+
+                    <label for="email-mensagem" style="display:block;font-weight:600;margin-bottom:4px;">Mensagem</label>
+                    <textarea id="email-mensagem" rows="6" maxlength="5000"
+                        class="swal2-textarea" style="width:100%;margin:0 0 12px 0;"
+                        placeholder="Escreva a sua mensagem..."></textarea>
+
+                    <label for="email-anexos" style="display:block;font-weight:600;margin-bottom:4px;">
+                        Anexos <span style="font-weight:400;color:#6b7280;">(opcional — máx. 5 ficheiros, 10 MB cada, 25 MB total)</span>
+                    </label>
+                    <input id="email-anexos" type="file" multiple
+                        style="width:100%;font-size:13px;"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.gif,.webp,.zip">
+                    <div id="email-anexos-info" style="font-size:12px;color:#6b7280;margin-top:4px;"></div>
+                </div>
+            `,
+            width: 600,
+            showCancelButton: true,
+            confirmButtonText: '📧 Enviar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#6b7280',
+            focusConfirm: false,
+            didOpen: () => {
+                const inputAnexos = document.getElementById('email-anexos');
+                const info        = document.getElementById('email-anexos-info');
+                inputAnexos.addEventListener('change', () => {
+                    const files = Array.from(inputAnexos.files || []);
+                    if (!files.length) { info.textContent = ''; return; }
+                    const totalMB = (files.reduce((s, f) => s + f.size, 0) / (1024 * 1024)).toFixed(2);
+                    info.textContent = `${files.length} ficheiro(s) seleccionado(s) — ${totalMB} MB no total`;
+                });
+            },
+            preConfirm: () => {
+                const assunto  = document.getElementById('email-assunto').value.trim();
+                const mensagem = document.getElementById('email-mensagem').value.trim();
+                const anexos   = document.getElementById('email-anexos').files;
+
+                if (!assunto || !mensagem) {
+                    Swal.showValidationMessage('Preencha o assunto e a mensagem.');
+                    return false;
+                }
+                if (anexos.length > 5) {
+                    Swal.showValidationMessage('Máximo de 5 anexos.');
+                    return false;
+                }
+                let total = 0;
+                for (const f of anexos) {
+                    if (f.size > 10 * 1024 * 1024) {
+                        Swal.showValidationMessage(`O ficheiro "${f.name}" excede 10 MB.`);
+                        return false;
+                    }
+                    total += f.size;
+                }
+                if (total > 25 * 1024 * 1024) {
+                    Swal.showValidationMessage('Tamanho total dos anexos excede 25 MB.');
+                    return false;
+                }
+                return { assunto, mensagem, anexos };
+            },
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            const formData = new FormData();
+            formData.append('colaborador_id', colaboradorId);
+            formData.append('assunto', result.value.assunto);
+            formData.append('mensagem', result.value.mensagem);
+            for (const f of result.value.anexos) {
+                formData.append('anexos[]', f, f.name);
+            }
+
+            Swal.fire({
+                title: 'A enviar...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            fetch('enviar_email_colaborador.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json().then(data => ({ ok: r.ok, data })))
+            .then(({ ok, data }) => {
+                if (ok && data.ok) {
+                    Swal.fire('Enviado!', data.mensagem || 'Email enviado com sucesso.', 'success');
+                } else {
+                    Swal.fire('Erro', (data && data.erro) || 'Não foi possível enviar o email.', 'error');
+                }
+            })
+            .catch(() => {
+                Swal.fire('Erro', 'Falha de comunicação com o servidor.', 'error');
+            });
+        });
+    });
 }
 
 </script>
