@@ -962,6 +962,9 @@ if (btnEnviarSms) {
                         <span id="sms-aviso"></span>
                         <span><span id="sms-contador">0</span> / 320 caracteres</span>
                     </div>
+                    <p style="margin-top:10px;font-size:12px;color:#6b7280;background:#f3f4f6;padding:8px 10px;border-radius:6px;">
+                        ℹ️ A mensagem será enviada com um prefixo automático a identificar o sistema e o utilizador emissor: <strong>[CrewGest - Nome do Utilizador]</strong>
+                    </p>
                 </div>
             `,
             width: 540,

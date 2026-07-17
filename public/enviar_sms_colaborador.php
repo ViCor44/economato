@@ -71,15 +71,26 @@ try {
         ? sprintf('%s <%s>', $colaborador['nome'], $numero)
         : $numero;
 
-    if (!$client->sendSms($numero, $mensagem, $errSms)) {
+    // Prefixo automático a identificar o sistema e o utilizador emissor.
+    // Usa apenas o primeiro e último nome para manter a SMS curta.
+    $partesNome = preg_split('/\s+/', $emissorNome, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    if (count($partesNome) >= 2) {
+        $nomeCurto = $partesNome[0] . ' ' . end($partesNome);
+    } else {
+        $nomeCurto = $emissorNome;
+    }
+    $prefixo         = sprintf('[CrewGest - %s] ', $nomeCurto);
+    $mensagemFinal   = $prefixo . $mensagem;
+
+    if (!$client->sendSms($numero, $mensagemFinal, $errSms)) {
         error_log('enviar_sms_colaborador: ' . ($errSms ?? 'erro desconhecido'));
-        logSms($pdo, $emissorNome, $receptorLabel, $mensagem, 'erro', $errSms);
+        logSms($pdo, $emissorNome, $receptorLabel, $mensagemFinal, 'erro', $errSms);
         http_response_code(500);
         echo json_encode(['ok' => false, 'erro' => 'Falha ao enviar SMS. Tente novamente mais tarde.']);
         exit;
     }
 
-    logSms($pdo, $emissorNome, $receptorLabel, $mensagem, 'enviado');
+    logSms($pdo, $emissorNome, $receptorLabel, $mensagemFinal, 'enviado');
 
     adicionarLog(
         $pdo,
