@@ -22,6 +22,7 @@ define('BASE_URL', 'http://localhost/economato');
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/sms_trb145.php';
+require_once __DIR__ . '/../src/log.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailerException;
@@ -306,9 +307,11 @@ HTML;
                 $upd->execute(array_merge([$hoje], $ids));
 
                 cron_log("SMS enviado → {$colaboradorNome} <{$numero}> (" . count($itens) . " item(ns))", $logFile);
+                logSms($pdo, 'Sistema (Cron)', "{$colaboradorNome} <{$numero}>", $texto, 'enviado');
                 $smsEnviados++;
             } else {
                 cron_log("ERRO SMS para {$colaboradorNome} <{$numero}>: " . ($errSms ?? 'desconhecido'), $logFile);
+                logSms($pdo, 'Sistema (Cron)', "{$colaboradorNome} <{$numero}>", $texto, 'erro', $errSms);
                 $smsErros++;
             }
         }

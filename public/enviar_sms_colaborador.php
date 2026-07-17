@@ -63,12 +63,23 @@ try {
     $client = new Trb145SmsClient($smsCfg);
     $errSms = null;
 
+    $emissorNome = trim((string)($_SESSION['user_name'] ?? ''));
+    if ($emissorNome === '') {
+        $emissorNome = 'Utilizador #' . (int)($_SESSION['user_id'] ?? 0);
+    }
+    $receptorLabel = trim((string)$colaborador['nome']) !== ''
+        ? sprintf('%s <%s>', $colaborador['nome'], $numero)
+        : $numero;
+
     if (!$client->sendSms($numero, $mensagem, $errSms)) {
         error_log('enviar_sms_colaborador: ' . ($errSms ?? 'erro desconhecido'));
+        logSms($pdo, $emissorNome, $receptorLabel, $mensagem, 'erro', $errSms);
         http_response_code(500);
         echo json_encode(['ok' => false, 'erro' => 'Falha ao enviar SMS. Tente novamente mais tarde.']);
         exit;
     }
+
+    logSms($pdo, $emissorNome, $receptorLabel, $mensagem, 'enviado');
 
     adicionarLog(
         $pdo,
