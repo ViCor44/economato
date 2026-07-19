@@ -3,7 +3,7 @@
  * CRON: Notificar colaboradores com empréstimos de roupa com mais de 15 dias por devolver.
  *
  * Execução recomendada (Windows Task Scheduler):
- *   php C:\xampp\economato\cron\notificar_emprestimos_atrasados.php
+ *   php C:\xampp\htdocs\economato\cron\notificar_emprestimos_atrasados.php
  *
  * Recomendação: correr 1x por dia (ex: todos os dias às 08:00).
  * Envia no máximo 1 email por empréstimo por dia (controlado por `ultimo_aviso_email`).
@@ -16,8 +16,6 @@ if (PHP_SAPI !== 'cli') {
     http_response_code(403);
     exit("Este script só pode ser executado via linha de comandos.\n");
 }
-
-define('BASE_URL', 'http://localhost/economato');
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/db.php';
