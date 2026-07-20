@@ -11,6 +11,8 @@
 
 declare(strict_types=1);
 
+date_default_timezone_set('Europe/Lisbon');
+
 // Garantir que só corre em CLI
 if (PHP_SAPI !== 'cli') {
     http_response_code(403);
