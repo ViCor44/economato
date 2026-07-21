@@ -6,7 +6,8 @@
  *   php C:\xampp\economato\cron\notificar_emprestimos_atrasados.php
  *
  * Recomendação: correr 1x por dia (ex: todos os dias às 08:00).
- * Envia no máximo 1 email por empréstimo por dia (controlado por `ultimo_aviso_email`).
+ * Envia no máximo 1 aviso (email + SMS) por empréstimo a cada 7 dias
+ * (controlado por `ultimo_aviso_email` / `ultimo_aviso_sms`).
  */
 
 declare(strict_types=1);
@@ -31,6 +32,8 @@ $smtp     = require __DIR__ . '/../config/mail.php';
 $smsCfg   = require __DIR__ . '/../config/sms.php';
 
 $hoje = date('Y-m-d');
+// Só voltar a notificar o mesmo empréstimo se o último aviso foi há 7+ dias
+$limiteSemana = date('Y-m-d', strtotime('-7 days'));
 $logFile = __DIR__ . '/notificacoes_emprestimos.log';
 
 function cron_log(string $msg, string $logFile): void
@@ -92,12 +95,12 @@ try {
         WHERE fe.devolvido = 0
           AND DATEDIFF(CURDATE(), DATE(fe.data_emprestimo)) >= 15
           AND (
-                (c.email    IS NOT NULL AND c.email    != '' AND (fe.ultimo_aviso_email IS NULL OR fe.ultimo_aviso_email < :hoje))
-             OR (c.telefone IS NOT NULL AND c.telefone != '' AND (fe.ultimo_aviso_sms   IS NULL OR fe.ultimo_aviso_sms   < :hoje2))
+                (c.email    IS NOT NULL AND c.email    != '' AND (fe.ultimo_aviso_email IS NULL OR fe.ultimo_aviso_email <= :limite1))
+             OR (c.telefone IS NOT NULL AND c.telefone != '' AND (fe.ultimo_aviso_sms   IS NULL OR fe.ultimo_aviso_sms   <= :limite2))
           )
         ORDER BY dias_em_aberto DESC
     ");
-    $stmt->execute(['hoje' => $hoje, 'hoje2' => $hoje]);
+    $stmt->execute(['limite1' => $limiteSemana, 'limite2' => $limiteSemana]);
     $emprestimos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     cron_log("ERRO ao consultar empréstimos: " . $e->getMessage(), $logFile);
@@ -183,7 +186,7 @@ foreach ($porColaborador as $colaboradorId => $itens) {
     // ----------------------------- EMAIL -----------------------------
     $precisaEmail = $colaboradorEmail !== '' && array_reduce(
         $itens,
-        static fn(bool $carry, array $it) => $carry || empty($it['ultimo_aviso_email']) || $it['ultimo_aviso_email'] < $GLOBALS['hoje'],
+        static fn(bool $carry, array $it) => $carry || empty($it['ultimo_aviso_email']) || $it['ultimo_aviso_email'] <= $GLOBALS['limiteSemana'],
         false
     );
 
@@ -272,7 +275,7 @@ HTML;
         && $colaboradorTelefone !== ''
         && array_reduce(
             $itens,
-            static fn(bool $carry, array $it) => $carry || empty($it['ultimo_aviso_sms']) || $it['ultimo_aviso_sms'] < $GLOBALS['hoje'],
+            static fn(bool $carry, array $it) => $carry || empty($it['ultimo_aviso_sms']) || $it['ultimo_aviso_sms'] <= $GLOBALS['limiteSemana'],
             false
         );
 
