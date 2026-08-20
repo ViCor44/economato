@@ -111,7 +111,7 @@ $stmt = $pdo->prepare("
         c.nome AS cor,
         t.nome AS tamanho,
         SUM(fa.quantidade) AS quantidade_total,
-        MIN(fa.data_atribuicao) AS data_atribuicao,
+        DATE(fa.data_atribuicao) AS data_atribuicao,
         f.preco_unitario
     FROM farda_atribuicoes fa
     JOIN fardas f ON fa.farda_id = f.id
@@ -119,8 +119,8 @@ $stmt = $pdo->prepare("
     JOIN tamanhos t ON f.tamanho_id = t.id
     WHERE fa.colaborador_id = ?
       AND fa.estado = 'atribuida'
-    GROUP BY f.id, f.nome, c.nome, t.nome, f.preco_unitario
-    ORDER BY f.nome ASC
+    GROUP BY f.id, f.nome, c.nome, t.nome, f.preco_unitario, DATE(fa.data_atribuicao)
+    ORDER BY data_atribuicao ASC, f.nome ASC
 ");
 $stmt->execute([$colaborador_id]);
 $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -206,6 +206,7 @@ $html = '
     <th>Cor</th>
     <th>Tamanho</th>
     <th>Qtd</th>
+    <th>Data de atribuição</th>
     <th>Preço Unit. (€)</th>
     <th>Total (€)</th>
 </tr>
@@ -225,6 +226,7 @@ foreach ($fardas_atribuidas as $f) {
         <td>".htmlspecialchars($f['cor'])."</td>
         <td>".htmlspecialchars($f['tamanho'])."</td>
         <td>".$f['quantidade_total']."</td>
+        <td>".date('d/m/Y', strtotime($f['data_atribuicao']))."</td>
         <td>".number_format($f['preco_unitario'], 2, ',', '.')."</td>
         <td>".number_format($total_item, 2, ',', '.')."</td>
     </tr>";
