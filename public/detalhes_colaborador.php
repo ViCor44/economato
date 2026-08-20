@@ -524,19 +524,28 @@ try {
             🔄 <span>Gerar Novo Termo</span>
             </a>
 
+            <a href="consultar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+            target="_blank"
+            title="Consultar o termo atualmente em vigor"
+            style="background:#4b5563;color:#fff;font-weight:600;
+            display:flex;align-items:center;gap:8px;
+            padding:8px 16px;border-radius:8px;text-decoration:none;
+            box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4">
+            👁️ <span>Consultar Termo Atual</span>
+            </a>
+
             <?php elseif ($termoEstado === 'em_vigor'): ?>
 
-            <a href="gerar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
-            id="btnGerarTermo"
-            data-substitui="1"
-            title="Termo em vigor desde <?= date('d/m/Y H:i', strtotime($ultimoTermo['criado_em'])) ?>. Clique para emitir novamente (substitui o termo atual)."
-            style="background:#9ca3af;color:#fff;font-weight:600;
+            <a href="consultar_termo_farda.php?colaborador_id=<?= $colaborador['id'] ?>"
+            target="_blank"
+            title="Consultar o termo em vigor desde <?= date('d/m/Y H:i', strtotime($ultimoTermo['criado_em'])) ?>"
+            style="background:#4b5563;color:#fff;font-weight:600;
             display:flex;align-items:center;gap:8px;
             padding:8px 16px;border-radius:8px;text-decoration:none;
             box-shadow:0 2px 4px rgba(0,0,0,0.1);" class="mr-4"
-            onmouseover="this.style.backgroundColor='#6b7280';"
-            onmouseout="this.style.backgroundColor='#9ca3af';">
-            📄 <span>Termo em vigor</span>
+            onmouseover="this.style.backgroundColor='#374151';"
+            onmouseout="this.style.backgroundColor='#4b5563';">
+            👁️ <span>Consultar Termo Atual</span>
             </a>
 
             <?php else: ?>

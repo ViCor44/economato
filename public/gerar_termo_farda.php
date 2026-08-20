@@ -129,6 +129,42 @@ if (!$fardas_atribuidas) {
     die("O colaborador não tem fardas atribuídas.");
 }
 
+// Se o fardamento não mudou desde o último termo, apresentar o documento
+// em vigor em vez de criar e enviar uma cópia nova.
+if ($termoAnterior) {
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM farda_atribuicoes
+        WHERE colaborador_id = ?
+          AND estado IN ('atribuida','marcada_devolucao')
+          AND data_atribuicao > ?
+    ");
+    $stmt->execute([$colaborador_id, $termoAnterior['criado_em']]);
+    $temNovaAtribuicao = ((int)$stmt->fetchColumn() > 0);
+
+    $detalhesColaborador = '%Colaborador ID ' . $colaborador_id . '%';
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM logs
+        WHERE criado_em > ?
+          AND (
+            (acao = 'Atribuição de farda' AND detalhes LIKE ?)
+            OR (acao IN ('Editar atribuição','Anular atribuição') AND detalhes LIKE ?)
+          )
+    ");
+    $stmt->execute([
+        $termoAnterior['criado_em'],
+        $detalhesColaborador,
+        $detalhesColaborador,
+    ]);
+    $temAlteracaoRegistada = ((int)$stmt->fetchColumn() > 0);
+
+    if (!$temNovaAtribuicao && !$temAlteracaoRegistada) {
+        header('Location: consultar_termo_farda.php?colaborador_id=' . $colaborador_id);
+        exit;
+    }
+}
+
 $data_atribuicao = $fardas_atribuidas[0]['data_atribuicao'];
 
 /* ======================================================
