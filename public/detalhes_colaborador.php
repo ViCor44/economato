@@ -349,6 +349,8 @@ try {
     <!-- 🧥 FARDAS -->
 
     <?php
+        // Separar por estado para que peças já marcadas para devolução não sejam
+        // somadas com atribuições reais no mesmo agrupamento.
         $stmt = $pdo->prepare("
             SELECT
                 MIN(fa.id) AS id,
@@ -357,19 +359,22 @@ try {
                 t.nome AS tamanho,
                 SUM(fa.quantidade) AS quantidade,
                 f.preco_unitario,
-                MIN(fa.data_atribuicao) AS data_atribuicao
+                MIN(fa.data_atribuicao) AS data_atribuicao,
+                fa.estado,
+                MAX(fa.estado_devolucao) AS estado_devolucao
             FROM farda_atribuicoes fa
             JOIN fardas f ON fa.farda_id = f.id
             JOIN cores c ON f.cor_id = c.id
             JOIN tamanhos t ON f.tamanho_id = t.id
             WHERE fa.colaborador_id = ?
             AND fa.estado IN ('atribuida','marcada_devolucao')
-            GROUP BY fa.farda_id, f.nome, c.nome, t.nome, f.preco_unitario
-            ORDER BY MIN(fa.data_atribuicao) DESC
+            GROUP BY fa.farda_id, f.nome, c.nome, t.nome, f.preco_unitario, fa.estado
+            ORDER BY fa.estado ASC, MIN(fa.data_atribuicao) DESC
         ");
         $stmt->execute([$colaborador_id]);
         $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $total_geral = 0;
+        $total_pendente_devolucao = 0;
         $temFardas = !empty($fardas_atribuidas);
 
         // --- Estado do botão Gerar Termo ---
@@ -579,41 +584,76 @@ try {
                 <tbody>
                 <?php foreach ($fardas_atribuidas as $f):
                     $total_item = $f['quantidade'] * $f['preco_unitario'];
-                    $total_geral += $total_item;
+                    $isMarcada = ($f['estado'] === 'marcada_devolucao');
+                    if ($isMarcada) {
+                        $total_pendente_devolucao += $total_item;
+                    } else {
+                        $total_geral += $total_item;
+                    }
+                    $destinoDevolucao = $f['estado_devolucao'] === 'stock' ? 'volta ao stock' : 'reciclagem';
                 ?>
-                    <tr>
-                        <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['nome']) ?></td>
+                    <tr class="<?= $isMarcada ? 'bg-emerald-50' : '' ?>">
+                        <td class="px-4 py-2 border-b">
+                            <?= htmlspecialchars($f['nome']) ?>
+                            <?php if ($isMarcada): ?>
+                                <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold"
+                                      title="Aguarda geração do termo de devolução">
+                                    ✔ Marcada para devolução (<?= htmlspecialchars($destinoDevolucao) ?>)
+                                </span>
+                            <?php endif; ?>
+                        </td>
                         <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['cor']) ?></td>
                         <td class="px-4 py-2 border-b"><?= htmlspecialchars($f['tamanho']) ?></td>
                         <td class="px-4 py-2 border-b text-center"><?= $f['quantidade'] ?></td>
                         <td class="px-4 py-2 border-b text-right"><?= number_format($f['preco_unitario'], 2, ',', '.') ?></td>
-                        <td class="px-4 py-2 border-b text-right font-semibold">
+                        <td class="px-4 py-2 border-b text-right font-semibold <?= $isMarcada ? 'text-gray-400 line-through' : '' ?>">
                             <?= number_format($total_item, 2, ',', '.') ?>
                         </td>
                         <td class="px-4 py-2 border-b text-center">
                             <?= date('d/m/Y H:i', strtotime($f['data_atribuicao'])) ?>
                         </td>
                         <td class="px-4 py-2 border-b text-center">
-                            <a href="editar_atribuicao.php?id=<?= $f['id'] ?>"
-                            class="text-blue-600 hover:text-blue-800 font-semibold mr-2">
-                            ✏️
-                            </a>
-                            <a href="anular_atribuicao.php?id=<?= $f['id'] ?>"
-                            class="text-red-600 hover:text-red-800 font-semibold">
-                            ❌ Anular
-                            </a>
+                            <?php if ($isMarcada): ?>
+                                <a href="devolucao_farda.php?colaborador_id=<?= (int)$colaborador['id'] ?>"
+                                   class="text-emerald-700 hover:text-emerald-900 font-semibold text-xs"
+                                   title="Ir para a página de devolução">
+                                    Ver devolução
+                                </a>
+                            <?php else: ?>
+                                <a href="editar_atribuicao.php?id=<?= $f['id'] ?>"
+                                class="text-blue-600 hover:text-blue-800 font-semibold mr-2">
+                                ✏️
+                                </a>
+                                <a href="anular_atribuicao.php?id=<?= $f['id'] ?>"
+                                class="text-red-600 hover:text-red-800 font-semibold">
+                                ❌ Anular
+                                </a>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
                 <tfoot class="bg-gray-50">
                     <tr>
-                        <td colspan="5" class="px-4 py-3 text-right font-semibold">💰 Total Geral:</td>
+                        <td colspan="5" class="px-4 py-3 text-right font-semibold">💰 Total Atribuído:</td>
                         <td class="px-4 py-3 text-right font-bold text-green-700">
                             <?= number_format($total_geral, 2, ',', '.') ?> €
                         </td>
                         <td></td>
+                        <td></td>
                     </tr>
+                    <?php if ($total_pendente_devolucao > 0): ?>
+                    <tr>
+                        <td colspan="5" class="px-4 py-2 text-right font-semibold text-emerald-700">
+                            ✔ Marcadas para devolução (aguarda termo):
+                        </td>
+                        <td class="px-4 py-2 text-right font-bold text-emerald-700">
+                            <?= number_format($total_pendente_devolucao, 2, ',', '.') ?> €
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <?php endif; ?>
                 </tfoot>
             </table>
         <?php else: ?>
