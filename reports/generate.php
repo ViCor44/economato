@@ -308,6 +308,28 @@ try {
             }, $data);
             break;
 
+        case 'colaboradores_inativos_cartao_por_entregar':
+            $title = "Colaboradores Inativos com Cartão por Entregar";
+            $stmt = $pdo->prepare("
+                SELECT numero_funcionario, nome, cartao, telefone, email
+                FROM colaboradores
+                WHERE ativo = 0 AND COALESCE(cartao_entregue, 0) = 0
+                ORDER BY nome ASC
+            ");
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $columns = ['Nº Colaborador','Nome','Cartão','Telefone','Email'];
+            $rows = array_map(function($r){
+                return [
+                    'Nº Colaborador'=>$r['numero_funcionario'] ?? '',
+                    'Nome'=>$r['nome'],
+                    'Cartão'=>$r['cartao'],
+                    'Telefone'=>$r['telefone'] ?? '',
+                    'Email'=>$r['email'] ?? ''
+                ];
+            }, $data);
+            break;
+
         case 'colaboradores_sem_farda':
             $title = "Colaboradores sem Farda Atribuída";
             $sql = "

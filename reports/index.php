@@ -59,47 +59,48 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                                 <option value="lista_colaboradores">1. Lista de todos os colaboradores</option>
                                 <option value="colaboradores_ativos">2. Colaboradores ativos</option>
                                 <option value="colaboradores_inativos">3. Colaboradores inativos</option>
-                                <option value="colaboradores_sem_farda">4. Colaboradores sem farda atribuída</option>
-                                <option value="colaboradores_com_farda">5. Colaboradores com farda atribuída</option>
-                                <option value="colaboradores_com_emprestimos">6. Colaboradores com empréstimos activos</option>
-                                <option value="colaboradores_com_dividas">7. Colaboradores com dívidas de fardamento</option>
-                                <option value="colaboradores_por_departamento">8. Colaboradores por departamento</option>
+                                <option value="colaboradores_inativos_cartao_por_entregar">4. Colaboradores inativos com cartão por entregar</option>
+                                <option value="colaboradores_sem_farda">5. Colaboradores sem farda atribuída</option>
+                                <option value="colaboradores_com_farda">6. Colaboradores com farda atribuída</option>
+                                <option value="colaboradores_com_emprestimos">7. Colaboradores com empréstimos activos</option>
+                                <option value="colaboradores_com_dividas">8. Colaboradores com dívidas de fardamento</option>
+                                <option value="colaboradores_por_departamento">9. Colaboradores por departamento</option>
                             </optgroup>
 
                             <!-- Fardas -->
                             <optgroup label="Fardas">
-                                <option value="fardas_mais_atribuidas">9. Fardas mais atribuídas</option>
-                                <option value="fardas_menos_atribuidas">10. Fardas menos atribuídas</option>
-                                <option value="stock_atual">11. Stock atual completo</option>
-                                <option value="stock_baixo">12. Stock baixo (abaixo do mínimo)</option>
-                                <option value="compras_periodo">13. Compras de fardas por período</option>
-                                <option value="devolucoes_motivo">14. Devoluções por motivo / estado</option>
+                                <option value="fardas_mais_atribuidas">10. Fardas mais atribuídas</option>
+                                <option value="fardas_menos_atribuidas">11. Fardas menos atribuídas</option>
+                                <option value="stock_atual">12. Stock atual completo</option>
+                                <option value="stock_baixo">13. Stock baixo (abaixo do mínimo)</option>
+                                <option value="compras_periodo">14. Compras de fardas por período</option>
+                                <option value="devolucoes_motivo">15. Devoluções por motivo / estado</option>
                             </optgroup>
 
                             <!-- Cacifos -->
                             <optgroup label="Cacifos">
-                                <option value="cacifos_lista">15. Lista completa de cacifos</option>
-                                <option value="cacifos_ocupados">16. Cacifos ocupados</option>
-                                <option value="cacifos_livres">17. Cacifos livres</option>
-                                <option value="cacifos_avariados">18. Cacifos avariados</option>
-                                <option value="cacifos_colabs_inativos">19. Cacifos de colaboradores inativos</option>
+                                <option value="cacifos_lista">16. Lista completa de cacifos</option>
+                                <option value="cacifos_ocupados">17. Cacifos ocupados</option>
+                                <option value="cacifos_livres">18. Cacifos livres</option>
+                                <option value="cacifos_avariados">19. Cacifos avariados</option>
+                                <option value="cacifos_colabs_inativos">20. Cacifos de colaboradores inativos</option>
                             </optgroup>
 
                             <!-- Financeiros -->
                             <optgroup label="Financeiros">
-                                <option value="valor_total_stock">20. Valor total em stock</option>
-                                <option value="custo_por_colaborador">21. Custo de fardamento entregue por colaborador</option>
-                                <option value="custo_por_departamento">22. Custo total por departamento</option>
-                                <option value="custo_total_fardas">23. Custo total de fardas (atribuídas + stock)</option>
+                                <option value="valor_total_stock">21. Valor total em stock</option>
+                                <option value="custo_por_colaborador">22. Custo de fardamento entregue por colaborador</option>
+                                <option value="custo_por_departamento">23. Custo total por departamento</option>
+                                <option value="custo_total_fardas">24. Custo total de fardas (atribuídas + stock)</option>
                             </optgroup>
 
                             <!-- Diversos -->
                             <optgroup label="Diversos">
-                                <option value="logs_filtrados">24. Logs de sistema filtráveis</option>
-                                <option value="export_ean">25. Export EAN / códigos de barras (CSV)</option>
-                                <option value="print_ean">26. Imprimir EAN (etiquetas a partir dos PNGs)</option>
-                                <option value="itens_sem_ean">27. Itens de farda sem EAN</option>
-                                <option value="historico_atribuicoes">28. Histórico de atribuições</option>
+                                <option value="logs_filtrados">25. Logs de sistema filtráveis</option>
+                                <option value="export_ean">26. Export EAN / códigos de barras (CSV)</option>
+                                <option value="print_ean">27. Imprimir EAN (etiquetas a partir dos PNGs)</option>
+                                <option value="itens_sem_ean">28. Itens de farda sem EAN</option>
+                                <option value="historico_atribuicoes">29. Histórico de atribuições</option>
                             </optgroup>
                         </select>
                     </div>
@@ -242,6 +243,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
         lista_colaboradores:           ['Nº Colaborador','Nome','Cartão','Telefone','Email','Ativo','Criado Em'],
         colaboradores_ativos:          ['Nº Colaborador','Nome','Cartão','Telefone','Email','Criado Em'],
         colaboradores_inativos:        ['Nº Colaborador','Nome','Cartão','Telefone','Email','Criado Em'],
+        colaboradores_inativos_cartao_por_entregar: ['Nº Colaborador','Nome','Cartão','Telefone','Email'],
         colaboradores_sem_farda:       ['Nº Colaborador','Nome','Cartão','Email'],
         colaboradores_com_farda:       ['Nº Colaborador','Nome','Cartão','Email'],
         colaboradores_com_emprestimos: ['Nº Colaborador','Nome','Cartão','Email'],
@@ -262,6 +264,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
         lista_colaboradores:           ['Nome', 'Nº Colaborador', 'Cartão', 'Telefone', 'Email'],
         colaboradores_ativos:          ['Nome', 'Nº Colaborador', 'Cartão', 'Telefone', 'Email'],
         colaboradores_inativos:        ['Nome', 'Nº Colaborador', 'Cartão', 'Telefone', 'Email'],
+        colaboradores_inativos_cartao_por_entregar: ['Nome', 'Nº Colaborador', 'Cartão', 'Telefone', 'Email'],
         colaboradores_sem_farda:       ['Nome', 'Nº Colaborador', 'Cartão', 'Email'],
         colaboradores_com_farda:       ['Nome', 'Nº Colaborador', 'Cartão', 'Email'],
         colaboradores_com_emprestimos: ['Nome', 'Nº Colaborador', 'Cartão', 'Email'],

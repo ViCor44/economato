@@ -660,29 +660,29 @@ $html = <<<HTML
 
   <h2>10.1 Catálogo de Relatórios</h2>
 
-  <h3>Colaboradores (1–8)</h3>
+  <h3>Colaboradores (1–9)</h3>
   <table>
     <tr><th>#</th><th>Relatório</th><th>Dados pessoais</th></tr>
     <tr><td>1</td><td>Lista de todos os colaboradores</td><td><span class="badge badge-red">Sim</span></td></tr>
     <tr><td>2</td><td>Colaboradores ativos</td><td><span class="badge badge-red">Sim</span></td></tr>
     <tr><td>3</td><td>Colaboradores inativos</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>4</td><td>Colaboradores sem farda atribuída</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>5</td><td>Colaboradores com farda atribuída</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>6</td><td>Colaboradores com empréstimos ativos</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>7</td><td>Colaboradores com dívidas de fardamento</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>8</td><td>Colaboradores por departamento</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>4</td><td>Colaboradores inativos com cartão por entregar</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>5</td><td>Colaboradores sem farda atribuída</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>6</td><td>Colaboradores com farda atribuída</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>7</td><td>Colaboradores com empréstimos ativos</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>8</td><td>Colaboradores com dívidas de fardamento</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>9</td><td>Colaboradores por departamento</td><td><span class="badge badge-red">Sim</span></td></tr>
   </table>
 
-  <h3>Fardas (9–15)</h3>
+  <h3>Fardas (10–15)</h3>
   <table>
     <tr><th>#</th><th>Relatório</th><th>Dados pessoais</th></tr>
-    <tr><td>9</td><td>Fardas mais atribuídas</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>10</td><td>Fardas menos atribuídas</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>11</td><td>Stock atual completo</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>12</td><td>Stock baixo (abaixo do mínimo)</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>13</td><td>Compras de fardas por período</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>14</td><td>Devoluções por motivo / estado</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>15</td><td>Colaboradores inativos com farda</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>10</td><td>Fardas mais atribuídas</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>11</td><td>Fardas menos atribuídas</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>12</td><td>Stock atual completo</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>13</td><td>Stock baixo (abaixo do mínimo)</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>14</td><td>Compras de fardas por período</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>15</td><td>Devoluções por motivo / estado</td><td><span class="badge badge-red">Sim</span></td></tr>
   </table>
 
   <h3>Cacifos (16–20)</h3>
