@@ -353,7 +353,7 @@ $html = <<<HTML
     <tr><td><strong>Dívidas</strong></td><td>Registo de fardas não devolvidas e regularização</td></tr>
     <tr><td><strong>Cacifos</strong></td><td>Atribuição e gestão de cacifos por colaborador</td></tr>
     <tr><td><strong>Códigos EAN</strong></td><td>Geração e impressão de etiquetas de código de barras</td></tr>
-    <tr><td><strong>Relatórios</strong></td><td>29 relatórios exportáveis em HTML, PDF, XLSX e CSV</td></tr>
+    <tr><td><strong>Relatórios</strong></td><td>30 relatórios exportáveis em HTML, PDF, XLSX e CSV</td></tr>
     <tr><td><strong>Utilizadores</strong></td><td>Contas do sistema com aprovação e 2FA opcional</td></tr>
   </table>
 
@@ -483,7 +483,7 @@ $html = <<<HTML
   <ol>
     <li>Aceda à farda e clique em <strong>Gerar EAN</strong></li>
     <li>O código EAN-13 é gerado e associado ao artigo</li>
-    <li>Para imprimir etiquetas: <strong>Relatórios</strong> → <em>27. Imprimir EAN</em></li>
+    <li>Para imprimir etiquetas: <strong>Relatórios</strong> → <em>28. Imprimir EAN</em></li>
     <li>Leitores de código de barras preenchem automaticamente o artigo nos formulários</li>
   </ol>
 
@@ -655,12 +655,12 @@ $html = <<<HTML
   </div>
   <div class="chapter-title">10. Centro de Relatórios</div>
   <div class="chapter-intro">
-    O Centro de Relatórios disponibiliza 29 relatórios organizados por categoria, com filtros avançados e exportação múltipla. Relatórios com dados pessoais requerem confirmação RGPD.
+    O Centro de Relatórios disponibiliza 30 relatórios organizados por categoria, com filtros avançados e exportação múltipla. Relatórios com dados pessoais requerem confirmação RGPD.
   </div>
 
   <h2>10.1 Catálogo de Relatórios</h2>
 
-  <h3>Colaboradores (1–9)</h3>
+  <h3>Colaboradores (1–10)</h3>
   <table>
     <tr><th>#</th><th>Relatório</th><th>Dados pessoais</th></tr>
     <tr><td>1</td><td>Lista de todos os colaboradores</td><td><span class="badge badge-red">Sim</span></td></tr>
@@ -672,46 +672,47 @@ $html = <<<HTML
     <tr><td>7</td><td>Colaboradores com empréstimos ativos</td><td><span class="badge badge-red">Sim</span></td></tr>
     <tr><td>8</td><td>Colaboradores com dívidas de fardamento</td><td><span class="badge badge-red">Sim</span></td></tr>
     <tr><td>9</td><td>Colaboradores por departamento</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>10</td><td>Colaboradores por setor</td><td><span class="badge badge-red">Sim</span></td></tr>
   </table>
 
-  <h3>Fardas (10–15)</h3>
+  <h3>Fardas (11–16)</h3>
   <table>
     <tr><th>#</th><th>Relatório</th><th>Dados pessoais</th></tr>
-    <tr><td>10</td><td>Fardas mais atribuídas</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>11</td><td>Fardas menos atribuídas</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>12</td><td>Stock atual completo</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>13</td><td>Stock baixo (abaixo do mínimo)</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>14</td><td>Compras de fardas por período</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>15</td><td>Devoluções por motivo / estado</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>11</td><td>Fardas mais atribuídas</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>12</td><td>Fardas menos atribuídas</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>13</td><td>Stock atual completo</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>14</td><td>Stock baixo (abaixo do mínimo)</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>15</td><td>Compras de fardas por período</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>16</td><td>Devoluções por motivo / estado</td><td><span class="badge badge-red">Sim</span></td></tr>
   </table>
 
-  <h3>Cacifos (16–20)</h3>
+  <h3>Cacifos (17–21)</h3>
   <table>
     <tr><th>#</th><th>Relatório</th><th>Dados pessoais</th></tr>
-    <tr><td>16</td><td>Lista completa de cacifos</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>17</td><td>Cacifos ocupados</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>18</td><td>Cacifos livres</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>19</td><td>Cacifos avariados</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>20</td><td>Cacifos de colaboradores inativos</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>17</td><td>Lista completa de cacifos</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>18</td><td>Cacifos ocupados</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>19</td><td>Cacifos livres</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>20</td><td>Cacifos avariados</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>21</td><td>Cacifos de colaboradores inativos</td><td><span class="badge badge-red">Sim</span></td></tr>
   </table>
 
-  <h3>Financeiros (21–24)</h3>
+  <h3>Financeiros (22–25)</h3>
   <table>
     <tr><th>#</th><th>Relatório</th><th>Dados pessoais</th></tr>
-    <tr><td>21</td><td>Valor total em stock</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>22</td><td>Custo de fardamento entregue por colaborador</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>23</td><td>Custo total por departamento</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>24</td><td>Custo total de fardas (atribuídas + stock)</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>22</td><td>Valor total em stock</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>23</td><td>Custo de fardamento entregue por colaborador</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>24</td><td>Custo total por departamento</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>25</td><td>Custo total de fardas (atribuídas + stock)</td><td><span class="badge badge-green">Não</span></td></tr>
   </table>
 
-  <h3>Diversos (25–29)</h3>
+  <h3>Diversos (26–30)</h3>
   <table>
     <tr><th>#</th><th>Relatório</th><th>Dados pessoais</th></tr>
-    <tr><td>25</td><td>Logs de sistema filtráveis</td><td><span class="badge badge-red">Sim</span></td></tr>
-    <tr><td>26</td><td>Export EAN / códigos de barras (CSV)</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>27</td><td>Imprimir EAN (etiquetas a partir dos PNGs)</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>28</td><td>Itens de farda sem EAN</td><td><span class="badge badge-green">Não</span></td></tr>
-    <tr><td>29</td><td>Histórico de atribuições</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>26</td><td>Logs de sistema filtráveis</td><td><span class="badge badge-red">Sim</span></td></tr>
+    <tr><td>27</td><td>Export EAN / códigos de barras (CSV)</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>28</td><td>Imprimir EAN (etiquetas a partir dos PNGs)</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>29</td><td>Itens de farda sem EAN</td><td><span class="badge badge-green">Não</span></td></tr>
+    <tr><td>30</td><td>Histórico de atribuições</td><td><span class="badge badge-red">Sim</span></td></tr>
   </table>
 
   <h2>10.2 Filtros e Opções</h2>

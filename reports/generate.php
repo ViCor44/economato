@@ -864,6 +864,50 @@ break;
 
         break;
 
+        case 'colaboradores_por_sector':
+            $title = "Colaboradores por Setor";
+
+            $sql = "
+                SELECT
+                    c.sector,
+                    d.nome AS departamento,
+                    c.nome,
+                    c.cartao,
+                    c.telefone,
+                    c.email,
+                    c.ativo
+                FROM colaboradores c
+                LEFT JOIN departamentos d ON c.departamento_id = d.id
+                WHERE c.sector IS NOT NULL AND TRIM(c.sector) <> ''
+            ";
+
+            $params = [];
+
+            if ($departamento) {
+                $sql .= " AND c.departamento_id = ? ";
+                $params[] = $departamento;
+            }
+
+            $sql .= " ORDER BY c.sector ASC, c.nome ASC";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $columns = ['Setor','Departamento','Nome','Cartão','Telefone','Email','Ativo'];
+            $rows = array_map(function($r){
+                return [
+                    'Setor' => $r['sector'],
+                    'Departamento' => $r['departamento'] ?? '—',
+                    'Nome' => $r['nome'],
+                    'Cartão' => $r['cartao'] ?? '',
+                    'Telefone' => $r['telefone'] ?? '',
+                    'Email' => $r['email'] ?? '',
+                    'Ativo' => ($r['ativo'] ? 'Sim' : 'Não')
+                ];
+            }, $data);
+            break;
+
         case 'colaboradores_com_farda':
 
             $title = "Colaboradores com Farda Atribuída";
