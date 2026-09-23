@@ -720,6 +720,7 @@ $html = <<<HTML
     <li><strong>Período</strong> (data início / fim): para relatórios temporais</li>
     <li><strong>Top N</strong>: limitar o número de resultados</li>
     <li><strong>Departamento</strong>: filtrar por departamento específico</li>
+    <li><strong>Setor</strong>: filtrar o relatório de colaboradores por setor específico</li>
     <li><strong>Threshold</strong>: limite de quantidade (ex: stock mínimo)</li>
     <li><strong>Filtro livre</strong>: pesquisa por texto nos logs e histórico</li>
   </ul>

@@ -238,6 +238,7 @@ $inicio = safeDate($_GET['inicio'], date('2000-01-01'));
 $fim = safeDate($_GET['fim'], date('Y-m-d'));
 $top = max(1, intval($_GET['top'] ?? 10));
 $departamento = intval($_GET['departamento'] ?? 0);
+$sector = trim($_GET['sector'] ?? '');
 $threshold = max(1, intval($_GET['threshold'] ?? 5));
 $q = trim($_GET['q'] ?? '');
 
@@ -886,6 +887,11 @@ break;
             if ($departamento) {
                 $sql .= " AND c.departamento_id = ? ";
                 $params[] = $departamento;
+            }
+
+            if ($sector !== '') {
+                $sql .= " AND c.sector = ? ";
+                $params[] = $sector;
             }
 
             $sql .= " ORDER BY c.sector ASC, c.nome ASC";

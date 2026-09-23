@@ -4,6 +4,7 @@ require_once '../config/db.php';
 
 // Carregar opções dinâmicas
 $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome")->fetchAll(PDO::FETCH_ASSOC);
+$sectores = $pdo->query("SELECT DISTINCT sector FROM colaboradores WHERE sector IS NOT NULL AND TRIM(sector) <> '' ORDER BY sector")->fetchAll(PDO::FETCH_COLUMN);
 $cores = $pdo->query("SELECT id, nome FROM cores ORDER BY nome")->fetchAll(PDO::FETCH_ASSOC);
 
 // Path para o ficheiro que enviaste (será transformado em URL pelo teu ambiente)
@@ -133,6 +134,17 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
                         </select>
                     </div>
 
+                    <!-- Setor -->
+                    <div id="boxSector" class="field hidden">
+                        <label>Setor (opcional)</label>
+                        <select name="sector" id="sector">
+                            <option value="">-- Todos --</option>
+                            <?php foreach ($sectores as $sector): ?>
+                                <option value="<?= htmlspecialchars($sector) ?>"><?= htmlspecialchars($sector) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
                     <!-- Threshold -->
                     <div id="boxThreshold" class="field hidden">
                         <label>Threshold (quantidade)</label>
@@ -235,6 +247,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
     const boxDates = document.getElementById('boxDates');
     const boxTop = document.getElementById('boxTop');
     const boxDept = document.getElementById('boxDept');
+    const boxSector = document.getElementById('boxSector');
     const boxThreshold = document.getElementById('boxThreshold');
     const boxFreeText = document.getElementById('boxFreeText');
     const form = document.getElementById('reportForm');
@@ -399,6 +412,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
         boxDates.classList.add('hidden');
         boxTop.classList.add('hidden');
         boxDept.classList.add('hidden');
+        boxSector.classList.add('hidden');
         boxThreshold.classList.add('hidden');
         boxFreeText.classList.add('hidden');
 
@@ -419,6 +433,7 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
         ].includes(val)) {
             boxDept.classList.remove('hidden');
         }
+        if (val === 'colaboradores_por_sector') boxSector.classList.remove('hidden');
         if (val === 'stock_baixo') boxThreshold.classList.remove('hidden');
         if (['logs_filtrados','export_ean','itens_sem_ean','historico_atribuicoes'].includes(val)) boxFreeText.classList.remove('hidden');
     }
