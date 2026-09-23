@@ -390,7 +390,8 @@ $template_docx_path = '/mnt/data/JARDINEIROS.docx';
         form.querySelectorAll('input[name="cols[]"]').forEach(el => el.remove());
         // Adicionar colunas selecionadas (se houver seletor ativo)
         const colChecks = document.querySelectorAll('#rgpdColunasGrid input[type=checkbox]');
-        if (colChecks.length > 0) {
+        const requerSelecaoColunas = Array.isArray(dadosPessoaisMap[val]) && dadosPessoaisMap[val].length > 0;
+        if (requerSelecaoColunas && colChecks.length > 0) {
             const selecionadas = [...colChecks].filter(c => c.checked).map(c => c.value);
             if (selecionadas.length === 0) {
                 alert('Seleciona pelo menos uma coluna para incluir no relatório.');

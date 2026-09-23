@@ -376,7 +376,7 @@ try {
         // ------------------- Fardas -------------------
 case 'fardas_mais_atribuidas':
 
-$title = "Fardas Mais Atribuídas";
+$title = "Fardas Mais Atribuídas ({$inicio} → {$fim})";
 
 $sql = "
 SELECT 
@@ -392,8 +392,7 @@ FROM farda_atribuicoes fa
 JOIN fardas f ON f.id = fa.farda_id
 JOIN cores c ON c.id = f.cor_id
 JOIN tamanhos t ON t.id = f.tamanho_id
-WHERE fa.estado = 'atribuida'
-AND fa.data_atribuicao BETWEEN ? AND ?
+WHERE fa.data_atribuicao BETWEEN ? AND ?
 ";
 
 $params = [$inicioFull, $fimFull];
@@ -1000,14 +999,17 @@ break;
     // --- Filtrar colunas selecionadas pelo utilizador (via modal RGPD) ---
     if (!empty($_GET['cols']) && is_array($_GET['cols'])) {
         $colsSel = array_map('strval', $_GET['cols']);
-        $columns = array_values(array_filter($columns, fn($c) => in_array($c, $colsSel, true)));
-        $rows = array_map(function ($r) use ($columns) {
-            $filtered = [];
-            foreach ($columns as $col) {
-                $filtered[$col] = $r[$col] ?? '';
-            }
-            return $filtered;
-        }, $rows);
+        $filteredColumns = array_values(array_filter($columns, fn($c) => in_array($c, $colsSel, true)));
+        if (!empty($filteredColumns)) {
+            $columns = $filteredColumns;
+            $rows = array_map(function ($r) use ($columns) {
+                $filtered = [];
+                foreach ($columns as $col) {
+                    $filtered[$col] = $r[$col] ?? '';
+                }
+                return $filtered;
+            }, $rows);
+        }
     }
 
 } catch (Exception $e) {
