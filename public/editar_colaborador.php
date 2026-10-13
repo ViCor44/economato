@@ -30,11 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $departamento_id = $_POST['departamento_id'] ?? null;
     $ativo = isset($_POST['ativo']) ? 1 : 0;
     $cartao_entregue = isset($_POST['cartao_entregue']) ? 1 : 0;
-    $gerar_termo_devolucao = !empty($colaborador['ativo'])
-        && !$ativo
-        && ($_POST['gerar_termo_devolucao'] ?? '') === '1';
+    $tentouInativar = !empty($colaborador['ativo']) && !$ativo;
 
-    if (!$ativo && !$gerar_termo_devolucao) {
+    if ($tentouInativar) {
+        $errors[] = "Não é possível inativar por esta página. Conclua primeiro a devolução das fardas e dos cacifos e imprima o termo de devolução.";
+    }
+
+    if (!$ativo) {
         $numero_funcionario = '';
     }
 
@@ -52,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validações
     if (empty($nome)) $errors[] = "O nome é obrigatório.";
-    if (($ativo || $gerar_termo_devolucao) && empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório para colaboradores ativos.";
+    if ($ativo && empty($numero_funcionario)) $errors[] = "O número de funcionário é obrigatório para colaboradores ativos.";
     if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "O email inserido não é válido.";
     }
@@ -86,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Upload de nova foto (se existir)
-    if (!empty($_FILES['foto']['name'])) {
+    if (!$tentouInativar && !empty($_FILES['foto']['name'])) {
         $ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
         $permitidas = ['jpg', 'jpeg', 'png', 'webp'];
 
@@ -128,16 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email,
                 $departamento_id,
                 $sector,
-                $gerar_termo_devolucao ? 1 : $ativo,
+                $ativo,
                 $cartao_entregue,
                 $foto_nome,
                 $id
             ]);
-
-            if ($gerar_termo_devolucao) {
-                header('Location: gerar_termo_devolucao.php?colaborador_id=' . $id);
-                exit;
-            }
 
             $success = "✅ Dados do colaborador atualizados com sucesso!";
             // refrescar dados
@@ -187,8 +184,6 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
         <?php endif; ?>
 
         <form method="POST" enctype="multipart/form-data" class="space-y-6" id="form_editar_colaborador">
-            <input type="hidden" name="gerar_termo_devolucao" id="gerar_termo_devolucao" value="0">
-
             <div>
                 <label class="block text-gray-700 font-medium mb-1">Nome Completo</label>
                 <input type="text" name="nome" value="<?= htmlspecialchars($colaborador['nome']) ?>" class="w-full px-4 py-2 border rounded-md" required>
@@ -272,6 +267,11 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
                     <input type="checkbox" name="ativo" id="ativo" class="mr-2" <?= $colaborador['ativo'] ? 'checked' : '' ?>>
                     <span class="text-gray-700">Colaborador Ativo</span>
                 </label>
+                <?php if (!empty($colaborador['ativo'])): ?>
+                    <a href="detalhes_colaborador.php?id=<?= (int)$id ?>" class="text-sm text-blue-600 hover:underline">
+                        Iniciar processo de devolução
+                    </a>
+                <?php endif; ?>
 
                 <label class="inline-flex items-center">
                     <input type="checkbox" name="cartao_entregue" id="cartao_entregue" class="mr-2" <?= !empty($colaborador['cartao_entregue']) ? 'checked' : '' ?>>
@@ -293,10 +293,7 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
     const sectorInput = document.getElementById('sector');
     const ativoCheckbox = document.getElementById('ativo');
     const numeroFuncionarioInput = document.getElementById('numero_funcionario');
-    const formEditarColaborador = document.getElementById('form_editar_colaborador');
-    const gerarTermoInput = document.getElementById('gerar_termo_devolucao');
     const colaboradorEstavaAtivo = <?= !empty($colaborador['ativo']) ? 'true' : 'false' ?>;
-    let desativacaoConfirmada = false;
 
     function toggleSector() {
         const text =
@@ -320,31 +317,20 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
     }
 
     departamentoSelect.addEventListener('change', toggleSector);
-    ativoCheckbox.addEventListener('change', toggleNumeroFuncionario);
-
-    formEditarColaborador.addEventListener('submit', (event) => {
-        if (!colaboradorEstavaAtivo || ativoCheckbox.checked || desativacaoConfirmada) {
+    ativoCheckbox.addEventListener('change', () => {
+        if (colaboradorEstavaAtivo && !ativoCheckbox.checked) {
+            ativoCheckbox.checked = true;
+            toggleNumeroFuncionario();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Processo de devolução obrigatório',
+                text: 'Para inativar o colaborador, devolva primeiro as fardas e os cacifos e imprima o termo de devolução.',
+                confirmButtonText: 'OK'
+            });
             return;
         }
 
-        event.preventDefault();
-
-        Swal.fire({
-            icon: 'warning',
-            title: 'Imprimir termo de devolução?',
-            html: 'Antes de inativar o colaborador, deve gerar o termo de devolução.<br><strong>A geração do termo irá inativar o colaborador.</strong>',
-            showCancelButton: true,
-            confirmButtonText: 'Imprimir termo e inativar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#2563eb',
-            cancelButtonColor: '#6b7280'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                desativacaoConfirmada = true;
-                gerarTermoInput.value = '1';
-                formEditarColaborador.requestSubmit();
-            }
-        });
+        toggleNumeroFuncionario();
     });
 
     toggleSector();

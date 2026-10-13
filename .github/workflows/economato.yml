@@ -27,8 +27,11 @@ jobs:
               php -l $_.FullName
             }
 
-      - name: Skip PHPStan
-        run: echo "PHPStan disabled"
+      - name: PHPStan
+        run: composer analyse
+
+      - name: Tests
+        run: composer test
 
       # DEPLOY SÓ SE PASSAR TUDO
       - name: Deploy to production

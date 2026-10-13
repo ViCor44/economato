@@ -13,11 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $telefone = trim($_POST['telefone'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $departamento_id = $_POST['departamento_id'] ?? null;
-    $ativo = isset($_POST['ativo']) ? 1 : 0;
-
-    if (!$ativo) {
-        $numero_funcionario = '';
-    }
+    $ativo = 1;
 
     $foto_nome = null;
 
@@ -209,8 +205,9 @@ $departamentos = $pdo->query("SELECT id, nome FROM departamentos ORDER BY nome A
 
             <!-- Ativo -->
             <div class="flex items-center">
-                <input type="checkbox" name="ativo" id="ativo" class="mr-2" checked>
+                <input type="checkbox" id="ativo" class="mr-2" checked disabled>
                 <label for="ativo" class="text-gray-700">Colaborador Ativo</label>
+                <p class="text-sm text-gray-500 ml-3">Novos colaboradores são registados como ativos. A inativação exige a conclusão do processo de devolução.</p>
             </div>
 
             <!-- Botões -->

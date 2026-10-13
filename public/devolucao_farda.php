@@ -392,7 +392,12 @@ $fardas_atribuidas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $tem_fardas_nao_tratadas = array_filter($fardas_atribuidas, fn($f) => 
     $f['estado'] === 'atribuida' && !$f['marcado_como_divida']
 );
-$pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas);
+
+$stmtCacifos = $pdo->prepare("SELECT COUNT(*) FROM cacifos WHERE colaborador_id = ?");
+$stmtCacifos->execute([$colaborador_id]);
+$cacifos_pendentes = (int)$stmtCacifos->fetchColumn();
+
+$pode_gerar_termo = empty($tem_fardas_nao_tratadas) && $cacifos_pendentes === 0;
 ?>
 <!DOCTYPE html>
 <html lang="pt-PT" class="bg-gray-100">
@@ -431,6 +436,17 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                     <li><?= htmlspecialchars($err) ?></li>
                 <?php endforeach; ?>
             </ul>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($cacifos_pendentes > 0): ?>
+        <div class="bg-orange-50 border-l-4 border-orange-500 text-orange-800 p-4 rounded-md mb-4">
+            <strong>Devolução dos cacifos pendente:</strong>
+            ainda existem <?= $cacifos_pendentes ?> cacifo(s) associado(s) ao colaborador.
+            <a href="list_lockers.php?pesquisa=<?= urlencode($colaborador['nome']) ?>" class="font-semibold underline">
+                Libertar os cacifos
+            </a>
+            antes de gerar o termo.
         </div>
     <?php endif; ?>
 
@@ -547,7 +563,7 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                 onmouseover="this.style.backgroundColor='#15803d';"
                 onmouseout="this.style.backgroundColor='#16a34a';"
                 target="_blank">
-                📄 <span>Gerar Termo de Devolução</span>
+                📄 <span>Imprimir Termo de Devolução e Concluir Inativação</span>
             </a>
 
         <?php else: ?>
@@ -558,11 +574,19 @@ $pode_gerar_termo = !empty($fardas_atribuidas) && empty($tem_fardas_nao_tratadas
                     border-radius:8px;
                     box-shadow:0 2px 4px rgba(0,0,0,0.1);
                     cursor:not-allowed;"
-                title="<?= !empty($tem_fardas_nao_tratadas) ? 'Marque todas as fardas para devolução ou como dívida antes de gerar o termo' : 'Não existem fardas atribuídas para gerar termo' ?>">
-                📄 <span>Gerar Termo de Devolução</span>
+                title="<?= $cacifos_pendentes > 0
+                    ? 'Liberte todos os cacifos antes de gerar o termo'
+                    : (!empty($tem_fardas_nao_tratadas)
+                        ? 'Marque todas as fardas para devolução ou como dívida antes de gerar o termo'
+                        : 'Gerar termo de devolução') ?>">
+                📄 <span>Imprimir Termo de Devolução e Concluir Inativação</span>
             </span>
 
-            <?php if (!empty($tem_fardas_nao_tratadas)): ?>
+            <?php if ($cacifos_pendentes > 0): ?>
+                <p class="text-sm text-orange-500 mt-2">
+                    ⚠ Liberte primeiro todos os cacifos associados ao colaborador.
+                </p>
+            <?php elseif (!empty($tem_fardas_nao_tratadas)): ?>
                 <p class="text-sm text-orange-500 mt-2">
                     ⚠ Existem fardas ainda não marcadas para devolução ou como dívida.
                 </p>

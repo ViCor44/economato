@@ -1,6 +1,312 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_email'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_telefone'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''cor_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''country_code'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''data_emprestimo'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''dias_em_aberto'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''farda_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''from_email'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''from_name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''host'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''password'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''port'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''tamanho_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''username'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot call method exec\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot call method query\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 8
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 10
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#1 \$cfg of class Trb145SmsClient constructor expects array\<string, mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#1 \$pdo of function logSms expects PDO, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtok expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_reduce expects callable\(bool, mixed\)\: bool, Closure\(bool, array\)\: bool given\.$#'
+			identifier: argument.type
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#2 \$timestamp of function date expects int\|null, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#2 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#3 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Parameter \#4 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Part \$colaboradorNome \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 9
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Possibly invalid array key type mixed\.$#'
+			identifier: offsetAccess.invalidOffset
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Property PHPMailer\\PHPMailer\\PHPMailer\:\:\$Host \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Property PHPMailer\\PHPMailer\\PHPMailer\:\:\$Password \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Property PHPMailer\\PHPMailer\\PHPMailer\:\:\$Username \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 9
+			path: cron/notificar_emprestimos_atrasados.php
+
+		-
+			message: '#^Cannot access offset ''country_code'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Cannot access offset ''host'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Cannot access offset ''modem_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Cannot access offset ''password'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Cannot access offset ''scheme'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Parameter \#1 \$cfg of class Trb145SmsClient constructor expects array\<string, mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Part \$cfg\[''host''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Part \$cfg\[''modem_id''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: cron/testar_sms.php
+
+		-
+			message: '#^Part \$cfg\[''scheme''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: cron/testar_sms.php
+
+		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -39,7 +345,7 @@ parameters:
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 4
 			path: public/adicionar_colaborador.php
 
 		-
@@ -57,13 +363,25 @@ parameters:
 		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 4
 			path: public/adicionar_colaborador.php
 
 		-
 			message: '#^Cannot call method query\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
+			path: public/adicionar_colaborador.php
+
+		-
+			message: '#^Elseif condition is always true\.$#'
+			identifier: elseif.alwaysTrue
+			count: 1
+			path: public/adicionar_colaborador.php
+
+		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 2
 			path: public/adicionar_colaborador.php
 
 		-
@@ -99,13 +417,13 @@ parameters:
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 3
+			count: 5
 			path: public/adicionar_colaborador.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 4
+			count: 5
 			path: public/adicionar_farda.php
 
 		-
@@ -115,15 +433,39 @@ parameters:
 			path: public/adicionar_farda.php
 
 		-
+			message: '#^Cannot access offset ''cor'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/adicionar_farda.php
+
+		-
+			message: '#^Cannot access offset ''criado_em'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/adicionar_farda.php
+
+		-
+			message: '#^Cannot access offset ''ean'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/adicionar_farda.php
+
+		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 6
+			count: 7
 			path: public/adicionar_farda.php
 
 		-
 			message: '#^Cannot access offset ''nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
+			count: 4
+			path: public/adicionar_farda.php
+
+		-
+			message: '#^Cannot access offset ''tamanho'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
 			path: public/adicionar_farda.php
 
 		-
@@ -147,13 +489,13 @@ parameters:
 		-
 			message: '#^Cannot call method fetch\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: public/adicionar_farda.php
 
 		-
 			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 4
 			path: public/adicionar_farda.php
 
 		-
@@ -171,7 +513,7 @@ parameters:
 		-
 			message: '#^Cannot call method query\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 5
 			path: public/adicionar_farda.php
 
 		-
@@ -187,6 +529,12 @@ parameters:
 			path: public/adicionar_farda.php
 
 		-
+			message: '#^Parameter \#1 \$datetime of function strtotime expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/adicionar_farda.php
+
+		-
 			message: '#^Parameter \#1 \$pdo of function generate_unique_ean expects PDO, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -195,7 +543,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 6
+			count: 11
 			path: public/adicionar_farda.php
 
 		-
@@ -207,13 +555,13 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 3
 			path: public/adicionar_farda.php
 
 		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
-			count: 3
+			count: 4
 			path: public/adicionar_farda.php
 
 		-
@@ -237,7 +585,7 @@ parameters:
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 12
+			count: 14
 			path: public/adicionar_farda.php
 
 		-
@@ -377,6 +725,102 @@ parameters:
 			identifier: variable.undefined
 			count: 8
 			path: public/adicionar_stock.php
+
+		-
+			message: '#^Binary operation "\." between ''Location\: detalhes…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''farda_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''farda_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot call method beginTransaction\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot call method commit\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot call method rollBack\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
+			identifier: echo.nonString
+			count: 3
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Part \$atribuicao\[''colaborador_id''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/anular_atribuicao.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 7
+			path: public/anular_atribuicao.php
 
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
@@ -561,7 +1005,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
-			count: 1
+			count: 2
 			path: public/atribuir_farda.php
 
 		-
@@ -609,7 +1053,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 1
+			count: 3
 			path: public/colaboradores.php
 
 		-
@@ -621,19 +1065,19 @@ parameters:
 		-
 			message: '#^Cannot access offset ''cartao'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/colaboradores.php
 
 		-
 			message: '#^Cannot access offset ''departamento_nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/colaboradores.php
 
 		-
 			message: '#^Cannot access offset ''email'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/colaboradores.php
 
 		-
@@ -645,13 +1089,13 @@ parameters:
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
+			count: 6
 			path: public/colaboradores.php
 
 		-
 			message: '#^Cannot access offset ''nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 4
 			path: public/colaboradores.php
 
 		-
@@ -667,13 +1111,37 @@ parameters:
 			path: public/colaboradores.php
 
 		-
+			message: '#^Cannot access offset ''total_ativos'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/colaboradores.php
+
+		-
 			message: '#^Cannot access offset ''total_divida'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/colaboradores.php
 
 		-
+			message: '#^Cannot access offset ''total_inativos'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/colaboradores.php
+
+		-
+			message: '#^Cannot call method bindValue\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/colaboradores.php
+
+		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/colaboradores.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: public/colaboradores.php
@@ -681,19 +1149,43 @@ parameters:
 		-
 			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
 			identifier: method.nonObject
+			count: 2
+			path: public/colaboradores.php
+
+		-
+			message: '#^Cannot call method fetchColumn\(\) on mixed\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: public/colaboradores.php
 
 		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
+			count: 3
+			path: public/colaboradores.php
+
+		-
+			message: '#^Cannot call method query\(\) on mixed\.$#'
+			identifier: method.nonObject
 			count: 1
+			path: public/colaboradores.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 6
+			path: public/colaboradores.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 5
 			path: public/colaboradores.php
 
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 7
+			count: 9
 			path: public/colaboradores.php
 
 		-
@@ -709,9 +1201,15 @@ parameters:
 			path: public/colaboradores.php
 
 		-
+			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: public/colaboradores.php
+
+		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 1
+			count: 4
 			path: public/colaboradores.php
 
 		-
@@ -731,6 +1229,42 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: public/configurar_2fa.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/consultar_termo_farda.php
+
+		-
+			message: '#^Cannot call method fetchColumn\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/consultar_termo_farda.php
+
+		-
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/consultar_termo_farda.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: public/consultar_termo_farda.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: public/consultar_termo_farda.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: public/consultar_termo_farda.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
@@ -981,7 +1515,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 3
+			count: 4
 			path: public/detalhes_colaborador.php
 
 		-
@@ -1009,13 +1543,37 @@ parameters:
 			path: public/detalhes_colaborador.php
 
 		-
+			message: '#^Cannot access offset ''cartao_entregue'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/detalhes_colaborador.php
+
+		-
 			message: '#^Cannot access offset ''cor'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
 			path: public/detalhes_colaborador.php
 
 		-
+			message: '#^Cannot access offset ''cor_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/detalhes_colaborador.php
+
+		-
 			message: '#^Cannot access offset ''criado_em'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 5
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''data_atribuicao'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''data_emprestimo'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/detalhes_colaborador.php
@@ -1023,11 +1581,35 @@ parameters:
 		-
 			message: '#^Cannot access offset ''departamento_nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''dias_em_aberto'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Cannot access offset ''email'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''estado'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''estado_devolucao'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''farda_nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/detalhes_colaborador.php
@@ -1041,13 +1623,13 @@ parameters:
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 6
+			count: 16
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Cannot access offset ''nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
+			count: 5
 			path: public/detalhes_colaborador.php
 
 		-
@@ -1071,13 +1653,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: public/detalhes_colaborador.php
-
-		-
-			message: '#^Cannot access offset ''quantidade_total'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 4
 			path: public/detalhes_colaborador.php
 
 		-
@@ -1093,9 +1669,15 @@ parameters:
 			path: public/detalhes_colaborador.php
 
 		-
-			message: '#^Cannot access offset ''telefone'' on mixed\.$#'
+			message: '#^Cannot access offset ''tamanho_nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''telefone'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
 			path: public/detalhes_colaborador.php
 
 		-
@@ -1117,33 +1699,45 @@ parameters:
 			path: public/detalhes_colaborador.php
 
 		-
-			message: '#^Cannot access offset ''ultima_data'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
+			message: '#^Cannot call method exec\(\) on mixed\.$#'
+			identifier: method.nonObject
 			count: 1
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 10
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Cannot call method fetch\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 4
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 4
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot call method fetchColumn\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 10
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot call method query\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
 			path: public/detalhes_colaborador.php
 
 		-
@@ -1155,19 +1749,25 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 3
+			count: 15
+			path: public/detalhes_colaborador.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Parameter \#1 \$datetime of function strtotime expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 5
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Parameter \#1 \$haystack of function stripos expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 2
 			path: public/detalhes_colaborador.php
 
 		-
@@ -1177,21 +1777,27 @@ parameters:
 			path: public/detalhes_colaborador.php
 
 		-
+			message: '#^Parameter \#1 \$string of function addslashes expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: public/detalhes_colaborador.php
+
+		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 16
+			count: 18
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
-			count: 7
+			count: 10
 			path: public/detalhes_colaborador.php
 
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 5
+			count: 12
 			path: public/detalhes_colaborador.php
 
 		-
@@ -1203,19 +1809,19 @@ parameters:
 		-
 			message: '#^Cannot access offset ''atribuicao_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 5
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Cannot access offset ''cor'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 4
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Cannot access offset ''estado'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/devolucao_farda.php
 
 		-
@@ -1225,49 +1831,73 @@ parameters:
 			path: public/devolucao_farda.php
 
 		-
-			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			message: '#^Cannot access offset ''farda_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 3
+			count: 6
 			path: public/devolucao_farda.php
 
 		-
-			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: public/devolucao_farda.php
-
-		-
-			message: '#^Cannot access offset ''tamanho'' on mixed\.$#'
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
 			path: public/devolucao_farda.php
 
 		-
+			message: '#^Cannot access offset ''marcado_como_divida'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/devolucao_farda.php
+
+		-
+			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 6
+			path: public/devolucao_farda.php
+
+		-
+			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 5
+			path: public/devolucao_farda.php
+
+		-
+			message: '#^Cannot access offset ''tamanho'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: public/devolucao_farda.php
+
+		-
 			message: '#^Cannot call method beginTransaction\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: public/devolucao_farda.php
-
-		-
-			message: '#^Cannot call method commit\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: public/devolucao_farda.php
-
-		-
-			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 3
 			path: public/devolucao_farda.php
 
 		-
+			message: '#^Cannot call method commit\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/devolucao_farda.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 22
+			path: public/devolucao_farda.php
+
+		-
 			message: '#^Cannot call method fetch\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 6
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/devolucao_farda.php
+
+		-
+			message: '#^Cannot call method fetchColumn\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: public/devolucao_farda.php
@@ -1275,49 +1905,61 @@ parameters:
 		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 22
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Cannot call method rollBack\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: public/devolucao_farda.php
-
-		-
-			message: '#^Cannot call method rowCount\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
+			count: 3
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 12
+			path: public/devolucao_farda.php
+
+		-
+			message: '#^Parameter \#1 \$array of function array_filter expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 7
+			count: 13
+			path: public/devolucao_farda.php
+
+		-
+			message: '#^Parameter \#1 \$string of function urlencode expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
-			count: 2
+			count: 9
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Part \$estado_devolucao \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
+			count: 3
+			path: public/devolucao_farda.php
+
+		-
+			message: '#^Variable \$logMsg might not be defined\.$#'
+			identifier: variable.undefined
 			count: 1
 			path: public/devolucao_farda.php
 
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 7
+			count: 34
 			path: public/devolucao_farda.php
 
 		-
@@ -1330,6 +1972,12 @@ parameters:
 			message: '#^Cannot access offset ''colaborador'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
+			path: public/devolver_emprestimo.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
 			path: public/devolver_emprestimo.php
 
 		-
@@ -1353,19 +2001,25 @@ parameters:
 		-
 			message: '#^Cannot access offset ''farda_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/devolver_emprestimo.php
 
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 3
+			path: public/devolver_emprestimo.php
+
+		-
+			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
 			path: public/devolver_emprestimo.php
 
 		-
 			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 3
 			path: public/devolver_emprestimo.php
 
 		-
@@ -1383,19 +2037,25 @@ parameters:
 		-
 			message: '#^Cannot call method commit\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: public/devolver_emprestimo.php
 
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 7
+			path: public/devolver_emprestimo.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on PDOStatement\|false\.$#'
+			identifier: method.nonObject
+			count: 2
 			path: public/devolver_emprestimo.php
 
 		-
 			message: '#^Cannot call method fetch\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: public/devolver_emprestimo.php
 
 		-
@@ -1405,15 +2065,15 @@ parameters:
 			path: public/devolver_emprestimo.php
 
 		-
-			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			message: '#^Cannot call method lastInsertId\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 1
 			path: public/devolver_emprestimo.php
 
 		-
-			message: '#^Cannot call method query\(\) on mixed\.$#'
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 7
 			path: public/devolver_emprestimo.php
 
 		-
@@ -1425,7 +2085,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 1
+			count: 4
 			path: public/devolver_emprestimo.php
 
 		-
@@ -1435,9 +2095,15 @@ parameters:
 			path: public/devolver_emprestimo.php
 
 		-
+			message: '#^Parameter \#1 \$pdo of function garantirConversaoEmprestimos expects PDO, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/devolver_emprestimo.php
+
+		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 4
+			count: 5
 			path: public/devolver_emprestimo.php
 
 		-
@@ -1449,13 +2115,25 @@ parameters:
 		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
+			count: 2
+			path: public/devolver_emprestimo.php
+
+		-
+			message: '#^Part \$condicao \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
 			count: 1
+			path: public/devolver_emprestimo.php
+
+		-
+			message: '#^Part \$emprestimo\[''colaborador_id''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 2
 			path: public/devolver_emprestimo.php
 
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 7
+			count: 15
 			path: public/devolver_emprestimo.php
 
 		-
@@ -1551,17 +2229,215 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
+			count: 3
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Binary operation "\." between ''Location\: detalhes…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Binary operation "\." between mixed and '' \- '' results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''cor'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''departamento_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''ean'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''farda_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''farda_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 6
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot access offset ''tamanho'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot call method beginTransaction\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot call method commit\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 9
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 8
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot call method rollBack\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 15
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
+			identifier: echo.nonString
+			count: 2
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Part \$atribuicao\[''colaborador_id''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Part \$f\[''cor''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Part \$f\[''nome''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Part \$f\[''quantidade''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Part \$f\[''tamanho''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 12
+			path: public/editar_atribuicao.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
 			count: 1
 			path: public/editar_colaborador.php
 
 		-
 			message: '#^Cannot access offset ''ativo'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/editar_colaborador.php
 
 		-
 			message: '#^Cannot access offset ''cartao'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/editar_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''cartao_entregue'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/editar_colaborador.php
@@ -1575,7 +2451,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''departamento_nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 3
 			path: public/editar_colaborador.php
 
 		-
@@ -1635,7 +2511,7 @@ parameters:
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 5
 			path: public/editar_colaborador.php
 
 		-
@@ -1653,7 +2529,7 @@ parameters:
 		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 5
 			path: public/editar_colaborador.php
 
 		-
@@ -1677,7 +2553,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$haystack of function stripos expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 3
 			path: public/editar_colaborador.php
 
 		-
@@ -1713,7 +2589,7 @@ parameters:
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 4
+			count: 6
 			path: public/editar_colaborador.php
 
 		-
@@ -1833,7 +2709,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 9
+			count: 10
 			path: public/editar_farda.php
 
 		-
@@ -1881,7 +2757,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 3
 			path: public/editar_farda.php
 
 		-
@@ -2057,6 +2933,126 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: public/eliminar_colaborador.php
+
+		-
+			message: '#^Binary operation "\." between ''⚠️ Não é possível…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Binary operation "\." between ''✅ Farda \\'''' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Binary operation "\." between literal\-string&non\-falsy\-string and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot access offset ''ean'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot call method beginTransaction\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot call method commit\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot call method fetchColumn\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot call method inTransaction\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot call method rollBack\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Part \$farda\[''ean''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Part \$farda\[''id''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Part \$farda\[''nome''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/eliminar_farda.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 8
+			path: public/eliminar_farda.php
 
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
@@ -2239,6 +3235,252 @@ parameters:
 			path: public/emprestar_farda.php
 
 		-
+			message: '#^Cannot access offset ''email'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''error'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''size'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''tmp_name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''type'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access offset int\<0, 4\> on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 6
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access property \$AltBody on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access property \$Body on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access property \$Subject on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot call method addAddress\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot call method addAttachment\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot call method addReplyTo\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot call method send\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 5
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Parameter \#1 \$filename of function is_uploaded_file expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Parameter \#2 \$filename of function finfo_file expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Part \$colaborador\[''nome''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Part \$files\[''name''\]\[\$i\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: public/enviar_email_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''country_code'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''password'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Cannot access offset ''telefone'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 5
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Parameter \#1 \$cfg of class Trb145SmsClient constructor expects array\<string, mixed\>, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Parameter \#1 \$pdo of function logSms expects PDO, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Parameter \#2 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Part \$colaborador\[''nome''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/enviar_sms_colaborador.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: public/enviar_sms_colaborador.php
+
+		-
 			message: '#^Parameter \#1 \$pdo of function generate_unique_ean expects PDO, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -2260,6 +3502,12 @@ parameters:
 			message: '#^Binary operation "\*" between mixed and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 2
+			path: public/gerar_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''ativo'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
 			path: public/gerar_termo_devolucao.php
 
 		-
@@ -2294,6 +3542,12 @@ parameters:
 
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/gerar_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''marcado_como_divida'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/gerar_termo_devolucao.php
@@ -2343,17 +3597,23 @@ parameters:
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 8
+			count: 10
 			path: public/gerar_termo_devolucao.php
 
 		-
 			message: '#^Cannot call method fetch\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 3
 			path: public/gerar_termo_devolucao.php
 
 		-
 			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: public/gerar_termo_devolucao.php
+
+		-
+			message: '#^Cannot call method inTransaction\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: public/gerar_termo_devolucao.php
@@ -2367,7 +3627,7 @@ parameters:
 		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 8
+			count: 10
 			path: public/gerar_termo_devolucao.php
 
 		-
@@ -2379,6 +3639,12 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
+			count: 2
+			path: public/gerar_termo_devolucao.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, mixed given\.$#'
+			identifier: argument.type
 			count: 1
 			path: public/gerar_termo_devolucao.php
 
@@ -2433,7 +3699,7 @@ parameters:
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 12
+			count: 15
 			path: public/gerar_termo_devolucao.php
 
 		-
@@ -2569,8 +3835,26 @@ parameters:
 			path: public/gerar_termo_farda.php
 
 		-
+			message: '#^Binary operation "\." between ''%%Colaborador ID '' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/gerar_termo_farda.php
+
+		-
+			message: '#^Binary operation "\." between ''Location\: consultar…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/gerar_termo_farda.php
+
+		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
+			count: 1
+			path: public/gerar_termo_farda.php
+
+		-
+			message: '#^Cannot access offset ''codigo'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/gerar_termo_farda.php
 
@@ -2581,9 +3865,15 @@ parameters:
 			path: public/gerar_termo_farda.php
 
 		-
+			message: '#^Cannot access offset ''criado_em'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: public/gerar_termo_farda.php
+
+		-
 			message: '#^Cannot access offset ''data_atribuicao'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/gerar_termo_farda.php
 
 		-
@@ -2625,7 +3915,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 5
 			path: public/gerar_termo_farda.php
 
 		-
@@ -2677,15 +3967,33 @@ parameters:
 			path: public/gerar_termo_farda.php
 
 		-
+			message: '#^Cannot call method beginTransaction\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/gerar_termo_farda.php
+
+		-
+			message: '#^Cannot call method commit\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/gerar_termo_farda.php
+
+		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 8
+			path: public/gerar_termo_farda.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on PDOStatement\|false\.$#'
+			identifier: method.nonObject
+			count: 2
 			path: public/gerar_termo_farda.php
 
 		-
 			message: '#^Cannot call method fetch\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 3
 			path: public/gerar_termo_farda.php
 
 		-
@@ -2695,9 +4003,33 @@ parameters:
 			path: public/gerar_termo_farda.php
 
 		-
+			message: '#^Cannot call method fetchColumn\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: public/gerar_termo_farda.php
+
+		-
+			message: '#^Cannot call method lastInsertId\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/gerar_termo_farda.php
+
+		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 8
+			path: public/gerar_termo_farda.php
+
+		-
+			message: '#^Cannot call method rollBack\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/gerar_termo_farda.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 6
 			path: public/gerar_termo_farda.php
 
 		-
@@ -2733,7 +4065,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$datetime of function strtotime expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 3
 			path: public/gerar_termo_farda.php
 
 		-
@@ -2749,6 +4081,12 @@ parameters:
 			path: public/gerar_termo_farda.php
 
 		-
+			message: '#^Parameter \#1 \$pdo of function garantirVersionamentoDocumentos expects PDO, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/gerar_termo_farda.php
+
+		-
 			message: '#^Parameter \#1 \$string of function base64_encode expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -2757,7 +4095,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 7
+			count: 8
 			path: public/gerar_termo_farda.php
 
 		-
@@ -2823,13 +4161,13 @@ parameters:
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 3
+			count: 13
 			path: public/gerar_termo_farda.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 1
+			count: 2
 			path: public/gerir_stock_farda.php
 
 		-
@@ -2853,13 +4191,13 @@ parameters:
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 4
 			path: public/gerir_stock_farda.php
 
 		-
 			message: '#^Cannot access offset ''nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/gerir_stock_farda.php
 
 		-
@@ -2883,13 +4221,13 @@ parameters:
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: public/gerir_stock_farda.php
 
 		-
 			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: public/gerir_stock_farda.php
 
 		-
@@ -2899,9 +4237,15 @@ parameters:
 			path: public/gerir_stock_farda.php
 
 		-
+			message: '#^Cannot call method query\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/gerir_stock_farda.php
+
+		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 1
+			count: 3
 			path: public/gerir_stock_farda.php
 
 		-
@@ -2913,7 +4257,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 5
+			count: 8
 			path: public/gerir_stock_farda.php
 
 		-
@@ -2925,13 +4269,13 @@ parameters:
 		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
-			count: 1
+			count: 2
 			path: public/gerir_stock_farda.php
 
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 1
+			count: 2
 			path: public/gerir_stock_farda.php
 
 		-
@@ -3091,22 +4435,184 @@ parameters:
 			path: public/get_farda_by_ean.php
 
 		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 3
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''cartao'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''cor_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''data_emprestimo'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''departamento_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''dias_em_aberto'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 3
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''email'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''farda_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''foto'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/index.php
+
+		-
 			message: '#^Cannot access offset ''role_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
+			count: 4
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''tamanho_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/index.php
+
+		-
+			message: '#^Cannot access offset ''telefone'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: public/index.php
+
+		-
+			message: '#^Cannot call method fetchColumn\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Cannot call method query\(\) on mixed\.$#'
+			identifier: method.nonObject
 			count: 3
 			path: public/index.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
+			count: 15
+			path: public/index.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 10
+			path: public/index.php
+
+		-
+			message: '#^Parameter \#1 \$datetime of function strtotime expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 4
+			path: public/index.php
+
+		-
+			message: '#^Parameter \#1 \$value of function count expects array\|Countable, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
+			identifier: echo.nonString
+			count: 1
+			path: public/index.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
 			count: 3
 			path: public/index.php
 
 		-
-			message: '#^Dead catch \- PDOException is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
+			message: '#^Variable \$total_utilizadores_pendentes might not be defined\.$#'
+			identifier: variable.undefined
 			count: 1
 			path: public/index.php
+
+		-
+			message: '#^Binary operation "\." between '' \(Nº '' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: public/list_lockers.php
+
+		-
+			message: '#^Binary operation "\.\=" between mixed and non\-falsy\-string results in an error\.$#'
+			identifier: assignOp.invalid
+			count: 1
+			path: public/list_lockers.php
 
 		-
 			message: '#^Cannot access offset ''avariado'' on mixed\.$#'
@@ -3122,6 +4628,12 @@ parameters:
 
 		-
 			message: '#^Cannot access offset ''numero'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/list_lockers.php
+
+		-
+			message: '#^Cannot access offset ''numero_funcionario'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/list_lockers.php
@@ -3153,7 +4665,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 1
+			count: 2
 			path: public/list_lockers.php
 
 		-
@@ -3591,29 +5103,35 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 1
+			count: 2
 			path: public/register_locker.php
 
 		-
 			message: '#^Cannot access offset ''avariado'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 3
 			path: public/register_locker.php
 
 		-
 			message: '#^Cannot access offset ''colaborador_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 3
 			path: public/register_locker.php
 
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 5
 			path: public/register_locker.php
 
 		-
 			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/register_locker.php
+
+		-
+			message: '#^Cannot access offset ''numero_funcionario'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/register_locker.php
@@ -3651,7 +5169,19 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 6
+			path: public/register_locker.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: public/register_locker.php
+
+		-
+			message: '#^If condition is always false\.$#'
+			identifier: if.alwaysFalse
+			count: 1
 			path: public/register_locker.php
 
 		-
@@ -3663,12 +5193,18 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 2
 			path: public/register_locker.php
 
 		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
+			count: 1
+			path: public/register_locker.php
+
+		-
+			message: '#^Parameter \#2 \$array of function array_map expects array, mixed given\.$#'
+			identifier: argument.type
 			count: 1
 			path: public/register_locker.php
 
@@ -3895,6 +5431,156 @@ parameters:
 			path: public/reset_password.php
 
 		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 2
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''colaborador_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''data_termo'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''estado'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''estado_devolucao'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''farda_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''termo_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''total_atribuicoes'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot access offset ''total_quantidade'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot call method beginTransaction\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot call method commit\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot call method execute\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 9
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot call method fetch\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot call method prepare\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 9
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot call method rollBack\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 12
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Parameter \#1 \$datetime of function strtotime expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Part \$colabRow\[''nome''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: public/reverter_termo_devolucao.php
+
+		-
+			message: '#^Variable \$pdo might not be defined\.$#'
+			identifier: variable.undefined
+			count: 13
+			path: public/reverter_termo_devolucao.php
+
+		-
 			message: '#^Binary operation "\." between ''http\://''\|''https\://'' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -3997,6 +5683,12 @@ parameters:
 			path: public/send_reset.php
 
 		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: public/suporte.php
+
+		-
 			message: '#^Parameter \#2 \$options of function curl_setopt_array expects array\{19913\: bool, 47\: bool, 10023\: array\<int, string\>, 10015\: array\|string, 13\: int\}, array\{19913\: true, 47\: true, 10023\: array\{''Content\-Type\:…''\}, 10015\: non\-empty\-string\|false, 13\: 300\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -4005,23 +5697,29 @@ parameters:
 		-
 			message: '#^Cannot access offset ''codigo'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 4
 			path: public/validar_documento.php
 
 		-
 			message: '#^Cannot access offset ''colaborador_nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/validar_documento.php
 
 		-
 			message: '#^Cannot access offset ''criado_em'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 3
 			path: public/validar_documento.php
 
 		-
 			message: '#^Cannot access offset ''criado_por_nome'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/validar_documento.php
+
+		-
+			message: '#^Cannot access offset ''estado'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/validar_documento.php
@@ -4029,55 +5727,79 @@ parameters:
 		-
 			message: '#^Cannot access offset ''ficheiro'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: public/validar_documento.php
+
+		-
+			message: '#^Cannot access offset ''invalidado_em'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/validar_documento.php
+
+		-
+			message: '#^Cannot access offset ''invalidado_por_documento_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: public/validar_documento.php
+
+		-
+			message: '#^Cannot access offset ''motivo_invalidacao'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: public/validar_documento.php
 
 		-
 			message: '#^Cannot access offset ''tipo'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 2
 			path: public/validar_documento.php
 
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: public/validar_documento.php
 
 		-
 			message: '#^Cannot call method fetch\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: public/validar_documento.php
 
 		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
+			count: 2
+			path: public/validar_documento.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
 			count: 1
 			path: public/validar_documento.php
 
 		-
 			message: '#^Parameter \#1 \$datetime of function strtotime expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 4
 			path: public/validar_documento.php
 
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 4
+			count: 10
 			path: public/validar_documento.php
 
 		-
 			message: '#^Parameter \#1 \$string of function urlencode expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 3
 			path: public/validar_documento.php
 
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 1
+			count: 2
 			path: public/validar_documento.php
 
 		-
@@ -4183,19 +5905,7 @@ parameters:
 			path: reports/etiquetas_ean_from_pngs.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: reports/etiquetas_ean_from_pngs.php
-
-		-
 			message: '#^Cannot access offset ''nome'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: reports/etiquetas_ean_from_pngs.php
-
-		-
-			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: reports/etiquetas_ean_from_pngs.php
@@ -4233,7 +5943,7 @@ parameters:
 		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
-			count: 2
+			count: 1
 			path: reports/etiquetas_ean_from_pngs.php
 
 		-
@@ -4311,7 +6021,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 4
+			count: 3
 			path: reports/etiquetas_ean_from_pngs.php
 
 		-
@@ -4341,7 +6051,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 14
+			count: 12
 			path: reports/generate.php
 
 		-
@@ -4369,12 +6079,6 @@ parameters:
 			path: reports/generate.php
 
 		-
-			message: '#^Binary operation "\." between mixed and '' \('' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: reports/generate.php
-
-		-
 			message: '#^Binary operation "\." between mixed and '' 00\:00\:00'' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 2
@@ -4389,7 +6093,7 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 3
+			count: 1
 			path: reports/generate.php
 
 		-
@@ -4401,7 +6105,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''ativo'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 3
 			path: reports/generate.php
 
 		-
@@ -4413,7 +6117,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''cartao'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 6
+			count: 9
 			path: reports/generate.php
 
 		-
@@ -4425,7 +6129,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''colaborador_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 5
+			count: 4
 			path: reports/generate.php
 
 		-
@@ -4437,7 +6141,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''cor'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 7
+			count: 6
 			path: reports/generate.php
 
 		-
@@ -4479,7 +6183,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''departamento'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 4
 			path: reports/generate.php
 
 		-
@@ -4497,19 +6201,19 @@ parameters:
 		-
 			message: '#^Cannot access offset ''email'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 5
+			count: 9
 			path: reports/generate.php
 
 		-
 			message: '#^Cannot access offset ''farda'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
+			count: 3
 			path: reports/generate.php
 
 		-
 			message: '#^Cannot access offset ''id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 15
+			count: 8
 			path: reports/generate.php
 
 		-
@@ -4533,7 +6237,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''nome'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 14
+			count: 17
 			path: reports/generate.php
 
 		-
@@ -4545,7 +6249,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''numero_funcionario'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 8
 			path: reports/generate.php
 
 		-
@@ -4567,12 +6271,6 @@ parameters:
 			path: reports/generate.php
 
 		-
-			message: '#^Cannot access offset ''qty'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: reports/generate.php
-
-		-
 			message: '#^Cannot access offset ''quantidade'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 5
@@ -4585,9 +6283,15 @@ parameters:
 			path: reports/generate.php
 
 		-
+			message: '#^Cannot access offset ''sector'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: reports/generate.php
+
+		-
 			message: '#^Cannot access offset ''tamanho'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 7
+			count: 6
 			path: reports/generate.php
 
 		-
@@ -4599,7 +6303,7 @@ parameters:
 		-
 			message: '#^Cannot access offset ''telefone'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
+			count: 6
 			path: reports/generate.php
 
 		-
@@ -4641,37 +6345,37 @@ parameters:
 		-
 			message: '#^Cannot call method execute\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 22
+			count: 23
 			path: reports/generate.php
 
 		-
 			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 25
+			count: 27
 			path: reports/generate.php
 
 		-
 			message: '#^Cannot call method fetchColumn\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 7
+			count: 9
 			path: reports/generate.php
 
 		-
 			message: '#^Cannot call method prepare\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 21
+			count: 23
 			path: reports/generate.php
 
 		-
 			message: '#^Cannot call method query\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 11
+			count: 13
 			path: reports/generate.php
 
 		-
-			message: '#^Cannot cast mixed to int\.$#'
-			identifier: cast.int
-			count: 1
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 2
 			path: reports/generate.php
 
 		-
@@ -4795,6 +6499,12 @@ parameters:
 			path: reports/generate.php
 
 		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, ''strval'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: reports/generate.php
+
+		-
 			message: '#^Parameter \#1 \$data of function http_build_query expects array\|object, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -4845,7 +6555,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$string of function trim expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 2
 			path: reports/generate.php
 
 		-
@@ -4863,7 +6573,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$array of function array_map expects array, mixed given\.$#'
 			identifier: argument.type
-			count: 20
+			count: 24
 			path: reports/generate.php
 
 		-
@@ -4905,13 +6615,13 @@ parameters:
 		-
 			message: '#^Part \$fim \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
-			count: 5
+			count: 6
 			path: reports/generate.php
 
 		-
 			message: '#^Part \$inicio \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
-			count: 5
+			count: 6
 			path: reports/generate.php
 
 		-
@@ -4923,13 +6633,13 @@ parameters:
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 32
+			count: 36
 			path: reports/generate.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 1
+			count: 2
 			path: reports/index.php
 
 		-
@@ -4947,19 +6657,19 @@ parameters:
 		-
 			message: '#^Cannot call method fetchAll\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 3
 			path: reports/index.php
 
 		-
 			message: '#^Cannot call method query\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 3
 			path: reports/index.php
 
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
 			identifier: argument.type
-			count: 1
+			count: 3
 			path: reports/index.php
 
 		-
@@ -4971,7 +6681,7 @@ parameters:
 		-
 			message: '#^Variable \$pdo might not be defined\.$#'
 			identifier: variable.undefined
-			count: 2
+			count: 3
 			path: reports/index.php
 
 		-
@@ -5317,12 +7027,6 @@ parameters:
 			path: reports/report_stock.php
 
 		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: src/auth_guard.php
-
-		-
 			message: '#^Parameter \#2 \$type of method Picqer\\Barcode\\BarcodeGeneratorPNG\:\:getBarcode\(\) expects ''C128''\|''C128A''\|''C128B''\|''C128C''\|''C32''\|''C39''\|''C39\+''\|''C39E''\|''C39E\+''\|''C93''\|''CODABAR''\|''CODE11''\|''EAN13''\|''EAN2''\|''EAN5''\|''EAN8''\|''I25''\|''I25\+''\|''IMB''\|''ITF14''\|''KIX''\|''MSI''\|''MSI\+''\|''PHARMA''\|''PHARMA2T''\|''PLANET''\|''POSTNET''\|''RMS4CC''\|''S25''\|''S25\+''\|''TELEPENALPHA''\|''TELEPENNUMERIC''\|''UPCA''\|''UPCE'', mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -5389,6 +7093,18 @@ parameters:
 			path: src/logger_file.php
 
 		-
+			message: '#^Parameter \#2 \$string of function explode expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/logger_file.php
+
+		-
+			message: '#^Part \$ip \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: src/logger_file.php
+
+		-
 			message: '#^Part \$user_id \(mixed\) of encapsed string cannot be cast to string\.$#'
 			identifier: encapsedStringPart.nonString
 			count: 1
@@ -5397,6 +7113,54 @@ parameters:
 		-
 			message: '#^Binary operation "\." between mixed and "\\n" results in an error\.$#'
 			identifier: binaryOp.invalid
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot access offset ''from_email'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot access offset ''from_name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot access offset ''host'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot access offset ''password'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot access offset ''port'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot access offset ''secure'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot access offset ''username'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
 			count: 1
 			path: src/mailer.php
 
@@ -5411,6 +7175,78 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: src/mailer.php
+
+		-
+			message: '#^Parameter \#1 \$address of method PHPMailer\\PHPMailer\\PHPMailer\:\:setFrom\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Parameter \#2 \$name of method PHPMailer\\PHPMailer\\PHPMailer\:\:setFrom\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Property PHPMailer\\PHPMailer\\PHPMailer\:\:\$Host \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Property PHPMailer\\PHPMailer\\PHPMailer\:\:\$Password \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Property PHPMailer\\PHPMailer\\PHPMailer\:\:\$Username \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/mailer.php
+
+		-
+			message: '#^Cannot access offset ''token'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/sms_trb145.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/sms_trb145.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 3
+			path: src/sms_trb145.php
+
+		-
+			message: '#^Parameter \#2 \$options of function curl_setopt_array expects array\{10036\: non\-empty\-string\|null, 19913\: bool, 10023\: array\<int, string\>, 13\: int, 78\: int, 64\: bool, 81\: 0\|2\}, array\{10036\: string, 19913\: true, 10023\: non\-empty\-list\<string\>, 13\: int, 78\: int, 64\: bool, 81\: 0\|2\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/sms_trb145.php
+
+		-
+			message: '#^Parameter \#2 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/sms_trb145.php
+
+		-
+			message: '#^Parameter \#3 \$value of function curl_setopt expects array\|string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/sms_trb145.php
+
+		-
+			message: '#^Parameter \#3 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/sms_trb145.php
 
 		-
 			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, mixed given\.$#'
@@ -5431,9 +7267,51 @@ parameters:
 			path: src/templates/header.php
 
 		-
-			message: '#^Cannot access offset ''admin_id'' on mixed\.$#'
+			message: '#^Binary operation "\." between ''Location\: '' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Binary operation "\." between ''http\://'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Binary operation "\." between mixed and ''/super_login…'' results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Cannot access offset ''_config'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Cannot access offset ''crewgest'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Cannot access offset ''db_pass'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Cannot access offset ''db_user'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Cannot access offset ''dsn'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
 			path: sso_login.php
 
 		-
@@ -5443,7 +7321,7 @@ parameters:
 			path: sso_login.php
 
 		-
-			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			message: '#^Cannot access offset ''id_field'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: sso_login.php
@@ -5455,13 +7333,25 @@ parameters:
 			path: sso_login.php
 
 		-
+			message: '#^Cannot access offset ''pass'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Cannot access offset ''redirect_ok'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: sso_login.php
+
+		-
 			message: '#^Cannot access offset ''role_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: sso_login.php
 
 		-
-			message: '#^Cannot access offset ''system_key'' on mixed\.$#'
+			message: '#^Cannot access offset ''user'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: sso_login.php
@@ -5473,25 +7363,55 @@ parameters:
 			path: sso_login.php
 
 		-
-			message: '#^Cannot call method execute\(\) on mixed\.$#'
-			identifier: method.nonObject
+			message: '#^Cannot access offset ''users_table'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: sso_login.php
 
 		-
-			message: '#^Cannot call method fetch\(\) on mixed\.$#'
-			identifier: method.nonObject
+			message: '#^Cannot access offset mixed on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: sso_login.php
 
 		-
-			message: '#^Cannot call method prepare\(\) on mixed\.$#'
-			identifier: method.nonObject
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
 			count: 1
 			path: sso_login.php
 
 		-
-			message: '#^Variable \$pdo might not be defined\.$#'
-			identifier: variable.undefined
+			message: '#^Parameter \#1 \$dsn of class PDO constructor expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: sso_login.php
+
+		-
+			message: '#^Parameter \#1 \$string of function trim expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Parameter \#2 \$username of class PDO constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: sso_login.php
+
+		-
+			message: '#^Parameter \#3 \$password of class PDO constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: sso_login.php
+
+		-
+			message: '#^Part \$idField \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
+			count: 1
+			path: sso_login.php
+
+		-
+			message: '#^Part \$system\[''users_table''\] \(mixed\) of encapsed string cannot be cast to string\.$#'
+			identifier: encapsedStringPart.nonString
 			count: 1
 			path: sso_login.php

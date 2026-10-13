@@ -1,6 +1,7 @@
 <?php
 require_once '../config/db.php';
 require_once '../src/auth_guard.php';
+require_once '../src/colaborador_offboarding.php';
 require_once '../vendor/autoload.php';
 
 use Dompdf\Dompdf;
@@ -36,54 +37,64 @@ if (!$user) {
     die("Utilizador não encontrado.");
 }
 
-// 🔍 Buscar fardas em aberto
-$stmt = $pdo->prepare("
-    SELECT
-        fa.id,
-        f.nome,
-        c.nome AS cor,
-        t.nome AS tamanho,
-        fa.quantidade,
-        fa.estado,
-        fa.estado_devolucao,
-        fa.marcado_como_divida,
-        f.preco_unitario,
-        f.id AS farda_id
-    FROM farda_atribuicoes fa
-    JOIN fardas f ON fa.farda_id = f.id
-    JOIN cores c ON f.cor_id = c.id
-    JOIN tamanhos t ON f.tamanho_id = t.id
-    WHERE fa.colaborador_id = ?
-      AND (fa.estado IN ('atribuida', 'marcada_devolucao') OR fa.marcado_como_divida = 1)
-    ORDER BY f.nome ASC
-");
-$stmt->execute([$colaborador_id]);
-$fardas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// 🔍 Separar devolvidas / não devolvidas
-$fardas_devolvidas = [];
-$fardas_em_divida = [];
-$total_divida = 0;
-
-foreach ($fardas as $f) {
-    if ($f['marcado_como_divida']) {
-        // Farda marcada explicitamente como dívida
-        $fardas_em_divida[] = $f;
-        $total_divida += $f['quantidade'] * $f['preco_unitario'];
-    } elseif ($f['estado'] === 'marcada_devolucao') {
-        // Farda marcada para devolução
-        $fardas_devolvidas[] = $f;
-    } else {
-        // Farda que não foi marcada nem para devolução nem como dívida (não deveria acontecer)
-        $fardas_em_divida[] = $f;
-        $total_divida += $f['quantidade'] * $f['preco_unitario'];
-    }
-}
-
-// 🔒 INICIAR FECHO DEFINITIVO
+// 🔒 Fechar o processo numa transação: as validações e a inativação são atómicas.
 $pdo->beginTransaction();
 
 try {
+    $stmt = $pdo->prepare("SELECT ativo FROM colaboradores WHERE id = ? FOR UPDATE");
+    $stmt->execute([$colaborador_id]);
+    $estadoColaborador = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$estadoColaborador || (int)$estadoColaborador['ativo'] !== 1) {
+        throw new Exception("Este colaborador já está inativo ou não existe.");
+    }
+
+    $stmt = $pdo->prepare("SELECT numero FROM cacifos WHERE colaborador_id = ? FOR UPDATE");
+    $stmt->execute([$colaborador_id]);
+    $cacifosPendentes = count($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+    $stmt = $pdo->prepare("
+        SELECT
+            fa.id,
+            f.nome,
+            c.nome AS cor,
+            t.nome AS tamanho,
+            fa.quantidade,
+            fa.estado,
+            fa.estado_devolucao,
+            fa.marcado_como_divida,
+            f.preco_unitario,
+            f.id AS farda_id
+        FROM farda_atribuicoes fa
+        JOIN fardas f ON fa.farda_id = f.id
+        JOIN cores c ON f.cor_id = c.id
+        JOIN tamanhos t ON f.tamanho_id = t.id
+        WHERE fa.colaborador_id = ?
+          AND (fa.estado IN ('atribuida', 'marcada_devolucao') OR fa.marcado_como_divida = 1)
+        ORDER BY f.nome ASC
+        FOR UPDATE
+    ");
+    $stmt->execute([$colaborador_id]);
+    $fardas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $fardas_devolvidas = [];
+    $fardas_em_divida = [];
+    $total_divida = 0;
+    $temFardasNaoTratadas = false;
+
+    foreach ($fardas as $f) {
+        if ($f['marcado_como_divida']) {
+            $fardas_em_divida[] = $f;
+            $total_divida += $f['quantidade'] * $f['preco_unitario'];
+        } elseif ($f['estado'] === 'marcada_devolucao') {
+            $fardas_devolvidas[] = $f;
+        } else {
+            $temFardasNaoTratadas = true;
+        }
+    }
+
+    validarPrecondicoesInativacao($cacifosPendentes, $temFardasNaoTratadas);
+
     // 🧾 Criar termo
     $stmt = $pdo->prepare("
         INSERT INTO termos_devolucao (colaborador_id, total_divida)
@@ -131,15 +142,8 @@ try {
         UPDATE colaboradores
         SET ativo = 0,
             numero_funcionario = ''
-        WHERE id = ?
+        WHERE id = ? AND ativo = 1
     ")->execute([$colaborador_id]);
-
-    $pdo->commit();
-
-} catch (Exception $e) {
-    $pdo->rollBack();
-    die("Erro ao gerar termo: " . $e->getMessage());
-}
 
 // 📄 GERAR PDF
 $options = new Options();
@@ -245,4 +249,14 @@ Eu, <strong>{$user['nome']}</strong>, confirmo a veracidade deste termo.
 $dompdf->loadHtml($html);
 $dompdf->setPaper('A4');
 $dompdf->render();
-$dompdf->stream("termo_devolucao_{$colaborador_id}.pdf", ["Attachment" => true]);
+$pdo->commit();
+
+} catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    http_response_code(409);
+    die("Erro ao gerar termo: " . $e->getMessage());
+}
+
+$dompdf->stream("termo_devolucao_{$colaborador_id}.pdf", ["Attachment" => false]);
