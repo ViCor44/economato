@@ -109,6 +109,22 @@ WHERE colaborador_id = X;
 
 ---
 
+#### Teste 8: Dívida Regularizada Não Reaparece no Termo
+**Objetivo:** Garantir que uma dívida paga não volta a ser apresentada após reativar o colaborador
+
+**Passos:**
+1. Gere um termo de devolução com uma farda marcada como dívida
+2. Na página de detalhes do colaborador, regularize essa dívida
+3. Reative o colaborador e atribua ou trate as fardas necessárias para gerar um novo termo
+4. Gere o novo termo de devolução
+
+**Resultado Esperado:**
+- A atribuição regularizada tem estado `divida_paga`
+- A dívida regularizada não aparece em "Peças Não Devolvidas (Em Dívida)"
+- O total em dívida do novo termo não inclui o valor já regularizado
+
+---
+
 ### 🐛 Possíveis Problemas e Soluções
 
 | Problema | Solução |
@@ -127,4 +143,3 @@ WHERE colaborador_id = X;
 | Farda não marcada para devolução | Bloqueia "Gerar Termo" | Bloqueia se não marcada como dívida também |
 | Farda marcada como dívida | Não existia | Permite prosseguir para "Gerar Termo" |
 | PDF com divida | Não incluía | Inclui na seção "Peças Não Devolvidas" |
-

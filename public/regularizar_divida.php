@@ -26,7 +26,8 @@ if (!$atr) {
 // ✅ regularizar
 $stmt = $pdo->prepare("
     UPDATE farda_atribuicoes
-    SET estado = 'divida_paga'
+    SET estado = 'divida_paga',
+        marcado_como_divida = 0
     WHERE id = ?
 ");
 $stmt->execute([$atribuicao_id]);

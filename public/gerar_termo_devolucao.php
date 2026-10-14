@@ -70,7 +70,7 @@ try {
         JOIN cores c ON f.cor_id = c.id
         JOIN tamanhos t ON f.tamanho_id = t.id
         WHERE fa.colaborador_id = ?
-          AND (fa.estado IN ('atribuida', 'marcada_devolucao') OR fa.marcado_como_divida = 1)
+          AND fa.estado IN ('atribuida', 'marcada_devolucao', 'em_divida')
         ORDER BY f.nome ASC
         FOR UPDATE
     ");
@@ -83,7 +83,7 @@ try {
     $temFardasNaoTratadas = false;
 
     foreach ($fardas as $f) {
-        if ($f['marcado_como_divida']) {
+        if ($f['estado'] === 'em_divida' || $f['marcado_como_divida']) {
             $fardas_em_divida[] = $f;
             $total_divida += $f['quantidade'] * $f['preco_unitario'];
         } elseif ($f['estado'] === 'marcada_devolucao') {
